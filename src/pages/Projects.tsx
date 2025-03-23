@@ -96,7 +96,7 @@ const Projects = () => {
           *,
           project_packages(
             package_id,
-            package_types(id, name, description)
+            package_types(*)
           )
         `);
       
@@ -120,13 +120,19 @@ const Projects = () => {
         console.log(`Found ${data.length} projects:`, data);
         
         const transformedProjects = data.map(project => {
-          const packages = project.project_packages?.map(pp => pp.package_types) || [];
+          const packages = project.project_packages
+            ? project.project_packages
+                .map(pp => pp.package_types)
+                .filter(Boolean)
+            : [];
+          
           return {
             ...project,
-            packages: packages.filter(Boolean)
+            packages: packages
           };
         });
         
+        console.log("Transformed projects with packages:", transformedProjects);
         setProjects(transformedProjects);
       }
     } catch (error) {
