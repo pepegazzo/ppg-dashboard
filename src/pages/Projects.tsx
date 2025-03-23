@@ -610,7 +610,7 @@ const Projects = () => {
         <div className="rounded-md border">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableHead className="w-[50px]">
                   <Checkbox 
                     checked={filteredAndSortedProjects.length > 0 && selectedProjects.length === filteredAndSortedProjects.length}
