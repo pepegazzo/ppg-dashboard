@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search } from "lucide-react";
+import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
 import {
@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Type definition based on the existing database schema
 type Project = {
   id: string;
   name: string;
@@ -55,11 +54,9 @@ const Projects = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Sorting state
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  // Filtering state
   const [nameFilter, setNameFilter] = useState('');
   const [clientFilter, setClientFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -74,11 +71,9 @@ const Projects = () => {
       setLoading(true);
       setError(null);
       
-      // Check Supabase connection
       console.log("Supabase Client:", supabase);
       console.log("Attempting to fetch projects from Supabase...");
       
-      // Explicitly use the 'public' schema and name the table exactly as it appears in Supabase
       const { data, error } = await supabase
         .from('projects')
         .select('*');
@@ -94,17 +89,13 @@ const Projects = () => {
         return;
       }
       
-      // Log the raw response for debugging
       console.log("Raw Supabase response:", data);
       
       if (!data || data.length === 0) {
         console.log("No projects found in the database");
-        // Try doing a direct SQL query to verify the table exists and has data
         const { data: sqlData, error: sqlError } = await supabase.rpc(
           'debug_get_projects',
-          // No parameters needed for this function
           {},
-          // Properly type the expected response
           { count: 'exact' }
         );
         console.log("SQL debug query result:", sqlData, sqlError);
@@ -126,19 +117,15 @@ const Projects = () => {
     }
   };
 
-  // Sort projects
   const handleSort = (field: SortField) => {
-    // If already sorting by this field, toggle direction
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      // If sorting by a new field, default to ascending
       setSortField(field);
       setSortDirection('asc');
     }
   };
 
-  // Reset all filters
   const resetFilters = () => {
     setNameFilter('');
     setClientFilter('');
@@ -146,9 +133,7 @@ const Projects = () => {
     setPriorityFilter('all');
   };
 
-  // Apply sorting and filtering
   const filteredAndSortedProjects = useMemo(() => {
-    // First apply filters
     let result = projects.filter(project => {
       const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
       const clientMatch = project.client_name.toLowerCase().includes(clientFilter.toLowerCase());
@@ -158,17 +143,14 @@ const Projects = () => {
       return nameMatch && clientMatch && statusMatch && priorityMatch;
     });
 
-    // Then sort
     return result.sort((a, b) => {
       const fieldA = a[sortField];
       const fieldB = b[sortField];
 
-      // Handle null values
       if (fieldA === null && fieldB === null) return 0;
       if (fieldA === null) return sortDirection === 'asc' ? 1 : -1;
       if (fieldB === null) return sortDirection === 'asc' ? -1 : 1;
 
-      // String comparison
       const compareResult = String(fieldA).localeCompare(String(fieldB));
       return sortDirection === 'asc' ? compareResult : -compareResult;
     });
@@ -258,12 +240,13 @@ const Projects = () => {
     }
   };
 
-  // Render sort indicator for column headers
   const renderSortIndicator = (field: SortField) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? 
-      <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
-      <ChevronDown className="ml-1 h-4 w-4 inline" />;
+    if (sortField === field) {
+      return sortDirection === 'asc' ? 
+        <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
+        <ChevronDown className="ml-1 h-4 w-4 inline" />;
+    }
+    return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
   };
 
   const renderEmptyState = () => (
