@@ -29,32 +29,36 @@ interface ProjectFormProps {
   onSubmitted: () => void;
 }
 
+// Define the schema to match the required fields in the database
 const formSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   client_name: z.string().min(1, "Client name is required"),
   status: z.enum(["Onboarding", "Active", "Completed"]).default("Onboarding"),
   priority: z.enum(["Low", "Medium", "High"]).default("Medium"),
-  start_date: z.string().optional().nullable(),
-  due_date: z.string().optional().nullable(),
+  start_date: z.string().optional(),
+  due_date: z.string().optional(),
 });
+
+// Create a type from the schema
+type ProjectFormValues = z.infer<typeof formSchema>;
 
 const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       client_name: "",
       status: "Onboarding",
       priority: "Medium",
-      start_date: null,
-      due_date: null,
+      start_date: undefined,
+      due_date: undefined,
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: ProjectFormValues) => {
     try {
       setIsSubmitting(true);
       
