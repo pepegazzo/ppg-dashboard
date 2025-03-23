@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,8 +47,11 @@ const Projects = () => {
       setLoading(true);
       setError(null);
       
+      // Check Supabase connection
+      console.log("Supabase Client:", supabase);
       console.log("Attempting to fetch projects from Supabase...");
       
+      // Explicitly use the 'public' schema and name the table exactly as it appears in Supabase
       const { data, error } = await supabase
         .from('projects')
         .select('*');
@@ -70,6 +72,9 @@ const Projects = () => {
       
       if (!data || data.length === 0) {
         console.log("No projects found in the database");
+        // Try doing a direct SQL query to verify the table exists and has data
+        const { data: sqlData, error: sqlError } = await supabase.rpc('debug_get_projects');
+        console.log("SQL debug query result:", sqlData, sqlError);
         setProjects([]);
       } else {
         console.log(`Found ${data.length} projects:`, data);
@@ -133,6 +138,45 @@ const Projects = () => {
     }
   };
 
+  const testCreateProject = async () => {
+    try {
+      const testProject = {
+        name: "Test Project",
+        client_name: "Test Client",
+        status: "Onboarding" as const,
+        priority: "Medium" as const,
+      };
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .insert(testProject)
+        .select();
+      
+      if (error) {
+        console.error("Error creating test project:", error);
+        toast({
+          title: "Error creating test project",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log("Test project created:", data);
+        toast({
+          title: "Test project created",
+          description: "A test project was created successfully.",
+        });
+        fetchProjects();
+      }
+    } catch (error) {
+      console.error("Unexpected error creating test project:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while creating the test project.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderEmptyState = () => (
     <div className="border border-dashed border-zinc-300 rounded-lg p-8 text-center">
       <div className="flex flex-col items-center justify-center space-y-4">
@@ -143,13 +187,16 @@ const Projects = () => {
         <p className="text-zinc-500 max-w-md">
           You haven't created any projects yet. Get started by creating your first project.
         </p>
-        <div className="flex gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4">
           <Button onClick={() => setIsCreating(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Create your first project
           </Button>
           <Button variant="outline" onClick={handleRefreshProjects}>
             Refresh Projects
+          </Button>
+          <Button variant="secondary" onClick={testCreateProject}>
+            Create Test Project
           </Button>
         </div>
       </div>
