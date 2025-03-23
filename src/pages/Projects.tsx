@@ -45,15 +45,23 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
+      console.log("Fetching projects from Supabase...");
+      
       const { data, error } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log("Supabase response - data:", data);
+      console.log("Supabase response - error:", error);
       
-      console.log("Fetched projects:", data);
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
+      
       setProjects(data || []);
+      console.log("Projects state updated with:", data?.length || 0, "items");
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast({
@@ -94,6 +102,14 @@ const Projects = () => {
   };
 
   const renderTableView = () => {
+    if (projects.length === 0) {
+      return (
+        <div className="p-8 text-center text-muted-foreground">
+          No projects found. Create your first project to get started.
+        </div>
+      );
+    }
+    
     return (
       <div className="rounded-md border">
         <Table>
