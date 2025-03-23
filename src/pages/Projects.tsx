@@ -47,19 +47,20 @@ const Projects = () => {
       setLoading(true);
       console.log("Fetching projects from Supabase...");
       
-      // Log the Supabase URL and key (partial for security)
-      console.log("Supabase URL:", supabase.supabaseUrl);
-      console.log("Supabase key (first 10 chars):", supabase.supabaseKey.substring(0, 10) + "...");
+      // Log connection attempt without accessing protected properties
+      console.log("Attempting to connect to Supabase...");
       
-      // Get all tables to verify we're querying the right one
-      const { data: tablesList, error: tablesError } = await supabase
+      // Check if we can access the projects table
+      console.log("Testing connection to projects table...");
+      const { data: tableCheck, error: tableCheckError } = await supabase
         .from('projects')
-        .select('*')
+        .select('count')
         .limit(1);
-      
-      console.log("Tables check:", tablesList ? "Projects table exists" : "Projects table might not exist");
-      if (tablesError) {
-        console.error("Tables check error:", tablesError);
+        
+      if (tableCheckError) {
+        console.error("Connection test error:", tableCheckError);
+      } else {
+        console.log("Connection to projects table successful");
       }
       
       // Fetch all projects without any filters to see if any data exists
