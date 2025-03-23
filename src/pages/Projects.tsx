@@ -482,7 +482,7 @@ const Projects = () => {
                 <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
                   Priority {renderSortIndicator('priority')}
                 </TableHead>
-                <TableHead>
+                <TableHead className="w-[180px]">
                   Packages
                 </TableHead>
                 <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
@@ -556,17 +556,33 @@ const Projects = () => {
                       {project.priority}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="max-w-[180px]">
                     {project.packages && project.packages.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {project.packages.slice(0, 2).map(pkg => (
-                          <Badge key={pkg.id} variant="outline" className="flex items-center gap-1">
-                            <Package className="h-3 w-3" />
-                            {pkg.name}
+                          <Badge key={pkg.id} variant="outline" className="flex items-center gap-1 text-xs">
+                            <Package className="h-3 w-3 shrink-0" />
+                            <span className="truncate max-w-[70px]">{pkg.name}</span>
                           </Badge>
                         ))}
                         {project.packages.length > 2 && (
-                          <Badge variant="outline">+{project.packages.length - 2}</Badge>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-5 px-1.5 rounded-full">
+                                <Badge variant="outline" className="cursor-pointer">+{project.packages.length - 2}</Badge>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-2">
+                              <div className="flex flex-col gap-1">
+                                {project.packages.slice(2).map(pkg => (
+                                  <div key={pkg.id} className="flex items-center gap-1 text-sm py-1">
+                                    <Package className="h-3 w-3" />
+                                    {pkg.name}
+                                  </div>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         )}
                       </div>
                     ) : (
