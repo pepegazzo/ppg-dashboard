@@ -14,3 +14,6 @@ export const formSchema = z.object({
 
 // Create a type from the schema
 export type ProjectFormValues = z.infer<typeof formSchema>;
+
+// Add type for sorting by package name
+export type SortableProjectField = "name" | "client_name" | "status" | "priority" | "start_date" | "due_date" | "created_at" | "package_name";

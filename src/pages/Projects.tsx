@@ -37,6 +37,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Database } from "@/integrations/supabase/types";
+import { SortableProjectField } from "@/components/projects/form/types";
 
 type Project = {
   id: string;
@@ -48,7 +49,8 @@ type Project = {
   due_date: string | null;
   slug: string | null;
   created_at: string;
-  packages?: PackageType[];
+  package_name?: string | null;
+  package_id?: string | null;
 };
 
 type PackageType = {
@@ -57,7 +59,6 @@ type PackageType = {
   description: string | null;
 };
 
-type SortField = keyof Project;
 type SortDirection = 'asc' | 'desc';
 
 const Projects = () => {
@@ -69,7 +70,7 @@ const Projects = () => {
   const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortField, setSortField] = useState<SortableProjectField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const [nameFilter, setNameFilter] = useState('');
@@ -87,16 +88,15 @@ const Projects = () => {
       setLoading(true);
       setError(null);
       
-      console.log("Supabase Client:", supabase);
       console.log("Attempting to fetch projects from Supabase...");
       
       const { data, error } = await supabase
         .from('projects')
         .select(`
           *,
-          project_packages(
+          project_packages!inner(
             package_id,
-            package_types(*)
+            package_types(id, name, description)
           )
         `);
       
@@ -115,25 +115,51 @@ const Projects = () => {
       
       if (!data || data.length === 0) {
         console.log("No projects found in the database");
-        setProjects([]);
-      } else {
-        console.log(`Found ${data.length} projects:`, data);
         
+        // Try fetching all projects without the inner join
+        const { data: allProjects, error: allProjectsError } = await supabase
+          .from('projects')
+          .select('*');
+        
+        if (allProjectsError) {
+          console.error('Error fetching all projects:', allProjectsError);
+          setError(`Failed to load projects: ${allProjectsError.message}`);
+          setProjects([]);
+          return;
+        }
+        
+        console.log("Found projects without packages:", allProjects);
+        setProjects(allProjects || []);
+      } else {
+        console.log(`Found ${data.length} projects with packages:`, data);
+        
+        // Transform the data to include package information
         const transformedProjects = data.map(project => {
-          const packages = project.project_packages
-            ? project.project_packages
-                .map(pp => pp.package_types)
-                .filter(Boolean)
-            : [];
+          // Get the package from the first project_packages entry if it exists
+          const packageInfo = project.project_packages?.[0]?.package_types;
           
           return {
             ...project,
-            packages: packages
+            package_name: packageInfo?.name || null,
+            package_id: packageInfo?.id || null
           };
         });
         
-        console.log("Transformed projects with packages:", transformedProjects);
+        console.log("Transformed projects:", transformedProjects);
         setProjects(transformedProjects);
+        
+        // If we have projects with packages, also fetch projects without packages
+        const { data: projectsWithoutPackages, error: withoutPackagesError } = await supabase
+          .from('projects')
+          .select('*')
+          .not('id', 'in', transformedProjects.map(p => p.id));
+        
+        if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
+          console.log("Found projects without packages:", projectsWithoutPackages);
+          
+          // Combine projects with and without packages
+          setProjects([...transformedProjects, ...projectsWithoutPackages]);
+        }
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -166,7 +192,7 @@ const Projects = () => {
     }
   };
 
-  const handleSort = (field: SortField) => {
+  const handleSort = (field: SortableProjectField) => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -235,15 +261,25 @@ const Projects = () => {
     });
 
     return result.sort((a, b) => {
-      const fieldA = a[sortField];
-      const fieldB = b[sortField];
+      if (sortField === 'package_name') {
+        // Handle sorting by package name
+        const packageA = a.package_name || '';
+        const packageB = b.package_name || '';
+        
+        const compareResult = packageA.localeCompare(packageB);
+        return sortDirection === 'asc' ? compareResult : -compareResult;
+      } else {
+        // Handle sorting by other fields
+        const fieldA = a[sortField as keyof typeof a];
+        const fieldB = b[sortField as keyof typeof b];
 
-      if (fieldA === null && fieldB === null) return 0;
-      if (fieldA === null) return sortDirection === 'asc' ? 1 : -1;
-      if (fieldB === null) return sortDirection === 'asc' ? -1 : 1;
+        if (fieldA === null && fieldB === null) return 0;
+        if (fieldA === null) return sortDirection === 'asc' ? 1 : -1;
+        if (fieldB === null) return sortDirection === 'asc' ? -1 : 1;
 
-      const compareResult = String(fieldA).localeCompare(String(fieldB));
-      return sortDirection === 'asc' ? compareResult : -compareResult;
+        const compareResult = String(fieldA).localeCompare(String(fieldB));
+        return sortDirection === 'asc' ? compareResult : -compareResult;
+      }
     });
   }, [projects, nameFilter, clientFilter, statusFilter, priorityFilter, sortField, sortDirection]);
 
@@ -336,7 +372,7 @@ const Projects = () => {
     }
   };
 
-  const renderSortIndicator = (field: SortField) => {
+  const renderSortIndicator = (field: SortableProjectField) => {
     if (sortField === field) {
       return sortDirection === 'asc' ? 
         <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
@@ -482,8 +518,8 @@ const Projects = () => {
                 <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
                   Priority {renderSortIndicator('priority')}
                 </TableHead>
-                <TableHead className="w-[180px]">
-                  Packages
+                <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[180px]">
+                  Package {renderSortIndicator('package_name')}
                 </TableHead>
                 <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
                   Start Date {renderSortIndicator('start_date')}
@@ -502,6 +538,8 @@ const Projects = () => {
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{project.client_name}</TableCell>
+                  
+                  {/* Status Cell */}
                   <TableCell>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -551,44 +589,26 @@ const Projects = () => {
                       </PopoverContent>
                     </Popover>
                   </TableCell>
+                  
+                  {/* Priority Cell */}
                   <TableCell>
                     <Badge variant="outline" className={getPriorityColor(project.priority)}>
                       {project.priority}
                     </Badge>
                   </TableCell>
+                  
+                  {/* Package Cell */}
                   <TableCell className="max-w-[180px]">
-                    {project.packages && project.packages.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {project.packages.slice(0, 2).map(pkg => (
-                          <Badge key={pkg.id} variant="outline" className="flex items-center gap-1 text-xs">
-                            <Package className="h-3 w-3 shrink-0" />
-                            <span className="truncate max-w-[70px]">{pkg.name}</span>
-                          </Badge>
-                        ))}
-                        {project.packages.length > 2 && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-5 px-1.5 rounded-full">
-                                <Badge variant="outline" className="cursor-pointer">+{project.packages.length - 2}</Badge>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-2">
-                              <div className="flex flex-col gap-1">
-                                {project.packages.slice(2).map(pkg => (
-                                  <div key={pkg.id} className="flex items-center gap-1 text-sm py-1">
-                                    <Package className="h-3 w-3" />
-                                    {pkg.name}
-                                  </div>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        )}
-                      </div>
+                    {project.package_name ? (
+                      <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                        <Package className="h-3 w-3 shrink-0" />
+                        <span className="truncate max-w-[120px]">{project.package_name}</span>
+                      </Badge>
                     ) : (
-                      <span className="text-muted-foreground text-xs">No packages</span>
+                      <span className="text-muted-foreground text-xs">No package</span>
                     )}
                   </TableCell>
+                  
                   <TableCell>{formatDate(project.start_date)}</TableCell>
                   <TableCell>{formatDate(project.due_date)}</TableCell>
                   <TableCell>{formatDate(project.created_at)}</TableCell>
