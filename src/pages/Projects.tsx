@@ -518,7 +518,7 @@ const Projects = () => {
                 <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
                   Priority {renderSortIndicator('priority')}
                 </TableHead>
-                <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[180px]">
+                <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[150px]">
                   Package {renderSortIndicator('package_name')}
                 </TableHead>
                 <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
@@ -598,11 +598,11 @@ const Projects = () => {
                   </TableCell>
                   
                   {/* Package Cell */}
-                  <TableCell className="max-w-[180px]">
+                  <TableCell>
                     {project.package_name ? (
-                      <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                      <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
                         <Package className="h-3 w-3 shrink-0" />
-                        <span className="truncate max-w-[120px]">{project.package_name}</span>
+                        <span className="truncate">{project.package_name}</span>
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground text-xs">No package</span>
