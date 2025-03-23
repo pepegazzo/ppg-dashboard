@@ -78,14 +78,23 @@ export function InvoiceTable() {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'paid':
-        return <Badge variant="success" className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Paid</Badge>;
+        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1 w-fit"><CheckCircle className="h-3 w-3" /> Paid</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="flex items-center gap-1 bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3" /> Pending</Badge>;
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1 w-fit"><Clock className="h-3 w-3" /> Pending</Badge>;
       case 'overdue':
-        return <Badge variant="destructive" className="flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Overdue</Badge>;
+        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1 w-fit"><AlertCircle className="h-3 w-3" /> Overdue</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge variant="outline" className="w-fit">{status}</Badge>;
     }
+  };
+
+  const renderSortIndicator = (field: keyof Invoice | 'project.name' | 'project.client_name') => {
+    if (sortBy.field === field) {
+      return sortBy.direction === 'asc' ? 
+        <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
+        <ChevronDown className="ml-1 h-4 w-4 inline" />;
+    }
+    return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
   };
 
   if (error) {
@@ -97,51 +106,30 @@ export function InvoiceTable() {
   }
 
   return (
-    <div className="bg-white border rounded-md shadow-sm">
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('invoice_number')}>
-                Invoice #
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('invoice_number')} className="cursor-pointer">
+              Invoice # {renderSortIndicator('invoice_number')}
             </TableHead>
-            <TableHead className="font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('project.name')}>
-                Project
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer">
+              Project {renderSortIndicator('project.name')}
             </TableHead>
-            <TableHead className="font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('project.client_name')}>
-                Client
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('project.client_name')} className="cursor-pointer">
+              Client {renderSortIndicator('project.client_name')}
             </TableHead>
-            <TableHead className="text-right font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('amount')}>
-                Amount
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('amount')} className="cursor-pointer text-right">
+              Amount {renderSortIndicator('amount')}
             </TableHead>
-            <TableHead className="font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('status')}>
-                Status
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('status')} className="cursor-pointer">
+              Status {renderSortIndicator('status')}
             </TableHead>
-            <TableHead className="font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('issue_date')}>
-                Issue Date
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('issue_date')} className="cursor-pointer">
+              Issue Date {renderSortIndicator('issue_date')}
             </TableHead>
-            <TableHead className="font-medium text-xs text-muted-foreground">
-              <Button variant="ghost" className="p-0 h-8 font-medium text-xs hover:bg-transparent hover:text-foreground" onClick={() => toggleSort('due_date')}>
-                Due Date
-                <ArrowUpDown className="ml-2 h-3 w-3" />
-              </Button>
+            <TableHead onClick={() => toggleSort('due_date')} className="cursor-pointer">
+              Due Date {renderSortIndicator('due_date')}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -164,7 +152,11 @@ export function InvoiceTable() {
                 <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                 <TableCell className="text-sm">{invoice.project.name}</TableCell>
                 <TableCell className="text-sm">{invoice.project.client_name}</TableCell>
-                <TableCell className="text-right font-medium">S/ {invoice.amount.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-medium">
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
+                    S/ {invoice.amount.toFixed(2)}
+                  </Badge>
+                </TableCell>
                 <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{format(new Date(invoice.issue_date), 'MMM d, yyyy')}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
@@ -186,3 +178,4 @@ export function InvoiceTable() {
     </div>
   );
 }
+
