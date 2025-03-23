@@ -58,10 +58,10 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     try {
       setIsSubmitting(true);
       
-      // Insert project into Supabase
+      // Insert project into Supabase - pass values directly as a single object
       const { error } = await supabase
         .from('projects')
-        .insert([values]);
+        .insert(values);
 
       if (error) throw error;
       
