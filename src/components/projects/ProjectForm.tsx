@@ -62,14 +62,14 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     try {
       setIsSubmitting(true);
       
-      // Explicitly cast values to match what Supabase expects
+      // Create properly typed data object for Supabase
       const projectData = {
         name: values.name,
         client_name: values.client_name,
         status: values.status,
         priority: values.priority,
-        start_date: values.start_date || undefined,
-        due_date: values.due_date || undefined,
+        start_date: values.start_date || null,
+        due_date: values.due_date || null,
       };
       
       // Insert project into Supabase
