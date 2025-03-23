@@ -12,12 +12,15 @@ import ProjectForm from "@/components/projects/ProjectForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getProjects, createProject, updateProject, deleteProject } from "@/lib/db/projects";
 import { useToast } from "@/hooks/use-toast";
+import ConnectionCheck from "@/components/supabase/ConnectionCheck";
+import SetupInstructions from "@/components/supabase/SetupInstructions";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "All">("All");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showSetupInstructions, setShowSetupInstructions] = useState(true);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -136,6 +139,25 @@ const Projects = () => {
             </Button>
           </div>
         </div>
+
+        {/* Connection check */}
+        <ConnectionCheck />
+
+        {/* Setup Instructions */}
+        {showSetupInstructions && (
+          <div className="mb-6">
+            <SetupInstructions />
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowSetupInstructions(false)}
+              >
+                Hide Setup Instructions
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Search and filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">

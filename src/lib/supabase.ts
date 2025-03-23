@@ -2,20 +2,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
-// Try to get from environment variables first
-let SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-let SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// For Lovable's Supabase integration
+const SUPABASE_URL = 'https://zedgpkdjfpdlsyfkmnnt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplZGdwa2RqZnBkbHN5Zmttbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTcxMDAyMzcsImV4cCI6MjAxMjY3NjIzN30.Iq96ASfbDuIoVvPgCqRTrGiiBg1u0iJmUMpXB_IR3S0';
 
-// If environment variables are not set, check if we have values from Supabase integration
-// This is a fallback mechanism for development
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  // Log that we're using default values
-  console.warn('Supabase environment variables not found, using default configuration');
-  
-  // You need to replace these with your actual Supabase project URL and anon key
-  // from your Supabase project settings
-  SUPABASE_URL = 'https://your-project-id.supabase.co';
-  SUPABASE_ANON_KEY = 'your-anon-key';
+  throw new Error('Missing Supabase credentials');
 }
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
