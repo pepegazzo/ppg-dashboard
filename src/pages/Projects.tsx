@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2, List, Grid3X3 } from "lucide-react";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
 import {
@@ -36,7 +36,6 @@ const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,6 +52,7 @@ const Projects = () => {
 
       if (error) throw error;
       
+      console.log("Fetched projects:", data);
       setProjects(data || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -91,54 +91,6 @@ const Projects = () => {
       title: "Project created",
       description: "Your new project has been created successfully.",
     });
-  };
-
-  const renderGridView = () => {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
-          <Card key={project.id} className="overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-lg">{project.name}</h3>
-                <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Client</p>
-                  <p className="font-medium">{project.client_name}</p>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Priority</p>
-                    <Badge variant="outline" className={getPriorityColor(project.priority)}>
-                      {project.priority}
-                    </Badge>
-                  </div>
-                  
-                  {project.due_date && (
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Due Date</p>
-                      <p className="font-medium">{format(new Date(project.due_date), 'MMM d, yyyy')}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="flex justify-between items-center">
-                <Button variant="outline" size="sm" className="w-full" onClick={() => console.log('View details', project.id)}>
-                  View Details
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
   };
 
   const renderTableView = () => {
@@ -197,32 +149,10 @@ const Projects = () => {
           <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Management</span>
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-zinc-900">Projects</h1>
-            <div className="flex items-center gap-2">
-              <div className="bg-muted p-1 rounded-md flex">
-                <Button 
-                  variant={viewMode === 'table' ? 'default' : 'ghost'} 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={() => setViewMode('table')}
-                >
-                  <List className="h-4 w-4" />
-                  <span className="sr-only">Table view</span>
-                </Button>
-                <Button 
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'} 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  <span className="sr-only">Grid view</span>
-                </Button>
-              </div>
-              <Button onClick={() => setIsCreating(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                New Project
-              </Button>
-            </div>
+            <Button onClick={() => setIsCreating(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Project
+            </Button>
           </div>
         </div>
         
@@ -247,7 +177,7 @@ const Projects = () => {
               Create your first project
             </Button>
           </div>
-        ) : viewMode === 'table' ? renderTableView() : renderGridView()}
+        ) : renderTableView()}
       </div>
     </DashboardLayout>
   );
