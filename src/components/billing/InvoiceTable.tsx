@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowUpDown, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Loader2, ArrowUpDown, CheckCircle, Clock, AlertCircle, ChevronUp, ChevronDown } from "lucide-react";
 import {
   Table,
   TableBody,
