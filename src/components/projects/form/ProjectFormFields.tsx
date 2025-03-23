@@ -45,9 +45,9 @@ export function ProjectFormFields({ control }: ProjectFormFieldsProps) {
         label="Due Date" 
       />
       
-      <ProjectRevenueField control={control} />
-      
       <ProjectPackageField control={control} />
+      
+      <ProjectRevenueField control={control} />
     </div>
   );
 }
