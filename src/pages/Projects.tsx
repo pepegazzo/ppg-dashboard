@@ -650,7 +650,7 @@ const Projects = () => {
             </TableHeader>
             <TableBody>
               {filteredAndSortedProjects.map((project) => (
-                <TableRow key={project.id}>
+                <TableRow key={project.id} className="hover:bg-muted/30 transition-colors">
                   <TableCell>
                     <Checkbox 
                       checked={selectedProjects.includes(project.id)}
@@ -659,7 +659,7 @@ const Projects = () => {
                     />
                   </TableCell>
                   <TableCell className="font-medium">{project.name}</TableCell>
-                  <TableCell>{project.client_name}</TableCell>
+                  <TableCell className="text-sm">{project.client_name}</TableCell>
                   
                   <TableCell>
                     <Popover>
@@ -734,9 +734,9 @@ const Projects = () => {
                     </Badge>
                   </TableCell>
                   
-                  <TableCell>{formatDate(project.start_date)}</TableCell>
-                  <TableCell>{formatDate(project.due_date)}</TableCell>
-                  <TableCell>{formatDate(project.created_at)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDate(project.start_date)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDate(project.due_date)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDate(project.created_at)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

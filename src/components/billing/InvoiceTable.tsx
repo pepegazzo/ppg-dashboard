@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -108,25 +109,25 @@ export function InvoiceTable() {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead onClick={() => toggleSort('invoice_number')} className="cursor-pointer h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('invoice_number')} className="cursor-pointer">
               Invoice # {renderSortIndicator('invoice_number')}
             </TableHead>
-            <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer">
               Project {renderSortIndicator('project.name')}
             </TableHead>
-            <TableHead onClick={() => toggleSort('project.client_name')} className="cursor-pointer h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('project.client_name')} className="cursor-pointer">
               Client {renderSortIndicator('project.client_name')}
             </TableHead>
-            <TableHead onClick={() => toggleSort('amount')} className="cursor-pointer text-right h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('amount')} className="cursor-pointer text-right">
               Amount {renderSortIndicator('amount')}
             </TableHead>
-            <TableHead onClick={() => toggleSort('status')} className="cursor-pointer h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('status')} className="cursor-pointer">
               Status {renderSortIndicator('status')}
             </TableHead>
-            <TableHead onClick={() => toggleSort('issue_date')} className="cursor-pointer h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('issue_date')} className="cursor-pointer">
               Issue Date {renderSortIndicator('issue_date')}
             </TableHead>
-            <TableHead onClick={() => toggleSort('due_date')} className="cursor-pointer h-10 text-xs font-medium text-muted-foreground">
+            <TableHead onClick={() => toggleSort('due_date')} className="cursor-pointer">
               Due Date {renderSortIndicator('due_date')}
             </TableHead>
           </TableRow>
