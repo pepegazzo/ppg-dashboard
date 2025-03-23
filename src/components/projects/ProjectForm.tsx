@@ -27,6 +27,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       priority: "Medium",
       start_date: undefined,
       due_date: undefined,
+      packages: [],
     },
   });
 
@@ -45,11 +46,34 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       };
       
       // Insert project into Supabase
-      const { error } = await supabase
+      const { data: projectData, error: projectError } = await supabase
         .from('projects')
-        .insert(projectData);
+        .insert(projectData)
+        .select('id')
+        .single();
 
-      if (error) throw error;
+      if (projectError) throw projectError;
+      
+      // If packages are selected, create package associations
+      if (values.packages && values.packages.length > 0) {
+        const packageData = values.packages.map(packageId => ({
+          project_id: projectData.id,
+          package_id: packageId
+        }));
+        
+        const { error: packageError } = await supabase
+          .from('project_packages')
+          .insert(packageData);
+          
+        if (packageError) {
+          console.error("Error linking packages:", packageError);
+          toast({
+            title: "Warning",
+            description: "Project created but there was an error linking packages.",
+            variant: "destructive",
+          });
+        }
+      }
       
       onSubmitted();
     } catch (error) {
