@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2, Info } from "lucide-react";
+import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
 import {
@@ -18,6 +18,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Type definition based on the existing database schema
 type Project = {
@@ -32,12 +46,25 @@ type Project = {
   created_at: string;
 };
 
+type SortField = keyof Project;
+type SortDirection = 'asc' | 'desc';
+
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Sorting state
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  // Filtering state
+  const [nameFilter, setNameFilter] = useState('');
+  const [clientFilter, setClientFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [priorityFilter, setPriorityFilter] = useState<string>('');
 
   useEffect(() => {
     fetchProjects();
@@ -99,6 +126,54 @@ const Projects = () => {
       setLoading(false);
     }
   };
+
+  // Sort projects
+  const handleSort = (field: SortField) => {
+    // If already sorting by this field, toggle direction
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // If sorting by a new field, default to ascending
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Reset all filters
+  const resetFilters = () => {
+    setNameFilter('');
+    setClientFilter('');
+    setStatusFilter('');
+    setPriorityFilter('');
+  };
+
+  // Apply sorting and filtering
+  const filteredAndSortedProjects = useMemo(() => {
+    // First apply filters
+    let result = projects.filter(project => {
+      const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
+      const clientMatch = project.client_name.toLowerCase().includes(clientFilter.toLowerCase());
+      const statusMatch = !statusFilter || project.status === statusFilter;
+      const priorityMatch = !priorityFilter || project.priority === priorityFilter;
+      
+      return nameMatch && clientMatch && statusMatch && priorityMatch;
+    });
+
+    // Then sort
+    return result.sort((a, b) => {
+      const fieldA = a[sortField];
+      const fieldB = b[sortField];
+
+      // Handle null values
+      if (fieldA === null && fieldB === null) return 0;
+      if (fieldA === null) return sortDirection === 'asc' ? 1 : -1;
+      if (fieldB === null) return sortDirection === 'asc' ? -1 : 1;
+
+      // String comparison
+      const compareResult = String(fieldA).localeCompare(String(fieldB));
+      return sortDirection === 'asc' ? compareResult : -compareResult;
+    });
+  }, [projects, nameFilter, clientFilter, statusFilter, priorityFilter, sortField, sortDirection]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -184,6 +259,14 @@ const Projects = () => {
     }
   };
 
+  // Render sort indicator for column headers
+  const renderSortIndicator = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? 
+      <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
+      <ChevronDown className="ml-1 h-4 w-4 inline" />;
+  };
+
   const renderEmptyState = () => (
     <div className="border border-dashed border-zinc-300 rounded-lg p-8 text-center">
       <div className="flex flex-col items-center justify-center space-y-4">
@@ -207,6 +290,58 @@ const Projects = () => {
           </Button>
         </div>
       </div>
+    </div>
+  );
+
+  const renderFilterBar = () => (
+    <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex-1">
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Filter by project name..."
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+      <div className="flex-1">
+        <Input
+          placeholder="Filter by client name..."
+          value={clientFilter}
+          onChange={(e) => setClientFilter(e.target.value)}
+        />
+      </div>
+      <div className="w-[180px]">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="Onboarding">Onboarding</SelectItem>
+            <SelectItem value="Active">Active</SelectItem>
+            <SelectItem value="Completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-[180px]">
+        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Priorities</SelectItem>
+            <SelectItem value="Low">Low</SelectItem>
+            <SelectItem value="Medium">Medium</SelectItem>
+            <SelectItem value="High">High</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button variant="outline" size="icon" onClick={resetFilters} className="shrink-0">
+        ✕
+      </Button>
     </div>
   );
 
@@ -235,50 +370,90 @@ const Projects = () => {
       return renderEmptyState();
     }
 
+    if (filteredAndSortedProjects.length === 0) {
+      return (
+        <div>
+          {renderFilterBar()}
+          <div className="text-center p-8 border rounded-md">
+            <h3 className="text-lg font-medium mb-2">No matching projects</h3>
+            <p className="text-muted-foreground mb-4">Try adjusting your filters to see more results.</p>
+            <Button variant="outline" onClick={resetFilters}>
+              Clear All Filters
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Project Name</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {projects.map((project) => (
-              <TableRow key={project.id}>
-                <TableCell className="font-medium">{project.name}</TableCell>
-                <TableCell>{project.client_name}</TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={getPriorityColor(project.priority)}>
-                    {project.priority}
-                  </Badge>
-                </TableCell>
-                <TableCell>{formatDate(project.start_date)}</TableCell>
-                <TableCell>{formatDate(project.due_date)}</TableCell>
-                <TableCell>{formatDate(project.created_at)}</TableCell>
-                <TableCell className="text-right">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => console.log('View details', project.id)}
-                  >
-                    View
-                  </Button>
-                </TableCell>
+      <div>
+        {renderFilterBar()}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
+                  Project Name {renderSortIndicator('name')}
+                </TableHead>
+                <TableHead onClick={() => handleSort('client_name')} className="cursor-pointer">
+                  Client {renderSortIndicator('client_name')}
+                </TableHead>
+                <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
+                  Status {renderSortIndicator('status')}
+                </TableHead>
+                <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
+                  Priority {renderSortIndicator('priority')}
+                </TableHead>
+                <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
+                  Start Date {renderSortIndicator('start_date')}
+                </TableHead>
+                <TableHead onClick={() => handleSort('due_date')} className="cursor-pointer">
+                  Due Date {renderSortIndicator('due_date')}
+                </TableHead>
+                <TableHead onClick={() => handleSort('created_at')} className="cursor-pointer">
+                  Created {renderSortIndicator('created_at')}
+                </TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredAndSortedProjects.map((project) => (
+                <TableRow key={project.id}>
+                  <TableCell className="font-medium">{project.name}</TableCell>
+                  <TableCell>{project.client_name}</TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={getPriorityColor(project.priority)}>
+                      {project.priority}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(project.start_date)}</TableCell>
+                  <TableCell>{formatDate(project.due_date)}</TableCell>
+                  <TableCell>{formatDate(project.created_at)}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          Actions
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => console.log('View details', project.id)}>
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => console.log('Edit', project.id)}>
+                          Edit Project
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     );
   };
