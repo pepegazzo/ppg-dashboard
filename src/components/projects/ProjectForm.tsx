@@ -14,19 +14,31 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Plus, Calendar as CalendarIcon, Check, X } from "lucide-react";
+import { Trash2, Plus, Calendar as CalendarIcon, Check, X, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { projectStatuses, projectPriorities, projectPackages } from "@/data/projects";
 import { v4 as uuidv4 } from "uuid";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectFormProps {
   project?: Project | null;
+  onSave: (project: Project | Omit<Project, 'id' | 'createdAt'>) => void;
+  onDelete?: (id: string) => void;
   onClose: () => void;
 }
 
-const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
+const ProjectForm = ({ project, onSave, onDelete, onClose }: ProjectFormProps) => {
   const isNewProject = !project;
 
   const [formData, setFormData] = useState<Partial<Project>>(
@@ -52,9 +64,21 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
     }
   );
 
+  const [errors, setErrors] = useState<{
+    name?: string;
+    clientName?: string;
+    slug?: string;
+    dueDate?: string;
+  }>({});
+
   // Handle basic form field changes
   const handleChange = (field: keyof Project, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear related error
+    if (errors[field as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   // Handle package selection
@@ -139,11 +163,38 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
     }
   };
 
+  const validateForm = () => {
+    const newErrors: {
+      name?: string;
+      clientName?: string;
+      slug?: string;
+      dueDate?: string;
+    } = {};
+
+    if (!formData.name) {
+      newErrors.name = "Project name is required";
+    }
+
+    if (!formData.clientName) {
+      newErrors.clientName = "Client name is required";
+    }
+
+    if (!formData.slug) {
+      newErrors.slug = "Slug is required";
+    }
+
+    if (formData.startDate && formData.dueDate && formData.startDate > formData.dueDate) {
+      newErrors.dueDate = "Due date must be after start date";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = () => {
-    // In a real app, this would save to your database
-    console.log("Saving project:", formData);
-    // Add validation here
-    onClose();
+    if (validateForm()) {
+      onSave(formData as any);
+    }
   };
 
   return (
@@ -160,7 +211,9 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
               value={formData.name || ""}
               onChange={e => handleChange("name", e.target.value)}
               onBlur={generateSlug}
+              className={errors.name ? "border-red-500" : ""}
             />
+            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
           </div>
           
           <div className="space-y-2">
@@ -169,7 +222,9 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
               id="clientName"
               value={formData.clientName || ""}
               onChange={e => handleChange("clientName", e.target.value)}
+              className={errors.clientName ? "border-red-500" : ""}
             />
+            {errors.clientName && <p className="text-xs text-red-500">{errors.clientName}</p>}
           </div>
 
           <div className="space-y-2">
@@ -239,7 +294,7 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
               <PopoverTrigger asChild>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start text-left font-normal"
+                  className={`w-full justify-start text-left font-normal ${errors.dueDate ? "border-red-500" : ""}`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.dueDate ? format(formData.dueDate, "PPP") : "Select date"}
@@ -254,6 +309,7 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
                 />
               </PopoverContent>
             </Popover>
+            {errors.dueDate && <p className="text-xs text-red-500">{errors.dueDate}</p>}
           </div>
         </div>
       </div>
@@ -286,14 +342,19 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
                 id="slug"
                 value={formData.slug || ""}
                 onChange={e => handleChange("slug", e.target.value)}
+                className={errors.slug ? "border-red-500" : ""}
               />
               <Button type="button" variant="outline" onClick={generateSlug}>
                 Generate
               </Button>
             </div>
-            <p className="text-xs text-gray-500">
-              Client portal will be accessible at: /client/{formData.slug || "your-slug"}
-            </p>
+            {errors.slug ? (
+              <p className="text-xs text-red-500">{errors.slug}</p>
+            ) : (
+              <p className="text-xs text-gray-500">
+                Client portal will be accessible at: /client/{formData.slug || "your-slug"}
+              </p>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -384,13 +445,47 @@ const ProjectForm = ({ project, onClose }: ProjectFormProps) => {
       </div>
 
       {/* Action buttons */}
-      <div className="flex justify-end space-x-4 pt-4">
-        <Button variant="outline" onClick={onClose}>
-          <X className="mr-2 h-4 w-4" /> Cancel
-        </Button>
-        <Button onClick={handleSubmit}>
-          <Check className="mr-2 h-4 w-4" /> {isNewProject ? "Create Project" : "Save Changes"}
-        </Button>
+      <div className="flex justify-between space-x-4 pt-4">
+        <div>
+          {!isNewProject && onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Project
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    the project and all of its data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={() => {
+                      onDelete(formData.id!);
+                      onClose();
+                    }}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+        <div className="flex space-x-4">
+          <Button variant="outline" onClick={onClose}>
+            <X className="mr-2 h-4 w-4" /> Cancel
+          </Button>
+          <Button onClick={handleSubmit}>
+            <Check className="mr-2 h-4 w-4" /> {isNewProject ? "Create Project" : "Save Changes"}
+          </Button>
+        </div>
       </div>
     </div>
   );
