@@ -455,16 +455,18 @@ const Projects = () => {
                   <TableCell>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Badge className={`${getStatusColor(project.status)} cursor-pointer`}>
-                          {updatingProjectId === project.id ? (
-                            <span className="flex items-center">
-                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                              Updating...
-                            </span>
-                          ) : (
-                            project.status
-                          )}
-                        </Badge>
+                        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
+                          <Badge className={getStatusColor(project.status)}>
+                            {updatingProjectId === project.id ? (
+                              <span className="flex items-center">
+                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                Updating...
+                              </span>
+                            ) : (
+                              project.status
+                            )}
+                          </Badge>
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-2">
                         <div className="flex flex-col gap-1">
