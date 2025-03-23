@@ -37,7 +37,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       setIsSubmitting(true);
       
       // Create properly typed data object for Supabase
-      // Excluding revenue since it's not a column in the projects table
       const projectPayload = {
         name: values.name,
         client_name: values.client_name,
@@ -45,6 +44,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         priority: values.priority,
         start_date: values.start_date || null,
         due_date: values.due_date || null,
+        revenue: values.revenue || null,
       };
       
       // Insert project into Supabase
@@ -75,11 +75,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
             variant: "destructive",
           });
         }
-      }
-      
-      // Log the revenue value separately (just for information, not storing it in DB)
-      if (values.revenue) {
-        console.log("Project revenue value:", values.revenue);
       }
       
       onSubmitted();

@@ -184,6 +184,7 @@ export type Database = {
           name: string
           portal_password: string | null
           priority: Database["public"]["Enums"]["project_priority"]
+          revenue: number | null
           slug: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
@@ -197,6 +198,7 @@ export type Database = {
           name: string
           portal_password?: string | null
           priority?: Database["public"]["Enums"]["project_priority"]
+          revenue?: number | null
           slug?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -210,6 +212,7 @@ export type Database = {
           name?: string
           portal_password?: string | null
           priority?: Database["public"]["Enums"]["project_priority"]
+          revenue?: number | null
           slug?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
