@@ -47,9 +47,7 @@ export function ProjectFormFields({ control }: ProjectFormFieldsProps) {
       
       <ProjectRevenueField control={control} />
       
-      <div className="md:col-span-2">
-        <ProjectPackageField control={control} />
-      </div>
+      <ProjectPackageField control={control} />
     </div>
   );
 }
