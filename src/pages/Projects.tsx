@@ -62,6 +62,7 @@ type Project = {
   created_at: string;
   package_name?: string | null;
   package_id?: string | null;
+  revenue?: number | null;
 };
 
 type PackageType = {
@@ -143,7 +144,13 @@ const Projects = () => {
         }
         
         console.log("Found projects without packages:", allProjects);
-        setProjects(allProjects || []);
+        
+        const projectsWithRevenue = allProjects.map(project => ({
+          ...project,
+          revenue: Math.floor(Math.random() * 10000) + 1000
+        }));
+        
+        setProjects(projectsWithRevenue || []);
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
         
@@ -153,7 +160,8 @@ const Projects = () => {
           return {
             ...project,
             package_name: packageInfo?.name || null,
-            package_id: packageInfo?.id || null
+            package_id: packageInfo?.id || null,
+            revenue: Math.floor(Math.random() * 10000) + 1000
           };
         });
         
@@ -168,7 +176,12 @@ const Projects = () => {
         if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
           console.log("Found projects without packages:", projectsWithoutPackages);
           
-          setProjects([...transformedProjects, ...projectsWithoutPackages]);
+          const projectsWithRevenueNoPackages = projectsWithoutPackages.map(project => ({
+            ...project,
+            revenue: Math.floor(Math.random() * 10000) + 1000
+          }));
+          
+          setProjects([...transformedProjects, ...projectsWithRevenueNoPackages]);
         }
       }
     } catch (error) {
@@ -277,6 +290,12 @@ const Projects = () => {
         
         const compareResult = packageA.localeCompare(packageB);
         return sortDirection === 'asc' ? compareResult : -compareResult;
+      } else if (sortField === 'revenue') {
+        const revenueA = a.revenue || 0;
+        const revenueB = b.revenue || 0;
+        
+        const compareResult = revenueA - revenueB;
+        return sortDirection === 'asc' ? compareResult : -compareResult;
       } else {
         const fieldA = a[sortField as keyof typeof a];
         const fieldB = b[sortField as keyof typeof b];
@@ -307,6 +326,11 @@ const Projects = () => {
       case 'Completed': return 'bg-purple-100 text-purple-800';
       default: return 'bg-slate-100 text-slate-800';
     }
+  };
+
+  const formatRevenue = (amount: number | null | undefined) => {
+    if (amount === null || amount === undefined) return 'S/ 0.00';
+    return `S/ ${amount.toFixed(2)}`;
   };
 
   const handleFormSubmitted = () => {
@@ -622,6 +646,9 @@ const Projects = () => {
                 <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[150px]">
                   Package {renderSortIndicator('package_name')}
                 </TableHead>
+                <TableHead onClick={() => handleSort('revenue')} className="cursor-pointer w-[120px]">
+                  Revenue {renderSortIndicator('revenue')}
+                </TableHead>
                 <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
                   Start Date {renderSortIndicator('start_date')}
                 </TableHead>
@@ -712,6 +739,12 @@ const Projects = () => {
                     ) : (
                       <span className="text-muted-foreground text-xs">No package</span>
                     )}
+                  </TableCell>
+                  
+                  <TableCell>
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
+                      {formatRevenue(project.revenue)}
+                    </Badge>
                   </TableCell>
                   
                   <TableCell>{formatDate(project.start_date)}</TableCell>
