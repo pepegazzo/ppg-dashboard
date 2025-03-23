@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown, Package } from "lucide-react";
+import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown, Package, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
 import {
@@ -36,6 +36,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Database } from "@/integrations/supabase/types";
 import { SortableProjectField } from "@/components/projects/form/types";
 
@@ -77,6 +88,10 @@ const Projects = () => {
   const [clientFilter, setClientFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -116,7 +131,6 @@ const Projects = () => {
       if (!data || data.length === 0) {
         console.log("No projects found in the database");
         
-        // Try fetching all projects without the inner join
         const { data: allProjects, error: allProjectsError } = await supabase
           .from('projects')
           .select('*');
@@ -133,9 +147,7 @@ const Projects = () => {
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
         
-        // Transform the data to include package information
         const transformedProjects = data.map(project => {
-          // Get the package from the first project_packages entry if it exists
           const packageInfo = project.project_packages?.[0]?.package_types;
           
           return {
@@ -148,7 +160,6 @@ const Projects = () => {
         console.log("Transformed projects:", transformedProjects);
         setProjects(transformedProjects);
         
-        // If we have projects with packages, also fetch projects without packages
         const { data: projectsWithoutPackages, error: withoutPackagesError } = await supabase
           .from('projects')
           .select('*')
@@ -157,7 +168,6 @@ const Projects = () => {
         if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
           console.log("Found projects without packages:", projectsWithoutPackages);
           
-          // Combine projects with and without packages
           setProjects([...transformedProjects, ...projectsWithoutPackages]);
         }
       }
@@ -262,14 +272,12 @@ const Projects = () => {
 
     return result.sort((a, b) => {
       if (sortField === 'package_name') {
-        // Handle sorting by package name
         const packageA = a.package_name || '';
         const packageB = b.package_name || '';
         
         const compareResult = packageA.localeCompare(packageB);
         return sortDirection === 'asc' ? compareResult : -compareResult;
       } else {
-        // Handle sorting by other fields
         const fieldA = a[sortField as keyof typeof a];
         const fieldB = b[sortField as keyof typeof b];
 
@@ -459,6 +467,65 @@ const Projects = () => {
     </div>
   );
 
+  const toggleProjectSelection = (projectId: string) => {
+    setSelectedProjects(prev => {
+      if (prev.includes(projectId)) {
+        return prev.filter(id => id !== projectId);
+      } else {
+        return [...prev, projectId];
+      }
+    });
+  };
+
+  const handleSelectAllProjects = () => {
+    if (selectedProjects.length === filteredAndSortedProjects.length) {
+      setSelectedProjects([]);
+    } else {
+      setSelectedProjects(filteredAndSortedProjects.map(p => p.id));
+    }
+  };
+
+  const deleteSelectedProjects = async () => {
+    if (selectedProjects.length === 0) return;
+    
+    try {
+      setIsDeleting(true);
+      
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .in('id', selectedProjects);
+      
+      if (error) {
+        console.error('Error deleting projects:', error);
+        toast({
+          title: "Error deleting projects",
+          description: error.message || "Please try again later.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Projects deleted",
+        description: `Successfully deleted ${selectedProjects.length} project(s)`,
+      });
+      
+      fetchProjects();
+      setSelectedProjects([]);
+    } catch (err) {
+      console.error('Unexpected error deleting projects:', err);
+      toast({
+        title: "Error deleting projects",
+        description: "An unexpected error occurred. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -502,10 +569,44 @@ const Projects = () => {
     return (
       <div>
         {renderFilterBar()}
+        
+        {selectedProjects.length > 0 && (
+          <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+            <span className="text-sm">
+              {selectedProjects.length} project{selectedProjects.length !== 1 ? 's' : ''} selected
+            </span>
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={() => setShowDeleteModal(true)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Selected
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+        
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <Checkbox 
+                    checked={filteredAndSortedProjects.length > 0 && selectedProjects.length === filteredAndSortedProjects.length}
+                    onCheckedChange={handleSelectAllProjects}
+                    aria-label="Select all projects"
+                  />
+                </TableHead>
                 <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
                   Project Name {renderSortIndicator('name')}
                 </TableHead>
@@ -536,10 +637,16 @@ const Projects = () => {
             <TableBody>
               {filteredAndSortedProjects.map((project) => (
                 <TableRow key={project.id}>
+                  <TableCell>
+                    <Checkbox 
+                      checked={selectedProjects.includes(project.id)}
+                      onCheckedChange={() => toggleProjectSelection(project.id)}
+                      aria-label={`Select project ${project.name}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{project.client_name}</TableCell>
                   
-                  {/* Status Cell */}
                   <TableCell>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -590,14 +697,12 @@ const Projects = () => {
                     </Popover>
                   </TableCell>
                   
-                  {/* Priority Cell */}
                   <TableCell>
                     <Badge variant="outline" className={getPriorityColor(project.priority)}>
                       {project.priority}
                     </Badge>
                   </TableCell>
                   
-                  {/* Package Cell */}
                   <TableCell>
                     {project.package_name ? (
                       <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
@@ -625,6 +730,15 @@ const Projects = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => console.log('Edit', project.id)}>
                           Edit Project
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setSelectedProjects([project.id]);
+                            setShowDeleteModal(true);
+                          }}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          Delete Project
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -669,6 +783,33 @@ const Projects = () => {
         ) : (
           renderContent()
         )}
+
+        <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {selectedProjects.length > 1 ? 'Projects' : 'Project'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {selectedProjects.length === 1 ? 'this project' : `these ${selectedProjects.length} projects`}? 
+                This action cannot be undone and all associated data will be permanently removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={deleteSelectedProjects}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );
