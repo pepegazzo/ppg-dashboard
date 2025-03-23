@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,7 +74,13 @@ const Projects = () => {
       if (!data || data.length === 0) {
         console.log("No projects found in the database");
         // Try doing a direct SQL query to verify the table exists and has data
-        const { data: sqlData, error: sqlError } = await supabase.rpc('debug_get_projects');
+        const { data: sqlData, error: sqlError } = await supabase.rpc(
+          'debug_get_projects',
+          // No parameters needed for this function
+          {},
+          // Properly type the expected response
+          { count: 'exact' }
+        );
         console.log("SQL debug query result:", sqlData, sqlError);
         setProjects([]);
       } else {
