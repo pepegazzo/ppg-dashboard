@@ -48,14 +48,15 @@ const Projects = () => {
       setLoading(true);
       setError(null);
       
+      console.log("Attempting to fetch projects from Supabase...");
+      
       const { data, error } = await supabase
         .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
       
       if (error) {
         console.error('Error fetching projects:', error);
-        setError("Failed to load projects. Please try again.");
+        setError(`Failed to load projects: ${error.message}`);
         toast({
           title: "Error fetching projects",
           description: error.message || "Please try again later.",
@@ -64,13 +65,19 @@ const Projects = () => {
         return;
       }
       
-      // For debugging only
-      console.log("Projects fetched:", data);
+      // Log the raw response for debugging
+      console.log("Raw Supabase response:", data);
       
-      setProjects(data || []);
+      if (!data || data.length === 0) {
+        console.log("No projects found in the database");
+        setProjects([]);
+      } else {
+        console.log(`Found ${data.length} projects:`, data);
+        setProjects(data);
+      }
     } catch (error) {
       console.error('Unexpected error:', error);
-      setError("An unexpected error occurred.");
+      setError("An unexpected error occurred while fetching projects.");
       toast({
         title: "Error fetching projects",
         description: "An unexpected error occurred. Please try again later.",
@@ -108,6 +115,24 @@ const Projects = () => {
     });
   };
 
+  const handleRefreshProjects = () => {
+    fetchProjects();
+    toast({
+      title: "Refreshing projects",
+      description: "Attempting to fetch the latest projects.",
+    });
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (e) {
+      console.error('Error formatting date:', dateString, e);
+      return dateString || '-';
+    }
+  };
+
   const renderEmptyState = () => (
     <div className="border border-dashed border-zinc-300 rounded-lg p-8 text-center">
       <div className="flex flex-col items-center justify-center space-y-4">
@@ -118,10 +143,15 @@ const Projects = () => {
         <p className="text-zinc-500 max-w-md">
           You haven't created any projects yet. Get started by creating your first project.
         </p>
-        <Button onClick={() => setIsCreating(true)} className="mt-2">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create your first project
-        </Button>
+        <div className="flex gap-2 mt-4">
+          <Button onClick={() => setIsCreating(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create your first project
+          </Button>
+          <Button variant="outline" onClick={handleRefreshProjects}>
+            Refresh Projects
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -179,9 +209,9 @@ const Projects = () => {
                     {project.priority}
                   </Badge>
                 </TableCell>
-                <TableCell>{project.start_date ? format(new Date(project.start_date), 'MMM d, yyyy') : '-'}</TableCell>
-                <TableCell>{project.due_date ? format(new Date(project.due_date), 'MMM d, yyyy') : '-'}</TableCell>
-                <TableCell>{format(new Date(project.created_at), 'MMM d, yyyy')}</TableCell>
+                <TableCell>{formatDate(project.start_date)}</TableCell>
+                <TableCell>{formatDate(project.due_date)}</TableCell>
+                <TableCell>{formatDate(project.created_at)}</TableCell>
                 <TableCell className="text-right">
                   <Button 
                     variant="outline" 
@@ -206,10 +236,15 @@ const Projects = () => {
           <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Management</span>
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-zinc-900">Projects</h1>
-            <Button onClick={() => setIsCreating(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Project
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setIsCreating(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Project
+              </Button>
+              <Button variant="outline" onClick={handleRefreshProjects}>
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
         
