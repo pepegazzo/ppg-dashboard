@@ -31,6 +31,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Database } from "@/integrations/supabase/types";
 
 type Project = {
   id: string;
@@ -52,6 +58,7 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [sortField, setSortField] = useState<SortField>('created_at');
@@ -131,6 +138,48 @@ const Projects = () => {
     setClientFilter('');
     setStatusFilter('all');
     setPriorityFilter('all');
+  };
+
+  const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
+    try {
+      setUpdatingProjectId(projectId);
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .update({ status: newStatus })
+        .eq('id', projectId)
+        .select();
+      
+      if (error) {
+        console.error('Error updating project status:', error);
+        toast({
+          title: "Error updating status",
+          description: error.message || "Please try again later.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setProjects(prevProjects => 
+        prevProjects.map(project => 
+          project.id === projectId ? { ...project, status: newStatus } : project
+        )
+      );
+      
+      toast({
+        title: "Status updated",
+        description: `Project status changed to ${newStatus}`,
+      });
+    } catch (err) {
+      console.error('Unexpected error updating status:', err);
+      toast({
+        title: "Error updating status",
+        description: "An unexpected error occurred. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingProjectId(null);
+    }
   };
 
   const filteredAndSortedProjects = useMemo(() => {
@@ -404,7 +453,51 @@ const Projects = () => {
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{project.client_name}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Badge className={`${getStatusColor(project.status)} cursor-pointer`}>
+                          {updatingProjectId === project.id ? (
+                            <span className="flex items-center">
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                              Updating...
+                            </span>
+                          ) : (
+                            project.status
+                          )}
+                        </Badge>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-2">
+                        <div className="flex flex-col gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className={`justify-start ${project.status === 'Onboarding' ? 'bg-blue-50' : ''}`}
+                            onClick={() => updateProjectStatus(project.id, 'Onboarding')}
+                            disabled={updatingProjectId === project.id}
+                          >
+                            <Badge className={getStatusColor('Onboarding')}>Onboarding</Badge>
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className={`justify-start ${project.status === 'Active' ? 'bg-blue-50' : ''}`}
+                            onClick={() => updateProjectStatus(project.id, 'Active')}
+                            disabled={updatingProjectId === project.id}
+                          >
+                            <Badge className={getStatusColor('Active')}>Active</Badge>
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className={`justify-start ${project.status === 'Completed' ? 'bg-blue-50' : ''}`}
+                            onClick={() => updateProjectStatus(project.id, 'Completed')}
+                            disabled={updatingProjectId === project.id}
+                          >
+                            <Badge className={getStatusColor('Completed')}>Completed</Badge>
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={getPriorityColor(project.priority)}>
