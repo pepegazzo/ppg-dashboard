@@ -1,18 +1,38 @@
 
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { BillingStats } from "@/components/billing/BillingStats";
+import { InvoiceTable } from "@/components/billing/InvoiceTable";
+import { CreateInvoiceForm } from "@/components/billing/CreateInvoiceForm";
 
 const Billing = () => {
+  const queryClient = useQueryClient();
+  
+  const handleInvoiceCreated = () => {
+    // Invalidate queries to refresh data
+    queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    queryClient.invalidateQueries({ queryKey: ['billing-stats'] });
+  };
+  
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
-        <div className="flex flex-col gap-2 mb-8">
-          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Finance</span>
-          <h1 className="text-3xl font-bold text-zinc-900">Billing</h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Finance</span>
+            <h1 className="text-3xl font-bold text-zinc-900 mt-2">Billing</h1>
+          </div>
+          <CreateInvoiceForm onSuccess={handleInvoiceCreated} />
         </div>
         
-        {/* Content area - will be populated later */}
-        <div className="border border-dashed border-zinc-300 rounded-lg h-[70vh] flex items-center justify-center">
-          <p className="text-zinc-500">Billing content will be added here in the next steps</p>
+        <div className="space-y-8">
+          <BillingStats />
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Invoices</h2>
+            <InvoiceTable />
+          </div>
         </div>
       </div>
     </DashboardLayout>
