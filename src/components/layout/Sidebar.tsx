@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -10,8 +11,12 @@ import {
   FileText, 
   Users, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  LogOut,
+  LogIn,
+  UserPlus
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const menuItems = [
   {
@@ -54,6 +59,7 @@ const menuItems = [
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { user, signOut, isOwner } = useAuth();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -120,23 +126,60 @@ const Sidebar = () => {
           </nav>
         </div>
         
-        <div className="px-3 pb-6">
-          <div className={`
-            flex items-center gap-3 p-3 
-            rounded-lg bg-zinc-800/30 
-            border border-zinc-700/30
-            ${collapsed ? 'justify-center' : ''}
-          `}>
-            <div className="w-9 h-9 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
-              {collapsed ? "C" : "CS"}
-            </div>
-            {!collapsed && (
-              <div>
-                <h4 className="text-sm font-medium text-zinc-200">Creative Studio</h4>
-                <p className="text-xs text-zinc-500">Workspace</p>
+        <div className="px-3 pb-6 space-y-3">
+          {user ? (
+            <>
+              <div className={`
+                flex items-center gap-3 p-3 
+                rounded-lg bg-zinc-800/30 
+                border border-zinc-700/30
+                ${collapsed ? 'justify-center' : ''}
+              `}>
+                <div className="w-9 h-9 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
+                  {user.email?.charAt(0).toUpperCase() || "U"}
+                </div>
+                {!collapsed && (
+                  <div className="overflow-hidden">
+                    <h4 className="text-sm font-medium text-zinc-200 truncate">{user.email}</h4>
+                    <p className="text-xs text-zinc-500">
+                      {isOwner ? "Owner" : "User"}
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+              
+              <Button 
+                onClick={() => signOut()} 
+                variant="ghost" 
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                {!collapsed && "Sign Out"}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-zinc-400 hover:text-zinc-100"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  {!collapsed && "Sign In"}
+                </Button>
+              </Link>
+              
+              <Link to="/register">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-zinc-400 hover:text-zinc-100"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  {!collapsed && "Register"}
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

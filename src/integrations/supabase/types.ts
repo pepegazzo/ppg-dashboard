@@ -30,6 +30,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          is_owner: boolean
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          is_owner?: boolean
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_owner?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       project_packages: {
         Row: {
           created_at: string
@@ -195,7 +222,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      debug_get_projects: {
+        Args: Record<PropertyKey, never>
+        Returns: Json[]
+      }
+      is_owner: {
+        Args: {
+          user_id?: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       project_priority: "Low" | "Medium" | "High"
