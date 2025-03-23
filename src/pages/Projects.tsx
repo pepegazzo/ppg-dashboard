@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { PlusCircle, Loader2, Info } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
 import {
@@ -36,6 +36,7 @@ const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,51 +46,34 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      console.log("Fetching projects from Supabase...");
+      setError(null);
       
-      // Log connection attempt without accessing protected properties
-      console.log("Attempting to connect to Supabase...");
-      
-      // Check if we can access the projects table
-      console.log("Testing connection to projects table...");
-      const { data: tableCheck, error: tableCheckError } = await supabase
-        .from('projects')
-        .select('count')
-        .limit(1);
-        
-      if (tableCheckError) {
-        console.error("Connection test error:", tableCheckError);
-      } else {
-        console.log("Connection to projects table successful");
-      }
-      
-      // Fetch all projects without any filters to see if any data exists
       const { data, error } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
-
-      console.log("Supabase response - data:", data);
-      console.log("Supabase response - data type:", data ? typeof data : "undefined");
-      console.log("Supabase response - data length:", data ? data.length : "N/A");
-      console.log("Supabase response - error:", error);
       
       if (error) {
-        console.error('Error details:', error);
-        throw error;
+        console.error('Error fetching projects:', error);
+        setError("Failed to load projects. Please try again.");
+        toast({
+          title: "Error fetching projects",
+          description: error.message || "Please try again later.",
+          variant: "destructive",
+        });
+        return;
       }
       
-      if (!data || data.length === 0) {
-        console.log("No projects found in the database. The projects array is empty.");
-      }
+      // For debugging only
+      console.log("Projects fetched:", data);
       
       setProjects(data || []);
-      console.log("Projects state updated with:", data?.length || 0, "items");
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      console.error('Unexpected error:', error);
+      setError("An unexpected error occurred.");
       toast({
         title: "Error fetching projects",
-        description: "Please try again later.",
+        description: "An unexpected error occurred. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -124,15 +108,49 @@ const Projects = () => {
     });
   };
 
-  const renderTableView = () => {
-    if (projects.length === 0) {
+  const renderEmptyState = () => (
+    <div className="border border-dashed border-zinc-300 rounded-lg p-8 text-center">
+      <div className="flex flex-col items-center justify-center space-y-4">
+        <div className="bg-zinc-100 p-3 rounded-full">
+          <Info className="h-8 w-8 text-zinc-500" />
+        </div>
+        <h3 className="text-lg font-medium text-zinc-900">No projects found</h3>
+        <p className="text-zinc-500 max-w-md">
+          You haven't created any projects yet. Get started by creating your first project.
+        </p>
+        <Button onClick={() => setIsCreating(true)} className="mt-2">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Create your first project
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    if (loading) {
       return (
-        <div className="p-8 text-center text-muted-foreground">
-          No projects found. Create your first project to get started.
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       );
     }
-    
+
+    if (error) {
+      return (
+        <div className="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
+          <h3 className="text-lg font-medium text-red-800 mb-2">Error loading projects</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button variant="outline" onClick={fetchProjects}>
+            Try Again
+          </Button>
+        </div>
+      );
+    }
+
+    if (projects.length === 0) {
+      return renderEmptyState();
+    }
+
     return (
       <div className="rounded-md border">
         <Table>
@@ -204,24 +222,8 @@ const Projects = () => {
               />
             </CardContent>
           </Card>
-        ) : loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
         ) : (
-          <>
-            {projects.length === 0 ? (
-              <div className="border border-dashed border-zinc-300 rounded-lg h-64 flex flex-col items-center justify-center">
-                <p className="text-zinc-500 mb-4">No projects found</p>
-                <Button onClick={() => setIsCreating(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create your first project
-                </Button>
-              </div>
-            ) : (
-              renderTableView()
-            )}
-          </>
+          renderContent()
         )}
       </div>
     </DashboardLayout>
