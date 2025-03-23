@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,8 +62,8 @@ const Projects = () => {
   // Filtering state
   const [nameFilter, setNameFilter] = useState('');
   const [clientFilter, setClientFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [priorityFilter, setPriorityFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchProjects();
@@ -143,8 +142,8 @@ const Projects = () => {
   const resetFilters = () => {
     setNameFilter('');
     setClientFilter('');
-    setStatusFilter('');
-    setPriorityFilter('');
+    setStatusFilter('all');
+    setPriorityFilter('all');
   };
 
   // Apply sorting and filtering
@@ -153,8 +152,8 @@ const Projects = () => {
     let result = projects.filter(project => {
       const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
       const clientMatch = project.client_name.toLowerCase().includes(clientFilter.toLowerCase());
-      const statusMatch = !statusFilter || project.status === statusFilter;
-      const priorityMatch = !priorityFilter || project.priority === priorityFilter;
+      const statusMatch = !statusFilter || statusFilter === "all" || project.status === statusFilter;
+      const priorityMatch = !priorityFilter || priorityFilter === "all" || project.priority === priorityFilter;
       
       return nameMatch && clientMatch && statusMatch && priorityMatch;
     });
@@ -319,7 +318,7 @@ const Projects = () => {
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="Onboarding">Onboarding</SelectItem>
             <SelectItem value="Active">Active</SelectItem>
             <SelectItem value="Completed">Completed</SelectItem>
@@ -332,7 +331,7 @@ const Projects = () => {
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Priorities</SelectItem>
+            <SelectItem value="all">All Priorities</SelectItem>
             <SelectItem value="Low">Low</SelectItem>
             <SelectItem value="Medium">Medium</SelectItem>
             <SelectItem value="High">High</SelectItem>
