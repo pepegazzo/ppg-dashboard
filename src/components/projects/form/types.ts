@@ -9,6 +9,7 @@ export const formSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"]).default("Medium"),
   start_date: z.string().optional(),
   due_date: z.string().optional(),
+  packages: z.array(z.string()).default([]),
 });
 
 // Create a type from the schema

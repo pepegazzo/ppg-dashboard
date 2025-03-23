@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown } from "lucide-react";
+import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown, Package } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
 import {
@@ -48,6 +48,13 @@ type Project = {
   due_date: string | null;
   slug: string | null;
   created_at: string;
+  packages?: PackageType[];
+};
+
+type PackageType = {
+  id: string;
+  name: string;
+  description: string | null;
 };
 
 type SortField = keyof Project;
@@ -55,6 +62,7 @@ type SortDirection = 'asc' | 'desc';
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [packageTypes, setPackageTypes] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +79,7 @@ const Projects = () => {
 
   useEffect(() => {
     fetchProjects();
+    fetchPackageTypes();
   }, []);
 
   const fetchProjects = async () => {
@@ -83,7 +92,13 @@ const Projects = () => {
       
       const { data, error } = await supabase
         .from('projects')
-        .select('*');
+        .select(`
+          *,
+          project_packages(
+            package_id,
+            package_types(id, name, description)
+          )
+        `);
       
       if (error) {
         console.error('Error fetching projects:', error);
@@ -109,7 +124,16 @@ const Projects = () => {
         setProjects([]);
       } else {
         console.log(`Found ${data.length} projects:`, data);
-        setProjects(data);
+        
+        const transformedProjects = data.map(project => {
+          const packages = project.project_packages?.map(pp => pp.package_types) || [];
+          return {
+            ...project,
+            packages: packages.filter(Boolean)
+          };
+        });
+        
+        setProjects(transformedProjects);
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -121,6 +145,24 @@ const Projects = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPackageTypes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('package_types')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching package types:', error);
+        return;
+      }
+      
+      setPackageTypes(data || []);
+    } catch (error) {
+      console.error('Unexpected error fetching package types:', error);
     }
   };
 
@@ -248,6 +290,11 @@ const Projects = () => {
       console.error('Error formatting date:', dateString, e);
       return dateString || '-';
     }
+  };
+
+  const getPackageDisplayNames = (packages: PackageType[] | undefined) => {
+    if (!packages || packages.length === 0) return "None";
+    return packages.map(pkg => pkg.name).join(", ");
   };
 
   const testCreateProject = async () => {
@@ -435,6 +482,9 @@ const Projects = () => {
                 <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
                   Priority {renderSortIndicator('priority')}
                 </TableHead>
+                <TableHead>
+                  Packages
+                </TableHead>
                 <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
                   Start Date {renderSortIndicator('start_date')}
                 </TableHead>
@@ -505,6 +555,23 @@ const Projects = () => {
                     <Badge variant="outline" className={getPriorityColor(project.priority)}>
                       {project.priority}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {project.packages && project.packages.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {project.packages.slice(0, 2).map(pkg => (
+                          <Badge key={pkg.id} variant="outline" className="flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            {pkg.name}
+                          </Badge>
+                        ))}
+                        {project.packages.length > 2 && (
+                          <Badge variant="outline">+{project.packages.length - 2}</Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">No packages</span>
+                    )}
                   </TableCell>
                   <TableCell>{formatDate(project.start_date)}</TableCell>
                   <TableCell>{formatDate(project.due_date)}</TableCell>
