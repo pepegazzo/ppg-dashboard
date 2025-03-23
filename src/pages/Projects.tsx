@@ -47,17 +47,39 @@ const Projects = () => {
       setLoading(true);
       console.log("Fetching projects from Supabase...");
       
+      // Log the Supabase URL and key (partial for security)
+      console.log("Supabase URL:", supabase.supabaseUrl);
+      console.log("Supabase key (first 10 chars):", supabase.supabaseKey.substring(0, 10) + "...");
+      
+      // Get all tables to verify we're querying the right one
+      const { data: tablesList, error: tablesError } = await supabase
+        .from('projects')
+        .select('*')
+        .limit(1);
+      
+      console.log("Tables check:", tablesList ? "Projects table exists" : "Projects table might not exist");
+      if (tablesError) {
+        console.error("Tables check error:", tablesError);
+      }
+      
+      // Fetch all projects without any filters to see if any data exists
       const { data, error } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
 
       console.log("Supabase response - data:", data);
+      console.log("Supabase response - data type:", data ? typeof data : "undefined");
+      console.log("Supabase response - data length:", data ? data.length : "N/A");
       console.log("Supabase response - error:", error);
       
       if (error) {
         console.error('Error details:', error);
         throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        console.log("No projects found in the database. The projects array is empty.");
       }
       
       setProjects(data || []);
@@ -185,15 +207,21 @@ const Projects = () => {
           <div className="flex justify-center items-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : projects.length === 0 ? (
-          <div className="border border-dashed border-zinc-300 rounded-lg h-64 flex flex-col items-center justify-center">
-            <p className="text-zinc-500 mb-4">No projects found</p>
-            <Button onClick={() => setIsCreating(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create your first project
-            </Button>
-          </div>
-        ) : renderTableView()}
+        ) : (
+          <>
+            {projects.length === 0 ? (
+              <div className="border border-dashed border-zinc-300 rounded-lg h-64 flex flex-col items-center justify-center">
+                <p className="text-zinc-500 mb-4">No projects found</p>
+                <Button onClick={() => setIsCreating(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create your first project
+                </Button>
+              </div>
+            ) : (
+              renderTableView()
+            )}
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
