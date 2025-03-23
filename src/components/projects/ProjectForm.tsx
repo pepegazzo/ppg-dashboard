@@ -28,6 +28,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       start_date: undefined,
       due_date: undefined,
       package: undefined,
+      revenue: undefined,
     },
   });
 
@@ -43,6 +44,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         priority: values.priority,
         start_date: values.start_date || null,
         due_date: values.due_date || null,
+        revenue: values.revenue || null,
       };
       
       // Insert project into Supabase

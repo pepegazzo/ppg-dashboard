@@ -6,6 +6,7 @@ import { ProjectStatusField } from "./ProjectStatusField";
 import { ProjectPriorityField } from "./ProjectPriorityField";
 import { ProjectDateField } from "./ProjectDateField";
 import { ProjectPackageField } from "./ProjectPackageField";
+import { ProjectRevenueField } from "./ProjectRevenueField";
 
 interface ProjectFormFieldsProps {
   control: Control<ProjectFormValues>;
@@ -43,6 +44,8 @@ export function ProjectFormFields({ control }: ProjectFormFieldsProps) {
         name="due_date" 
         label="Due Date" 
       />
+      
+      <ProjectRevenueField control={control} />
       
       <div className="md:col-span-2">
         <ProjectPackageField control={control} />
