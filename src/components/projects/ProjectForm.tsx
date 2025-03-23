@@ -36,7 +36,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       setIsSubmitting(true);
       
       // Create properly typed data object for Supabase
-      const projectData = {
+      const projectPayload = {
         name: values.name,
         client_name: values.client_name,
         status: values.status,
@@ -46,9 +46,9 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       };
       
       // Insert project into Supabase
-      const { data: projectData, error: projectError } = await supabase
+      const { data: newProject, error: projectError } = await supabase
         .from('projects')
-        .insert(projectData)
+        .insert(projectPayload)
         .select('id')
         .single();
 
@@ -57,7 +57,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       // If packages are selected, create package associations
       if (values.packages && values.packages.length > 0) {
         const packageData = values.packages.map(packageId => ({
-          project_id: projectData.id,
+          project_id: newProject.id,
           package_id: packageId
         }));
         
