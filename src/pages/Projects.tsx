@@ -110,7 +110,7 @@ const Projects = () => {
         .from('projects')
         .select(`
           *,
-          project_packages!inner(
+          project_packages(
             package_id,
             package_types(id, name, description)
           )
@@ -144,13 +144,7 @@ const Projects = () => {
         }
         
         console.log("Found projects without packages:", allProjects);
-        
-        const projectsWithRevenue = allProjects.map(project => ({
-          ...project,
-          revenue: Math.floor(Math.random() * 10000) + 1000
-        }));
-        
-        setProjects(projectsWithRevenue || []);
+        setProjects(allProjects || []);
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
         
@@ -161,7 +155,6 @@ const Projects = () => {
             ...project,
             package_name: packageInfo?.name || null,
             package_id: packageInfo?.id || null,
-            revenue: Math.floor(Math.random() * 10000) + 1000
           };
         });
         
@@ -175,13 +168,7 @@ const Projects = () => {
         
         if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
           console.log("Found projects without packages:", projectsWithoutPackages);
-          
-          const projectsWithRevenueNoPackages = projectsWithoutPackages.map(project => ({
-            ...project,
-            revenue: Math.floor(Math.random() * 10000) + 1000
-          }));
-          
-          setProjects([...transformedProjects, ...projectsWithRevenueNoPackages]);
+          setProjects([...transformedProjects, ...projectsWithoutPackages]);
         }
       }
     } catch (error) {
