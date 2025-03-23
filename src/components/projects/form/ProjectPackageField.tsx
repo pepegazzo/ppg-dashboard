@@ -5,7 +5,6 @@ import { Check, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -25,14 +24,13 @@ interface ProjectPackageFieldProps {
 
 export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
-  const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const { field } = useController({
-    name: "packages",
+    name: "package",
     control,
-    defaultValue: [],
+    defaultValue: "",
   });
 
   useEffect(() => {
@@ -58,29 +56,19 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
     fetchPackages();
   }, []);
 
-  useEffect(() => {
-    // Update form value when selected packages change
-    field.onChange(selectedPackages);
-  }, [selectedPackages, field]);
-
-  const togglePackage = (packageId: string) => {
-    setSelectedPackages((current) => {
-      if (current.includes(packageId)) {
-        return current.filter(id => id !== packageId);
-      } else {
-        return [...current, packageId];
-      }
-    });
+  const selectPackage = (packageId: string) => {
+    field.onChange(packageId);
   };
 
-  const getPackageName = (packageId: string) => {
-    const pkg = packages.find(p => p.id === packageId);
-    return pkg ? pkg.name : packageId;
+  const getSelectedPackageName = () => {
+    if (!field.value) return "";
+    const pkg = packages.find(p => p.id === field.value);
+    return pkg ? pkg.name : "";
   };
 
   return (
     <div className="space-y-2">
-      <Label>Packages</Label>
+      <Label>Package</Label>
       
       <Popover>
         <PopoverTrigger asChild>
@@ -90,9 +78,9 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
           >
             <Package className="h-4 w-4 mr-2 opacity-70" />
             <span className="font-normal">
-              {selectedPackages.length === 0 
-                ? "Select packages..." 
-                : `${selectedPackages.length} package${selectedPackages.length !== 1 ? 's' : ''} selected`
+              {field.value 
+                ? getSelectedPackageName()
+                : "Select package..."
               }
             </span>
           </Button>
@@ -114,10 +102,10 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
                     key={pkg.id}
                     variant="ghost"
                     className="w-full justify-start mb-1 h-auto py-2"
-                    onClick={() => togglePackage(pkg.id)}
+                    onClick={() => selectPackage(pkg.id)}
                   >
                     <div className="mr-2 h-4 w-4 flex items-center justify-center">
-                      {selectedPackages.includes(pkg.id) && <Check className="h-4 w-4" />}
+                      {field.value === pkg.id && <Check className="h-4 w-4" />}
                     </div>
                     <div className="flex flex-col items-start">
                       <span>{pkg.name}</span>
@@ -132,22 +120,6 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
           </div>
         </PopoverContent>
       </Popover>
-      
-      {selectedPackages.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {selectedPackages.map(packageId => (
-            <Badge
-              key={packageId}
-              variant="secondary"
-              className="cursor-pointer"
-              onClick={() => togglePackage(packageId)}
-            >
-              {getPackageName(packageId)}
-              <span className="ml-1 text-xs">×</span>
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
