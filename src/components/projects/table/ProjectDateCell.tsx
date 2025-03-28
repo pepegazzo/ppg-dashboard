@@ -30,7 +30,7 @@ export function ProjectDateCell({
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
-      return format(parseISO(dateString), 'MMM d, yyyy');
+      return format(parseISO(dateString), 'MM/dd/yy');
     } catch (e) {
       console.error('Error formatting date:', dateString, e);
       return dateString || '-';
@@ -64,7 +64,7 @@ export function ProjectDateCell({
   };
 
   return (
-    <div className="cursor-pointer w-[120px]" onDoubleClick={startEdit}>
+    <div className="cursor-pointer w-[80px]" onDoubleClick={startEdit}>
       {editMode ? (
         <Popover 
           open={isPopoverOpen} 
@@ -79,13 +79,13 @@ export function ProjectDateCell({
             <Button
               variant="outline"
               className={cn(
-                "w-[120px] justify-start text-left font-normal text-xs",
+                "w-[80px] justify-start text-left font-normal text-xs",
                 !dateValue && "text-muted-foreground"
               )}
               disabled={disabled}
             >
               <CalendarIcon className="mr-1 h-3 w-3" />
-              {dateValue ? format(parseISO(dateValue), "MMM d, yyyy") : <span>Pick a date</span>}
+              {dateValue ? format(parseISO(dateValue), "MM/dd") : <span>Pick</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">

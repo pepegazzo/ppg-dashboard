@@ -1,3 +1,4 @@
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableProjectField, SortDirection } from "../types";
@@ -26,19 +27,19 @@ export function ProjectTableHeader({
         <TableHead className="w-[50px]">
           <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
         </TableHead>
-        <TableHead onClick={() => onSort('name')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('name')} className="cursor-pointer w-[220px]">
           Project {renderSortIndicator('name')}
         </TableHead>
-        <TableHead onClick={() => onSort('client_name')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('client_name')} className="cursor-pointer w-[180px]">
           Client {renderSortIndicator('client_name')}
         </TableHead>
-        <TableHead onClick={() => onSort('status')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[120px]">
           Status {renderSortIndicator('status')}
         </TableHead>
-        <TableHead onClick={() => onSort('progress')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('progress')} className="cursor-pointer w-[130px]">
           Progress {renderSortIndicator('progress')}
         </TableHead>
-        <TableHead onClick={() => onSort('priority')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('priority')} className="cursor-pointer w-[100px]">
           Priority {renderSortIndicator('priority')}
         </TableHead>
         <TableHead onClick={() => onSort('package_name')} className="cursor-pointer w-[100px]">
@@ -47,13 +48,13 @@ export function ProjectTableHeader({
         <TableHead onClick={() => onSort('revenue')} className="cursor-pointer w-[120px]">
           Revenue {renderSortIndicator('revenue')}
         </TableHead>
-        <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-auto">
+        <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-[80px]">
           Start {renderSortIndicator('start_date')}
         </TableHead>
-        <TableHead onClick={() => onSort('due_date')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[80px]">
           End {renderSortIndicator('due_date')}
         </TableHead>
-        <TableHead className="text-center">Actions</TableHead>
+        <TableHead className="text-center w-[100px]">Actions</TableHead>
       </TableRow>
     </TableHeader>;
 }
