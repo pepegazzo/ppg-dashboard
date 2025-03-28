@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "./types";
 import { format } from "date-fns";
@@ -85,13 +84,8 @@ export function TableRow({
         description: `Project status changed to ${newStatus}`,
       });
       
-      // If fetchProjects is provided, call it to refresh the entire list
-      // We'll call this after a short delay to avoid UI flickering
-      if (fetchProjects) {
-        setTimeout(() => {
-          fetchProjects();
-        }, 300);
-      }
+      // Remove the full page refresh - this was causing the flickering
+      // We've already updated the local state above, which is sufficient
     } catch (err) {
       console.error('Unexpected error updating status:', err);
       toast({
