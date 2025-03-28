@@ -59,6 +59,13 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                 }}
                 initialFocus
                 className="p-0 pointer-events-auto scale-80"
+                classNames={{
+                  day: cn(
+                    "h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left"
+                  ),
+                  caption: "flex justify-start pt-1 relative items-center",
+                  caption_label: "text-sm font-medium text-left"
+                }}
               />
             </PopoverContent>
           </Popover>
