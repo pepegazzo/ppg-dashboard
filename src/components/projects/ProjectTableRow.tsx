@@ -12,6 +12,7 @@ import { Package, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Database } from "@/integrations/supabase/types";
+
 interface ProjectTableRowProps {
   project: Project;
   selectedProjects: string[];
@@ -22,6 +23,7 @@ interface ProjectTableRowProps {
   setShowDeleteModal: (show: boolean) => void;
   fetchProjects?: () => void; // Optional prop to refresh all projects
 }
+
 export function TableRow({
   project,
   selectedProjects,
@@ -35,9 +37,11 @@ export function TableRow({
   const {
     toast
   } = useToast();
+
   // Add local state to track project data
   const [localProject, setLocalProject] = useState<Project>(project);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
     try {
       setUpdatingProjectId(projectId);
@@ -85,6 +89,7 @@ export function TableRow({
       setUpdatingProjectId(null);
     }
   };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High':
@@ -97,6 +102,7 @@ export function TableRow({
         return 'bg-slate-100 text-slate-800';
     }
   };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Onboarding':
@@ -109,10 +115,12 @@ export function TableRow({
         return 'bg-slate-100 text-slate-800';
     }
   };
+
   const formatRevenue = (amount: number | null | undefined) => {
     if (amount === null || amount === undefined) return 'S/ 0.00';
     return `S/ ${amount.toFixed(2)}`;
   };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
@@ -125,6 +133,7 @@ export function TableRow({
 
   // Use localProject instead of project
   const currentProject = localProject;
+
   return <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
         <Checkbox checked={selectedProjects.includes(currentProject.id)} onCheckedChange={() => toggleProjectSelection(currentProject.id)} aria-label={`Select project ${currentProject.name}`} />

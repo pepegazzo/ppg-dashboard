@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Trash2 } from "lucide-react";
 import { Table, TableBody, TableHead, TableHeader, TableRow as UITableRow } from "@/components/ui/table";
+
 interface ProjectListProps {
   projects: Project[];
   loading: boolean;
@@ -19,6 +20,7 @@ interface ProjectListProps {
   testCreateProject: () => void;
   setIsCreating: (isCreating: boolean) => void;
 }
+
 export function ProjectList({
   projects,
   loading,
@@ -38,6 +40,7 @@ export function ProjectList({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null);
+
   const handleSort = (field: SortableProjectField) => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -46,12 +49,14 @@ export function ProjectList({
       setSortDirection('asc');
     }
   };
+
   const resetFilters = () => {
     setNameFilter('');
     setClientFilter('');
     setStatusFilter('all');
     setPriorityFilter('all');
   };
+
   const filteredAndSortedProjects = useMemo(() => {
     let result = projects.filter(project => {
       const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
@@ -71,6 +76,11 @@ export function ProjectList({
         const revenueB = b.revenue || 0;
         const compareResult = revenueA - revenueB;
         return sortDirection === 'asc' ? compareResult : -compareResult;
+      } else if (sortField === 'progress') {
+        const progressA = a.progress || 0;
+        const progressB = b.progress || 0;
+        const compareResult = progressA - progressB;
+        return sortDirection === 'asc' ? compareResult : -compareResult;
       } else {
         const fieldA = a[sortField as keyof typeof a];
         const fieldB = b[sortField as keyof typeof b];
@@ -82,6 +92,7 @@ export function ProjectList({
       }
     });
   }, [projects, nameFilter, clientFilter, statusFilter, priorityFilter, sortField, sortDirection]);
+
   const toggleProjectSelection = (projectId: string) => {
     setSelectedProjects(prev => {
       if (prev.includes(projectId)) {
@@ -91,6 +102,7 @@ export function ProjectList({
       }
     });
   };
+
   const handleSelectAllProjects = () => {
     if (selectedProjects.length === filteredAndSortedProjects.length) {
       setSelectedProjects([]);
@@ -98,17 +110,20 @@ export function ProjectList({
       setSelectedProjects(filteredAndSortedProjects.map(p => p.id));
     }
   };
+
   const renderSortIndicator = (field: SortableProjectField) => {
     if (sortField === field) {
       return sortDirection === 'asc' ? <span className="inline-flex items-center">↑</span> : <span className="inline-flex items-center">↓</span>;
     }
     return <span className="inline-flex items-center opacity-40">↕</span>;
   };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>;
   }
+
   if (error) {
     return <div className="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
         <h3 className="text-lg font-medium text-red-800 mb-2">Error loading projects</h3>
@@ -118,9 +133,11 @@ export function ProjectList({
         </Button>
       </div>;
   }
+
   if (projects.length === 0) {
     return <EmptyState setIsCreating={setIsCreating} handleRefreshProjects={fetchProjects} testCreateProject={testCreateProject} />;
   }
+
   if (filteredAndSortedProjects.length === 0) {
     return <div>
         <FilterBar nameFilter={nameFilter} setNameFilter={setNameFilter} clientFilter={clientFilter} setClientFilter={setClientFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter} resetFilters={resetFilters} />
@@ -133,6 +150,7 @@ export function ProjectList({
         </div>
       </div>;
   }
+
   return <div>
       <FilterBar nameFilter={nameFilter} setNameFilter={setNameFilter} clientFilter={clientFilter} setClientFilter={setClientFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter} resetFilters={resetFilters} />
       
@@ -167,8 +185,8 @@ export function ProjectList({
               <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
                 Status {renderSortIndicator('status')}
               </TableHead>
-              <TableHead>
-                Progress
+              <TableHead onClick={() => handleSort('progress')} className="cursor-pointer">
+                Progress {renderSortIndicator('progress')}
               </TableHead>
               <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
                 Priority {renderSortIndicator('priority')}

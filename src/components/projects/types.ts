@@ -24,3 +24,5 @@ export type PackageType = {
 };
 
 export type SortDirection = 'asc' | 'desc';
+
+export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';

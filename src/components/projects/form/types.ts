@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 // Define the schema to match the required fields in the database
@@ -17,4 +16,4 @@ export const formSchema = z.object({
 export type ProjectFormValues = z.infer<typeof formSchema>;
 
 // Add type for sorting by package name
-export type SortableProjectField = "name" | "client_name" | "status" | "priority" | "start_date" | "due_date" | "created_at" | "package_name" | "revenue";
+export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';
