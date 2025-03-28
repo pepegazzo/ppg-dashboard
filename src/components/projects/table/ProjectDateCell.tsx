@@ -64,7 +64,7 @@ export function ProjectDateCell({
   };
 
   return (
-    <div className="cursor-pointer" onDoubleClick={startEdit}>
+    <div className="cursor-pointer w-[120px]" onDoubleClick={startEdit}>
       {editMode ? (
         <Popover 
           open={isPopoverOpen} 
@@ -79,12 +79,12 @@ export function ProjectDateCell({
             <Button
               variant="outline"
               className={cn(
-                "w-[180px] justify-start text-left font-normal",
+                "w-[120px] justify-start text-left font-normal text-xs",
                 !dateValue && "text-muted-foreground"
               )}
               disabled={disabled}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
+              <CalendarIcon className="mr-1 h-3 w-3" />
               {dateValue ? format(parseISO(dateValue), "MMM d, yyyy") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
