@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -45,8 +44,14 @@ export function ProjectDateCell({
       const formattedDate = `${year}-${month}-${day}`;
       
       setDateValue(formattedDate);
-      onUpdateDate(projectId, fieldName, formattedDate);
-      setIsPopoverOpen(false);
+      onUpdateDate(projectId, fieldName, formattedDate)
+        .then(() => {
+          setIsPopoverOpen(false);
+          setEditMode(false);
+        })
+        .catch(err => {
+          console.error('Error updating date:', err);
+        });
     }
   };
 
