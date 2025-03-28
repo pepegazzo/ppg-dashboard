@@ -70,6 +70,6 @@ export function ProjectDateCell({
           caption_label: "text-sm font-medium text-left"
         }} />
           </PopoverContent>
-        </Popover> : <span className="justify-center">{formatDate(date)}</span>}
+        </Popover> : <span className="object-center\n">{formatDate(date)}</span>}
     </div>;
 }
