@@ -1,77 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Project, PackageType } from "@/components/projects/types";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown, Package, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { PlusCircle } from "lucide-react";
 import ProjectForm from "@/components/projects/ProjectForm";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Database } from "@/integrations/supabase/types";
-import { SortableProjectField } from "@/components/projects/form/types";
-
-type Project = {
-  id: string;
-  name: string;
-  client_name: string;
-  status: 'Onboarding' | 'Active' | 'Completed';
-  priority: 'Low' | 'Medium' | 'High';
-  start_date: string | null;
-  due_date: string | null;
-  slug: string | null;
-  created_at: string;
-  package_name?: string | null;
-  package_id?: string | null;
-  revenue?: number | null;
-};
-
-type PackageType = {
-  id: string;
-  name: string;
-  description: string | null;
-};
-
-type SortDirection = 'asc' | 'desc';
+import { ProjectList } from "@/components/projects/ProjectList";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -79,20 +16,7 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null);
   const { toast } = useToast();
-
-  const [sortField, setSortField] = useState<SortableProjectField>('created_at');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-
-  const [nameFilter, setNameFilter] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  
-  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -144,7 +68,13 @@ const Projects = () => {
         }
         
         console.log("Found projects without packages:", allProjects);
-        setProjects(allProjects || []);
+        
+        const projectsWithProgress = allProjects?.map(project => ({
+          ...project,
+          progress: Math.floor(Math.random() * 101)
+        })) || [];
+        
+        setProjects(projectsWithProgress);
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
         
@@ -155,6 +85,7 @@ const Projects = () => {
             ...project,
             package_name: packageInfo?.name || null,
             package_id: packageInfo?.id || null,
+            progress: Math.floor(Math.random() * 101)
           };
         });
         
@@ -168,7 +99,13 @@ const Projects = () => {
         
         if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
           console.log("Found projects without packages:", projectsWithoutPackages);
-          setProjects([...transformedProjects, ...projectsWithoutPackages]);
+          
+          const projectsWithProgress = projectsWithoutPackages.map(project => ({
+            ...project,
+            progress: Math.floor(Math.random() * 101)
+          }));
+          
+          setProjects([...transformedProjects, ...projectsWithProgress]);
         }
       }
     } catch (error) {
@@ -202,124 +139,6 @@ const Projects = () => {
     }
   };
 
-  const handleSort = (field: SortableProjectField) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const resetFilters = () => {
-    setNameFilter('');
-    setClientFilter('');
-    setStatusFilter('all');
-    setPriorityFilter('all');
-  };
-
-  const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
-    try {
-      setUpdatingProjectId(projectId);
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .update({ status: newStatus })
-        .eq('id', projectId)
-        .select();
-      
-      if (error) {
-        console.error('Error updating project status:', error);
-        toast({
-          title: "Error updating status",
-          description: error.message || "Please try again later.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setProjects(prevProjects => 
-        prevProjects.map(project => 
-          project.id === projectId ? { ...project, status: newStatus } : project
-        )
-      );
-      
-      toast({
-        title: "Status updated",
-        description: `Project status changed to ${newStatus}`,
-      });
-    } catch (err) {
-      console.error('Unexpected error updating status:', err);
-      toast({
-        title: "Error updating status",
-        description: "An unexpected error occurred. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdatingProjectId(null);
-    }
-  };
-
-  const filteredAndSortedProjects = useMemo(() => {
-    let result = projects.filter(project => {
-      const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
-      const clientMatch = project.client_name.toLowerCase().includes(clientFilter.toLowerCase());
-      const statusMatch = !statusFilter || statusFilter === "all" || project.status === statusFilter;
-      const priorityMatch = !priorityFilter || priorityFilter === "all" || project.priority === priorityFilter;
-      
-      return nameMatch && clientMatch && statusMatch && priorityMatch;
-    });
-
-    return result.sort((a, b) => {
-      if (sortField === 'package_name') {
-        const packageA = a.package_name || '';
-        const packageB = b.package_name || '';
-        
-        const compareResult = packageA.localeCompare(packageB);
-        return sortDirection === 'asc' ? compareResult : -compareResult;
-      } else if (sortField === 'revenue') {
-        const revenueA = a.revenue || 0;
-        const revenueB = b.revenue || 0;
-        
-        const compareResult = revenueA - revenueB;
-        return sortDirection === 'asc' ? compareResult : -compareResult;
-      } else {
-        const fieldA = a[sortField as keyof typeof a];
-        const fieldB = b[sortField as keyof typeof b];
-
-        if (fieldA === null && fieldB === null) return 0;
-        if (fieldA === null) return sortDirection === 'asc' ? 1 : -1;
-        if (fieldB === null) return sortDirection === 'asc' ? -1 : 1;
-
-        const compareResult = String(fieldA).localeCompare(String(fieldB));
-        return sortDirection === 'asc' ? compareResult : -compareResult;
-      }
-    });
-  }, [projects, nameFilter, clientFilter, statusFilter, priorityFilter, sortField, sortDirection]);
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-amber-100 text-amber-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-slate-100 text-slate-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Onboarding': return 'bg-blue-100 text-blue-800';
-      case 'Active': return 'bg-emerald-100 text-emerald-800';
-      case 'Completed': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-slate-100 text-slate-800';
-    }
-  };
-
-  const formatRevenue = (amount: number | null | undefined) => {
-    if (amount === null || amount === undefined) return 'S/ 0.00';
-    return `S/ ${amount.toFixed(2)}`;
-  };
-
   const handleFormSubmitted = () => {
     setIsCreating(false);
     fetchProjects();
@@ -335,21 +154,6 @@ const Projects = () => {
       title: "Refreshing projects",
       description: "Attempting to fetch the latest projects.",
     });
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy');
-    } catch (e) {
-      console.error('Error formatting date:', dateString, e);
-      return dateString || '-';
-    }
-  };
-
-  const getPackageDisplayNames = (packages: PackageType[] | undefined) => {
-    if (!packages || packages.length === 0) return "None";
-    return packages.map(pkg => pkg.name).join(", ");
   };
 
   const testCreateProject = async () => {
@@ -391,387 +195,6 @@ const Projects = () => {
     }
   };
 
-  const renderSortIndicator = (field: SortableProjectField) => {
-    if (sortField === field) {
-      return sortDirection === 'asc' ? 
-        <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
-        <ChevronDown className="ml-1 h-4 w-4 inline" />;
-    }
-    return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
-  };
-
-  const renderEmptyState = () => (
-    <div className="border border-dashed border-zinc-300 rounded-lg p-8 text-center">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <div className="bg-zinc-100 p-3 rounded-full">
-          <Info className="h-8 w-8 text-zinc-500" />
-        </div>
-        <h3 className="text-lg font-medium text-zinc-900">No projects found</h3>
-        <p className="text-zinc-500 max-w-md">
-          You haven't created any projects yet. Get started by creating your first project.
-        </p>
-        <div className="flex flex-wrap gap-2 mt-4">
-          <Button onClick={() => setIsCreating(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create your first project
-          </Button>
-          <Button variant="outline" onClick={handleRefreshProjects}>
-            Refresh Projects
-          </Button>
-          <Button variant="secondary" onClick={testCreateProject}>
-            Create Test Project
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderFilterBar = () => (
-    <div className="flex flex-col sm:flex-row gap-3 mb-4">
-      <div className="flex-1">
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Filter by project name..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-      <div className="flex-1">
-        <Input
-          placeholder="Filter by client name..."
-          value={clientFilter}
-          onChange={(e) => setClientFilter(e.target.value)}
-        />
-      </div>
-      <div className="w-[180px]">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="Onboarding">Onboarding</SelectItem>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="w-[180px]">
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            <SelectItem value="Low">Low</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="High">High</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <Button variant="outline" size="icon" onClick={resetFilters} className="shrink-0">
-        ✕
-      </Button>
-    </div>
-  );
-
-  const toggleProjectSelection = (projectId: string) => {
-    setSelectedProjects(prev => {
-      if (prev.includes(projectId)) {
-        return prev.filter(id => id !== projectId);
-      } else {
-        return [...prev, projectId];
-      }
-    });
-  };
-
-  const handleSelectAllProjects = () => {
-    if (selectedProjects.length === filteredAndSortedProjects.length) {
-      setSelectedProjects([]);
-    } else {
-      setSelectedProjects(filteredAndSortedProjects.map(p => p.id));
-    }
-  };
-
-  const deleteSelectedProjects = async () => {
-    if (selectedProjects.length === 0) return;
-    
-    try {
-      setIsDeleting(true);
-      
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .in('id', selectedProjects);
-      
-      if (error) {
-        console.error('Error deleting projects:', error);
-        toast({
-          title: "Error deleting projects",
-          description: error.message || "Please try again later.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      toast({
-        title: "Projects deleted",
-        description: `Successfully deleted ${selectedProjects.length} project(s)`,
-      });
-      
-      fetchProjects();
-      setSelectedProjects([]);
-    } catch (err) {
-      console.error('Unexpected error deleting projects:', err);
-      toast({
-        title: "Error deleting projects",
-        description: "An unexpected error occurred. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteModal(false);
-    }
-  };
-
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
-          <h3 className="text-lg font-medium text-red-800 mb-2">Error loading projects</h3>
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button variant="outline" onClick={fetchProjects}>
-            Try Again
-          </Button>
-        </div>
-      );
-    }
-
-    if (projects.length === 0) {
-      return renderEmptyState();
-    }
-
-    if (filteredAndSortedProjects.length === 0) {
-      return (
-        <div>
-          {renderFilterBar()}
-          <div className="text-center p-8 border rounded-md">
-            <h3 className="text-lg font-medium mb-2">No matching projects</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your filters to see more results.</p>
-            <Button variant="outline" onClick={resetFilters}>
-              Clear All Filters
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div>
-        {renderFilterBar()}
-        
-        {selectedProjects.length > 0 && (
-          <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
-            <span className="text-sm">
-              {selectedProjects.length} project{selectedProjects.length !== 1 ? 's' : ''} selected
-            </span>
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              onClick={() => setShowDeleteModal(true)}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Selected
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-        
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="w-[50px]">
-                  <Checkbox 
-                    checked={filteredAndSortedProjects.length > 0 && selectedProjects.length === filteredAndSortedProjects.length}
-                    onCheckedChange={handleSelectAllProjects}
-                    aria-label="Select all projects"
-                  />
-                </TableHead>
-                <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
-                  Project Name {renderSortIndicator('name')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('client_name')} className="cursor-pointer">
-                  Client {renderSortIndicator('client_name')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
-                  Status {renderSortIndicator('status')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
-                  Priority {renderSortIndicator('priority')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[150px]">
-                  Package {renderSortIndicator('package_name')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('revenue')} className="cursor-pointer w-[120px]">
-                  Revenue {renderSortIndicator('revenue')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
-                  Start Date {renderSortIndicator('start_date')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('due_date')} className="cursor-pointer">
-                  Due Date {renderSortIndicator('due_date')}
-                </TableHead>
-                <TableHead onClick={() => handleSort('created_at')} className="cursor-pointer">
-                  Created {renderSortIndicator('created_at')}
-                </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAndSortedProjects.map((project) => (
-                <TableRow key={project.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell>
-                    <Checkbox 
-                      checked={selectedProjects.includes(project.id)}
-                      onCheckedChange={() => toggleProjectSelection(project.id)}
-                      aria-label={`Select project ${project.name}`}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{project.name}</TableCell>
-                  <TableCell className="text-sm">{project.client_name}</TableCell>
-                  
-                  <TableCell>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
-                          <Badge className={getStatusColor(project.status)}>
-                            {updatingProjectId === project.id ? (
-                              <span className="flex items-center">
-                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                Updating...
-                              </span>
-                            ) : (
-                              project.status
-                            )}
-                          </Badge>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-2">
-                        <div className="flex flex-col gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={`justify-start ${project.status === 'Onboarding' ? 'bg-blue-50' : ''}`}
-                            onClick={() => updateProjectStatus(project.id, 'Onboarding')}
-                            disabled={updatingProjectId === project.id}
-                          >
-                            <Badge className={getStatusColor('Onboarding')}>Onboarding</Badge>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={`justify-start ${project.status === 'Active' ? 'bg-blue-50' : ''}`}
-                            onClick={() => updateProjectStatus(project.id, 'Active')}
-                            disabled={updatingProjectId === project.id}
-                          >
-                            <Badge className={getStatusColor('Active')}>Active</Badge>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={`justify-start ${project.status === 'Completed' ? 'bg-blue-50' : ''}`}
-                            onClick={() => updateProjectStatus(project.id, 'Completed')}
-                            disabled={updatingProjectId === project.id}
-                          >
-                            <Badge className={getStatusColor('Completed')}>Completed</Badge>
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Badge variant="outline" className={getPriorityColor(project.priority)}>
-                      {project.priority}
-                    </Badge>
-                  </TableCell>
-                  
-                  <TableCell>
-                    {project.package_name ? (
-                      <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
-                        <Package className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{project.package_name}</span>
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">No package</span>
-                    )}
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
-                      {formatRevenue(project.revenue)}
-                    </Badge>
-                  </TableCell>
-                  
-                  <TableCell className="text-sm text-muted-foreground">{formatDate(project.start_date)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatDate(project.due_date)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatDate(project.created_at)}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          Actions
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => console.log('View details', project.id)}>
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => console.log('Edit', project.id)}>
-                          Edit Project
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setSelectedProjects([project.id]);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          Delete Project
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -801,35 +224,16 @@ const Projects = () => {
             </CardContent>
           </Card>
         ) : (
-          renderContent()
+          <ProjectList
+            projects={projects}
+            loading={loading}
+            error={error}
+            packageTypes={packageTypes}
+            fetchProjects={fetchProjects}
+            testCreateProject={testCreateProject}
+            setIsCreating={setIsCreating}
+          />
         )}
-
-        <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete {selectedProjects.length > 1 ? 'Projects' : 'Project'}</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete {selectedProjects.length === 1 ? 'this project' : `these ${selectedProjects.length} projects`}? 
-                This action cannot be undone and all associated data will be permanently removed.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={deleteSelectedProjects}
-                disabled={isDeleting}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : 'Delete'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </DashboardLayout>
   );
