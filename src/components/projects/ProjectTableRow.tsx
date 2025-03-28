@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "./types";
 import { format } from "date-fns";
@@ -175,9 +176,11 @@ export function TableRow({
       </TableCell>
       
       <TableCell>
-        <div className="w-[120px]">
-          <Progress value={project.progress} className="h-2" />
-          <span className="text-xs text-muted-foreground mt-1 inline-block">
+        <div className="w-[120px] flex items-center gap-2">
+          <div className="flex-grow">
+            <Progress value={project.progress} className="h-2" />
+          </div>
+          <span className="text-xs text-muted-foreground shrink-0">
             {project.progress}%
           </span>
         </div>
