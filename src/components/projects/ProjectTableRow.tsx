@@ -47,6 +47,7 @@ export function TableRow({
   const { toast } = useToast();
   // Add local state to track project data
   const [localProject, setLocalProject] = useState<Project>(project);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
     try {
@@ -74,6 +75,9 @@ export function TableRow({
           ...prev,
           status: newStatus
         }));
+        
+        // Close the popover after successful status update
+        setIsPopoverOpen(false);
       }
       
       toast({
@@ -82,8 +86,11 @@ export function TableRow({
       });
       
       // If fetchProjects is provided, call it to refresh the entire list
+      // We'll call this after a short delay to avoid UI flickering
       if (fetchProjects) {
-        fetchProjects();
+        setTimeout(() => {
+          fetchProjects();
+        }, 300);
       }
     } catch (err) {
       console.error('Unexpected error updating status:', err);
@@ -146,7 +153,7 @@ export function TableRow({
       <TableCell className="text-sm">{currentProject.client_name}</TableCell>
       
       <TableCell>
-        <Popover>
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
               <Badge className={getStatusColor(currentProject.status)}>
@@ -197,10 +204,8 @@ export function TableRow({
       
       <TableCell>
         <div className="w-[120px] flex items-center gap-2">
-          <div className="flex-grow">
-            <Progress value={currentProject.progress} className="h-2" />
-          </div>
-          <span className="text-xs text-muted-foreground shrink-0">
+          <Progress value={currentProject.progress} className="h-2 flex-grow" />
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
             {currentProject.progress}%
           </span>
         </div>
