@@ -1,15 +1,13 @@
 import { useState, useMemo } from "react";
-import { Project, PackageType, SortDirection } from "@/components/projects/types";
-import { SortableProjectField } from "@/components/projects/form/types";
-import { TableRow } from "@/components/projects/ProjectTableRow";
-import { EmptyState } from "@/components/projects/EmptyState";
-import { FilterBar } from "@/components/projects/FilterBar";
-import { DeleteConfirmDialog } from "@/components/projects/DeleteConfirmDialog";
-import { Badge } from "@/components/ui/badge";
+import { Project, PackageType, SortDirection, SortableProjectField } from "./types";
+import { TableRow } from "./table/ProjectTableRow";
+import { ProjectTableHeader } from "./table/ProjectTableHeader";
+import { EmptyState } from "./EmptyState";
+import { FilterBar } from "./FilterBar";
+import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Trash2 } from "lucide-react";
-import { Table, TableBody, TableHead, TableHeader, TableRow as UITableRow } from "@/components/ui/table";
+import { Table, TableBody } from "@/components/ui/table";
 
 interface ProjectListProps {
   projects: Project[];
@@ -111,36 +109,50 @@ export function ProjectList({
     }
   };
 
-  const renderSortIndicator = (field: SortableProjectField) => {
-    if (sortField === field) {
-      return sortDirection === 'asc' ? <span className="inline-flex items-center">↑</span> : <span className="inline-flex items-center">↓</span>;
-    }
-    return <span className="inline-flex items-center opacity-40">↕</span>;
-  };
-
   if (loading) {
-    return <div className="flex justify-center items-center h-64">
+    return (
+      <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>;
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
+    return (
+      <div className="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
         <h3 className="text-lg font-medium text-red-800 mb-2">Error loading projects</h3>
         <p className="text-red-600 mb-4">{error}</p>
         <Button variant="outline" onClick={fetchProjects}>
           Try Again
         </Button>
-      </div>;
+      </div>
+    );
   }
 
   if (projects.length === 0) {
-    return <EmptyState setIsCreating={setIsCreating} handleRefreshProjects={fetchProjects} testCreateProject={testCreateProject} />;
+    return (
+      <EmptyState 
+        setIsCreating={setIsCreating} 
+        handleRefreshProjects={fetchProjects} 
+        testCreateProject={testCreateProject} 
+      />
+    );
   }
 
   if (filteredAndSortedProjects.length === 0) {
-    return <div>
-        <FilterBar nameFilter={nameFilter} setNameFilter={setNameFilter} clientFilter={clientFilter} setClientFilter={setClientFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter} resetFilters={resetFilters} />
+    return (
+      <div>
+        <FilterBar 
+          nameFilter={nameFilter} 
+          setNameFilter={setNameFilter} 
+          clientFilter={clientFilter} 
+          setClientFilter={setClientFilter} 
+          statusFilter={statusFilter} 
+          setStatusFilter={setStatusFilter} 
+          priorityFilter={priorityFilter} 
+          setPriorityFilter={setPriorityFilter} 
+          resetFilters={resetFilters} 
+        />
         <div className="text-center p-8 border rounded-md">
           <h3 className="text-lg font-medium mb-2">No matching projects</h3>
           <p className="text-muted-foreground mb-4">Try adjusting your filters to see more results.</p>
@@ -148,70 +160,88 @@ export function ProjectList({
             Clear All Filters
           </Button>
         </div>
-      </div>;
+      </div>
+    );
   }
 
-  return <div>
-      <FilterBar nameFilter={nameFilter} setNameFilter={setNameFilter} clientFilter={clientFilter} setClientFilter={setClientFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter} resetFilters={resetFilters} />
+  return (
+    <div>
+      <FilterBar 
+        nameFilter={nameFilter} 
+        setNameFilter={setNameFilter} 
+        clientFilter={clientFilter} 
+        setClientFilter={setClientFilter} 
+        statusFilter={statusFilter} 
+        setStatusFilter={setStatusFilter} 
+        priorityFilter={priorityFilter} 
+        setPriorityFilter={setPriorityFilter} 
+        resetFilters={resetFilters} 
+      />
       
-      {selectedProjects.length > 0 && <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+      {selectedProjects.length > 0 && (
+        <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
           <span className="text-sm">
             {selectedProjects.length} project{selectedProjects.length !== 1 ? 's' : ''} selected
           </span>
-          <Button variant="destructive" size="sm" onClick={() => setShowDeleteModal(true)} disabled={isDeleting}>
-            {isDeleting ? <>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={() => setShowDeleteModal(true)} 
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Deleting...
-              </> : <>
+              </>
+            ) : (
+              <>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Selected
-              </>}
+              </>
+            )}
           </Button>
-        </div>}
+        </div>
+      )}
       
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
-            <UITableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-[50px]">
-                <Checkbox checked={filteredAndSortedProjects.length > 0 && selectedProjects.length === filteredAndSortedProjects.length} onCheckedChange={handleSelectAllProjects} aria-label="Select all projects" />
-              </TableHead>
-              <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
-                Project {renderSortIndicator('name')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('client_name')} className="cursor-pointer">
-                Client {renderSortIndicator('client_name')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
-                Status {renderSortIndicator('status')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('progress')} className="cursor-pointer">
-                Progress {renderSortIndicator('progress')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
-                Priority {renderSortIndicator('priority')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[100px]">
-                Service {renderSortIndicator('package_name')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('revenue')} className="cursor-pointer w-[120px]">
-                Revenue {renderSortIndicator('revenue')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
-                Start {renderSortIndicator('start_date')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('due_date')} className="cursor-pointer">
-                End {renderSortIndicator('due_date')}
-              </TableHead>
-              <TableHead className="text-center">Client Portal</TableHead>
-            </UITableRow>
-          </TableHeader>
+          <ProjectTableHeader 
+            onSelectAll={handleSelectAllProjects}
+            allSelected={filteredAndSortedProjects.length > 0 && 
+                       selectedProjects.length === filteredAndSortedProjects.length}
+            onSort={handleSort}
+            sortField={sortField}
+            sortDirection={sortDirection}
+          />
+          
           <TableBody>
-            {filteredAndSortedProjects.map(project => <TableRow key={project.id} project={project} selectedProjects={selectedProjects} toggleProjectSelection={toggleProjectSelection} setSelectedProjects={setSelectedProjects} updatingProjectId={updatingProjectId} setUpdatingProjectId={setUpdatingProjectId} setShowDeleteModal={setShowDeleteModal} fetchProjects={fetchProjects} />)}
+            {filteredAndSortedProjects.map(project => (
+              <TableRow 
+                key={project.id} 
+                project={project} 
+                selectedProjects={selectedProjects} 
+                toggleProjectSelection={toggleProjectSelection} 
+                setSelectedProjects={setSelectedProjects} 
+                updatingProjectId={updatingProjectId} 
+                setUpdatingProjectId={setUpdatingProjectId} 
+                setShowDeleteModal={setShowDeleteModal}
+                fetchProjects={fetchProjects} 
+              />
+            ))}
           </TableBody>
         </Table>
       </div>
 
-      <DeleteConfirmDialog showDeleteModal={showDeleteModal} setShowDeleteModal={setShowDeleteModal} isDeleting={isDeleting} setIsDeleting={setIsDeleting} selectedProjects={selectedProjects} setSelectedProjects={setSelectedProjects} fetchProjects={fetchProjects} />
-    </div>;
+      <DeleteConfirmDialog 
+        showDeleteModal={showDeleteModal} 
+        setShowDeleteModal={setShowDeleteModal} 
+        isDeleting={isDeleting} 
+        setIsDeleting={setIsDeleting} 
+        selectedProjects={selectedProjects} 
+        setSelectedProjects={setSelectedProjects} 
+        fetchProjects={fetchProjects} 
+      />
+    </div>
+  );
 }
