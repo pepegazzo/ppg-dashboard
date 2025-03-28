@@ -177,7 +177,7 @@ export function ProjectList({
                 <Checkbox checked={filteredAndSortedProjects.length > 0 && selectedProjects.length === filteredAndSortedProjects.length} onCheckedChange={handleSelectAllProjects} aria-label="Select all projects" />
               </TableHead>
               <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
-                Project Name {renderSortIndicator('name')}
+                Project {renderSortIndicator('name')}
               </TableHead>
               <TableHead onClick={() => handleSort('client_name')} className="cursor-pointer">
                 Client {renderSortIndicator('client_name')}
@@ -192,18 +192,18 @@ export function ProjectList({
                 Priority {renderSortIndicator('priority')}
               </TableHead>
               <TableHead onClick={() => handleSort('package_name')} className="cursor-pointer w-[100px]">
-                Package {renderSortIndicator('package_name')}
+                Service {renderSortIndicator('package_name')}
               </TableHead>
               <TableHead onClick={() => handleSort('revenue')} className="cursor-pointer w-[120px]">
                 Revenue {renderSortIndicator('revenue')}
               </TableHead>
               <TableHead onClick={() => handleSort('start_date')} className="cursor-pointer">
-                Start Date {renderSortIndicator('start_date')}
+                Start {renderSortIndicator('start_date')}
               </TableHead>
               <TableHead onClick={() => handleSort('due_date')} className="cursor-pointer">
-                Due Date {renderSortIndicator('due_date')}
+                End {renderSortIndicator('due_date')}
               </TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-center">Client Portal</TableHead>
             </UITableRow>
           </TableHeader>
           <TableBody>
