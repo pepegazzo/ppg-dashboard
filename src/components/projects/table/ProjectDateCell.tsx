@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -84,7 +85,7 @@ export function ProjectDateCell({
               disabled={disabled}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateValue ? format(parseISO(dateValue), "PPP") : <span>Pick a date</span>}
+              {dateValue ? format(parseISO(dateValue), "MMM d, yyyy") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
