@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "./types";
 import { format } from "date-fns";
@@ -209,7 +208,6 @@ export function TableRow({
       
       <TableCell className="text-sm text-muted-foreground">{formatDate(project.start_date)}</TableCell>
       <TableCell className="text-sm text-muted-foreground">{formatDate(project.due_date)}</TableCell>
-      <TableCell className="text-sm text-muted-foreground">{formatDate(project.created_at)}</TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

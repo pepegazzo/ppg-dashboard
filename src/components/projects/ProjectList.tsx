@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Project, PackageType, SortDirection } from "@/components/projects/types";
 import { SortableProjectField } from "@/components/projects/form/types";
@@ -254,9 +253,6 @@ export function ProjectList({
               </TableHead>
               <TableHead onClick={() => handleSort('due_date')} className="cursor-pointer">
                 Due Date {renderSortIndicator('due_date')}
-              </TableHead>
-              <TableHead onClick={() => handleSort('created_at')} className="cursor-pointer">
-                Created {renderSortIndicator('created_at')}
               </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </UITableRow>
