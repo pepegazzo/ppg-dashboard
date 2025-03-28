@@ -62,7 +62,7 @@ export function ProjectDateCell({
   };
 
   return (
-    <div className="cursor-pointer w-[80px]" onDoubleClick={startEdit}>
+    <div className="cursor-pointer min-w-[80px]" onDoubleClick={startEdit}>
       {editMode ? (
         <Popover 
           open={isPopoverOpen} 
@@ -77,7 +77,7 @@ export function ProjectDateCell({
             <Button
               variant="outline"
               className={cn(
-                "w-[80px] justify-start text-left font-normal text-xs",
+                "min-w-[80px] px-2 justify-start text-left font-normal text-xs",
                 !dateValue && "text-muted-foreground"
               )}
               disabled={disabled}

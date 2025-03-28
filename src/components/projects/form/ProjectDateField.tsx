@@ -28,7 +28,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full pl-3 text-left font-normal",
+                    "w-full min-w-[120px] pl-3 text-left font-normal",
                     !field.value && "text-muted-foreground"
                   )}
                 >
