@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "./types";
 import { format } from "date-fns";
@@ -40,11 +39,9 @@ export function TableRow({
 }: ProjectTableRowProps) {
   const { toast } = useToast();
 
-  // Add local state to track project data
   const [localProject, setLocalProject] = useState<Project>(project);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // State for inline editing
   const [editMode, setEditMode] = useState<{ 
     name: boolean; 
     client_name: boolean;
@@ -63,7 +60,6 @@ export function TableRow({
     due_date: localProject.due_date || ''
   });
 
-  // For date calendar popover
   const [datePopoverOpen, setDatePopoverOpen] = useState({
     start_date: false,
     due_date: false
@@ -88,14 +84,11 @@ export function TableRow({
         return;
       }
 
-      // Update local project state with the new status
       if (data && data[0]) {
         setLocalProject(prev => ({
           ...prev,
           status: newStatus
         }));
-
-        // Close the popover after successful status update
         setIsPopoverOpen(false);
       }
       toast({
@@ -138,18 +131,14 @@ export function TableRow({
         return;
       }
 
-      // Update local project state with the new value
       if (data && data[0]) {
-        // Create a new object with the updated field
         const updatedProject = {
           ...localProject,
-          [field]: data[0][field]  // Use the value returned from the database
+          [field]: data[0][field]
         };
         
-        // Update the local state with this new object
         setLocalProject(updatedProject);
         
-        // Also update the edit values to match
         setEditValues(prev => ({
           ...prev,
           [field]: data[0][field] || ''
@@ -171,12 +160,10 @@ export function TableRow({
       });
     } finally {
       setUpdatingProjectId(null);
-      // Reset edit mode
       setEditMode(prev => ({
         ...prev,
         [field]: false
       }));
-      // Close date popovers if open
       if (field === 'start_date' || field === 'due_date') {
         setDatePopoverOpen(prev => ({
           ...prev,
@@ -214,7 +201,6 @@ export function TableRow({
       ...prev,
       [field]: localProject[field] || ''
     }));
-    // Close date popovers if open
     if (field === 'start_date' || field === 'due_date') {
       setDatePopoverOpen(prev => ({
         ...prev,
@@ -225,7 +211,11 @@ export function TableRow({
 
   const handleDateSelect = (field: 'start_date' | 'due_date', date: Date | undefined) => {
     if (date) {
-      const formattedDate = format(date, 'yyyy-MM-dd');
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      
       setEditValues(prev => ({
         ...prev,
         [field]: formattedDate
@@ -269,14 +259,13 @@ export function TableRow({
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
-      return format(new Date(dateString), 'MMM d, yyyy');
+      return format(parseISO(dateString), 'MMM d, yyyy');
     } catch (e) {
       console.error('Error formatting date:', dateString, e);
       return dateString || '-';
     }
   };
 
-  // Use localProject instead of project to ensure UI updates reflect the latest state
   const currentProject = localProject;
 
   return <UITableRow className="hover:bg-muted/30 transition-colors">
@@ -416,15 +405,16 @@ export function TableRow({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {editValues.start_date ? format(new Date(editValues.start_date), "PPP") : <span>Pick a date</span>}
+                {editValues.start_date ? format(parseISO(editValues.start_date), "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={editValues.start_date ? new Date(editValues.start_date) : undefined}
+                selected={editValues.start_date ? parseISO(editValues.start_date) : undefined}
                 onSelect={(date) => handleDateSelect('start_date', date)}
                 initialFocus
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -445,15 +435,16 @@ export function TableRow({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {editValues.due_date ? format(new Date(editValues.due_date), "PPP") : <span>Pick a date</span>}
+                {editValues.due_date ? format(parseISO(editValues.due_date), "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={editValues.due_date ? new Date(editValues.due_date) : undefined}
+                selected={editValues.due_date ? parseISO(editValues.due_date) : undefined}
                 onSelect={(date) => handleDateSelect('due_date', date)}
                 initialFocus
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
