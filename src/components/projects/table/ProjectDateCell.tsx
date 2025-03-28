@@ -77,7 +77,7 @@ export function ProjectDateCell({
             <Button
               variant="outline"
               className={cn(
-                "min-w-[80px] px-2 justify-start text-left font-normal text-xs",
+                "min-w-[80px] px-2 text-left justify-start font-normal text-xs",
                 !dateValue && "text-muted-foreground"
               )}
               disabled={disabled}
