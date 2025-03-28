@@ -131,15 +131,32 @@ export function TableRow({
 
       // Update local project state with the new value
       if (data && data[0]) {
-        setLocalProject(prev => ({
+        // Create a new object with the updated field
+        const updatedProject = {
+          ...localProject,
+          [field]: data[0][field]  // Use the value returned from the database
+        };
+        
+        // Update the local state with this new object
+        setLocalProject(updatedProject);
+        
+        // Also update the edit values to match
+        setEditValues(prev => ({
           ...prev,
-          [field]: value
+          [field]: data[0][field] || ''
         }));
+        
+        console.log(`Project ${field} updated:`, data[0][field]);
         
         toast({
           title: `${field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')} updated`,
           description: `Project ${field.replace('_', ' ')} has been updated`
         });
+        
+        // If fetchProjects is provided, refresh all projects
+        if (fetchProjects) {
+          fetchProjects();
+        }
       }
     } catch (err) {
       console.error(`Unexpected error updating ${field}:`, err);
