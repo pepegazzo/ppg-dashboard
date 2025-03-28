@@ -43,7 +43,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
             <PopoverContent 
               className="w-auto p-0" 
               align="start" 
-              sideOffset={8}
+              sideOffset={12}
             >
               <Calendar
                 mode="single"
@@ -58,7 +58,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                   }
                 }}
                 initialFocus
-                className="p-1 pointer-events-auto scale-90"
+                className="p-0 pointer-events-auto scale-80"
               />
             </PopoverContent>
           </Popover>
