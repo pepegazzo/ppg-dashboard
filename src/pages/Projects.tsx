@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { PlusCircle, Loader2, Info, ChevronUp, ChevronDown, Search, ArrowUpDown, Package, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import ProjectForm from "@/components/projects/ProjectForm";
@@ -63,6 +64,7 @@ type Project = {
   package_name?: string | null;
   package_id?: string | null;
   revenue?: number | null;
+  progress?: number;
 };
 
 type PackageType = {
@@ -144,7 +146,13 @@ const Projects = () => {
         }
         
         console.log("Found projects without packages:", allProjects);
-        setProjects(allProjects || []);
+        
+        const projectsWithProgress = allProjects?.map(project => ({
+          ...project,
+          progress: Math.floor(Math.random() * 101)
+        })) || [];
+        
+        setProjects(projectsWithProgress);
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
         
@@ -155,6 +163,7 @@ const Projects = () => {
             ...project,
             package_name: packageInfo?.name || null,
             package_id: packageInfo?.id || null,
+            progress: Math.floor(Math.random() * 101)
           };
         });
         
@@ -168,7 +177,13 @@ const Projects = () => {
         
         if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
           console.log("Found projects without packages:", projectsWithoutPackages);
-          setProjects([...transformedProjects, ...projectsWithoutPackages]);
+          
+          const projectsWithProgress = projectsWithoutPackages.map(project => ({
+            ...project,
+            progress: Math.floor(Math.random() * 101)
+          }));
+          
+          setProjects([...transformedProjects, ...projectsWithProgress]);
         }
       }
     } catch (error) {
@@ -627,6 +642,9 @@ const Projects = () => {
                 <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
                   Status {renderSortIndicator('status')}
                 </TableHead>
+                <TableHead>
+                  Progress
+                </TableHead>
                 <TableHead onClick={() => handleSort('priority')} className="cursor-pointer">
                   Priority {renderSortIndicator('priority')}
                 </TableHead>
@@ -709,6 +727,15 @@ const Projects = () => {
                         </div>
                       </PopoverContent>
                     </Popover>
+                  </TableCell>
+                  
+                  <TableCell>
+                    <div className="w-[120px]">
+                      <Progress value={project.progress} className="h-2" />
+                      <span className="text-xs text-muted-foreground mt-1 inline-block">
+                        {project.progress}%
+                      </span>
+                    </div>
                   </TableCell>
                   
                   <TableCell>
