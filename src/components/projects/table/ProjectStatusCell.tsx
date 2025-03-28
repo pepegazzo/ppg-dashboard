@@ -22,6 +22,7 @@ export function ProjectStatusCell({
 }: ProjectStatusCellProps) {
   const { toast } = useToast();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [localStatus, setLocalStatus] = useState(project.status);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -58,6 +59,8 @@ export function ProjectStatusCell({
       }
 
       if (data && data[0]) {
+        // Update local state with the new status
+        setLocalStatus(newStatus);
         setIsPopoverOpen(false);
       }
       
@@ -81,13 +84,13 @@ export function ProjectStatusCell({
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
-          <Badge className={getStatusColor(project.status)}>
+          <Badge className={getStatusColor(localStatus)}>
             {updatingProjectId === project.id ? (
               <span className="flex items-center">
                 <Loader2 className="h-3 w-3 animate-spin mr-1" />
                 Updating...
               </span>
-            ) : project.status}
+            ) : localStatus}
           </Badge>
         </Button>
       </PopoverTrigger>
@@ -96,7 +99,7 @@ export function ProjectStatusCell({
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`justify-start ${project.status === 'Onboarding' ? 'bg-blue-50' : ''}`} 
+            className={`justify-start ${localStatus === 'Onboarding' ? 'bg-blue-50' : ''}`} 
             onClick={() => updateProjectStatus(project.id, 'Onboarding')} 
             disabled={updatingProjectId === project.id}
           >
@@ -105,7 +108,7 @@ export function ProjectStatusCell({
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`justify-start ${project.status === 'Active' ? 'bg-blue-50' : ''}`} 
+            className={`justify-start ${localStatus === 'Active' ? 'bg-blue-50' : ''}`} 
             onClick={() => updateProjectStatus(project.id, 'Active')} 
             disabled={updatingProjectId === project.id}
           >
@@ -114,7 +117,7 @@ export function ProjectStatusCell({
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`justify-start ${project.status === 'Completed' ? 'bg-blue-50' : ''}`} 
+            className={`justify-start ${localStatus === 'Completed' ? 'bg-blue-50' : ''}`} 
             onClick={() => updateProjectStatus(project.id, 'Completed')} 
             disabled={updatingProjectId === project.id}
           >
