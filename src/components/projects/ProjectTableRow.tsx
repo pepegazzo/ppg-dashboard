@@ -31,6 +31,7 @@ interface ProjectTableRowProps {
   updatingProjectId: string | null;
   setUpdatingProjectId: (projectId: string | null) => void;
   setShowDeleteModal: (show: boolean) => void;
+  fetchProjects?: () => void; // Optional prop to refresh all projects
 }
 
 export function TableRow({
@@ -41,8 +42,11 @@ export function TableRow({
   updatingProjectId,
   setUpdatingProjectId,
   setShowDeleteModal,
+  fetchProjects,
 }: ProjectTableRowProps) {
   const { toast } = useToast();
+  // Add local state to track project data
+  const [localProject, setLocalProject] = useState<Project>(project);
 
   const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
     try {
@@ -64,10 +68,23 @@ export function TableRow({
         return;
       }
       
+      // Update local project state with the new status
+      if (data && data[0]) {
+        setLocalProject(prev => ({
+          ...prev,
+          status: newStatus
+        }));
+      }
+      
       toast({
         title: "Status updated",
         description: `Project status changed to ${newStatus}`,
       });
+      
+      // If fetchProjects is provided, call it to refresh the entire list
+      if (fetchProjects) {
+        fetchProjects();
+      }
     } catch (err) {
       console.error('Unexpected error updating status:', err);
       toast({
@@ -113,30 +130,33 @@ export function TableRow({
     }
   };
 
+  // Use localProject instead of project
+  const currentProject = localProject;
+
   return (
     <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
         <Checkbox 
-          checked={selectedProjects.includes(project.id)}
-          onCheckedChange={() => toggleProjectSelection(project.id)}
-          aria-label={`Select project ${project.name}`}
+          checked={selectedProjects.includes(currentProject.id)}
+          onCheckedChange={() => toggleProjectSelection(currentProject.id)}
+          aria-label={`Select project ${currentProject.name}`}
         />
       </TableCell>
-      <TableCell className="font-medium">{project.name}</TableCell>
-      <TableCell className="text-sm">{project.client_name}</TableCell>
+      <TableCell className="font-medium">{currentProject.name}</TableCell>
+      <TableCell className="text-sm">{currentProject.client_name}</TableCell>
       
       <TableCell>
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
-              <Badge className={getStatusColor(project.status)}>
-                {updatingProjectId === project.id ? (
+              <Badge className={getStatusColor(currentProject.status)}>
+                {updatingProjectId === currentProject.id ? (
                   <span className="flex items-center">
                     <Loader2 className="h-3 w-3 animate-spin mr-1" />
                     Updating...
                   </span>
                 ) : (
-                  project.status
+                  currentProject.status
                 )}
               </Badge>
             </Button>
@@ -146,27 +166,27 @@ export function TableRow({
               <Button 
                 variant="ghost" 
                 size="sm"
-                className={`justify-start ${project.status === 'Onboarding' ? 'bg-blue-50' : ''}`}
-                onClick={() => updateProjectStatus(project.id, 'Onboarding')}
-                disabled={updatingProjectId === project.id}
+                className={`justify-start ${currentProject.status === 'Onboarding' ? 'bg-blue-50' : ''}`}
+                onClick={() => updateProjectStatus(currentProject.id, 'Onboarding')}
+                disabled={updatingProjectId === currentProject.id}
               >
                 <Badge className={getStatusColor('Onboarding')}>Onboarding</Badge>
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm"
-                className={`justify-start ${project.status === 'Active' ? 'bg-blue-50' : ''}`}
-                onClick={() => updateProjectStatus(project.id, 'Active')}
-                disabled={updatingProjectId === project.id}
+                className={`justify-start ${currentProject.status === 'Active' ? 'bg-blue-50' : ''}`}
+                onClick={() => updateProjectStatus(currentProject.id, 'Active')}
+                disabled={updatingProjectId === currentProject.id}
               >
                 <Badge className={getStatusColor('Active')}>Active</Badge>
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm"
-                className={`justify-start ${project.status === 'Completed' ? 'bg-blue-50' : ''}`}
-                onClick={() => updateProjectStatus(project.id, 'Completed')}
-                disabled={updatingProjectId === project.id}
+                className={`justify-start ${currentProject.status === 'Completed' ? 'bg-blue-50' : ''}`}
+                onClick={() => updateProjectStatus(currentProject.id, 'Completed')}
+                disabled={updatingProjectId === currentProject.id}
               >
                 <Badge className={getStatusColor('Completed')}>Completed</Badge>
               </Button>
@@ -178,25 +198,25 @@ export function TableRow({
       <TableCell>
         <div className="w-[120px] flex items-center gap-2">
           <div className="flex-grow">
-            <Progress value={project.progress} className="h-2" />
+            <Progress value={currentProject.progress} className="h-2" />
           </div>
           <span className="text-xs text-muted-foreground shrink-0">
-            {project.progress}%
+            {currentProject.progress}%
           </span>
         </div>
       </TableCell>
       
       <TableCell>
-        <Badge variant="outline" className={getPriorityColor(project.priority)}>
-          {project.priority}
+        <Badge variant="outline" className={getPriorityColor(currentProject.priority)}>
+          {currentProject.priority}
         </Badge>
       </TableCell>
       
       <TableCell>
-        {project.package_name ? (
+        {currentProject.package_name ? (
           <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
             <Package className="h-3 w-3 shrink-0" />
-            <span className="truncate">{project.package_name}</span>
+            <span className="truncate">{currentProject.package_name}</span>
           </Badge>
         ) : (
           <span className="text-muted-foreground text-xs">No package</span>
@@ -205,12 +225,12 @@ export function TableRow({
       
       <TableCell>
         <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
-          {formatRevenue(project.revenue)}
+          {formatRevenue(currentProject.revenue)}
         </Badge>
       </TableCell>
       
-      <TableCell className="text-sm text-muted-foreground">{formatDate(project.start_date)}</TableCell>
-      <TableCell className="text-sm text-muted-foreground">{formatDate(project.due_date)}</TableCell>
+      <TableCell className="text-sm text-muted-foreground">{formatDate(currentProject.start_date)}</TableCell>
+      <TableCell className="text-sm text-muted-foreground">{formatDate(currentProject.due_date)}</TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -219,15 +239,15 @@ export function TableRow({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => console.log('View details', project.id)}>
+            <DropdownMenuItem onClick={() => console.log('View details', currentProject.id)}>
               View Details
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log('Edit', project.id)}>
+            <DropdownMenuItem onClick={() => console.log('Edit', currentProject.id)}>
               Edit Project
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => {
-                setSelectedProjects([project.id]);
+                setSelectedProjects([currentProject.id]);
                 setShowDeleteModal(true);
               }}
               className="text-destructive focus:text-destructive"

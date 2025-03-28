@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Project, PackageType, SortDirection } from "@/components/projects/types";
 import { SortableProjectField } from "@/components/projects/form/types";
@@ -268,6 +269,7 @@ export function ProjectList({
                 updatingProjectId={updatingProjectId}
                 setUpdatingProjectId={setUpdatingProjectId}
                 setShowDeleteModal={setShowDeleteModal}
+                fetchProjects={fetchProjects}
               />
             ))}
           </TableBody>
