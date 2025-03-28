@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
-import { Check, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
@@ -104,9 +104,9 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
                     className="w-full justify-start mb-1 h-auto py-2"
                     onClick={() => selectPackage(pkg.id)}
                   >
-                    <div className="mr-2 h-4 w-4 flex items-center justify-center">
-                      {field.value === pkg.id && <Check className="h-4 w-4" />}
-                    </div>
+                    {field.value === pkg.id && (
+                      <span className="absolute left-2">•</span>
+                    )}
                     <div className="flex flex-col items-start">
                       <span>{pkg.name}</span>
                       {pkg.description && (

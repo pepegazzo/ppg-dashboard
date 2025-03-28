@@ -8,8 +8,7 @@ interface ProjectPackageCellProps {
 
 export function ProjectPackageCell({ packageName }: ProjectPackageCellProps) {
   return packageName ? (
-    <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
-      <Package className="h-3 w-3 shrink-0" />
+    <Badge variant="outline" className="inline-flex items-center text-xs w-fit">
       <span className="truncate">{packageName}</span>
     </Badge>
   ) : (
