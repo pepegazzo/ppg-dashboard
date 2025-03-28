@@ -82,7 +82,7 @@ export function ProjectDateCell({
               )}
               disabled={disabled}
             >
-              {dateValue ? format(parseISO(dateValue), "MM/dd") : <span>Pick</span>}
+              {dateValue ? format(parseISO(dateValue), "MM/dd/yyyy") : <span>Pick</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent 
