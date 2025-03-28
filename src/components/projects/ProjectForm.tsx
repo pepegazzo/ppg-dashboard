@@ -51,7 +51,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert(projectPayload)
-        .select('id, name, client_name, revenue')
+        .select('id')
         .single();
 
       if (projectError) throw projectError;
@@ -73,41 +73,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
             title: "Warning",
             description: "Project created but there was an error linking the package.",
             variant: "destructive",
-          });
-        }
-      }
-      
-      // Create a pending invoice for the project if revenue is specified
-      if (newProject.revenue) {
-        const invoiceNumber = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 30); // Due date 30 days from now
-        
-        const invoiceData = {
-          project_id: newProject.id,
-          invoice_number: invoiceNumber,
-          amount: newProject.revenue,
-          status: "Pending",
-          issue_date: new Date().toISOString().split('T')[0],
-          due_date: dueDate.toISOString().split('T')[0],
-          description: `Invoice for ${newProject.name} - ${newProject.client_name}`
-        };
-        
-        const { error: invoiceError } = await supabase
-          .from('invoices')
-          .insert(invoiceData);
-        
-        if (invoiceError) {
-          console.error("Error creating invoice:", invoiceError);
-          toast({
-            title: "Warning",
-            description: "Project created but there was an error creating the associated invoice.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Success",
-            description: "Project and pending invoice created successfully.",
           });
         }
       }
