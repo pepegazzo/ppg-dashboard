@@ -9,19 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Package, Loader2 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Database } from "@/integrations/supabase/types";
-
 interface ProjectTableRowProps {
   project: Project;
   selectedProjects: string[];
@@ -32,7 +22,6 @@ interface ProjectTableRowProps {
   setShowDeleteModal: (show: boolean) => void;
   fetchProjects?: () => void; // Optional prop to refresh all projects
 }
-
 export function TableRow({
   project,
   selectedProjects,
@@ -41,49 +30,48 @@ export function TableRow({
   updatingProjectId,
   setUpdatingProjectId,
   setShowDeleteModal,
-  fetchProjects,
+  fetchProjects
 }: ProjectTableRowProps) {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   // Add local state to track project data
   const [localProject, setLocalProject] = useState<Project>(project);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
     try {
       setUpdatingProjectId(projectId);
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .update({ status: newStatus })
-        .eq('id', projectId)
-        .select();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('projects').update({
+        status: newStatus
+      }).eq('id', projectId).select();
       if (error) {
         console.error('Error updating project status:', error);
         toast({
           title: "Error updating status",
           description: error.message || "Please try again later.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-      
+
       // Update local project state with the new status
       if (data && data[0]) {
         setLocalProject(prev => ({
           ...prev,
           status: newStatus
         }));
-        
+
         // Close the popover after successful status update
         setIsPopoverOpen(false);
       }
-      
       toast({
         title: "Status updated",
-        description: `Project status changed to ${newStatus}`,
+        description: `Project status changed to ${newStatus}`
       });
-      
+
       // Remove the full page refresh - this was causing the flickering
       // We've already updated the local state above, which is sufficient
     } catch (err) {
@@ -91,36 +79,40 @@ export function TableRow({
       toast({
         title: "Error updating status",
         description: "An unexpected error occurred. Please try again later.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setUpdatingProjectId(null);
     }
   };
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-amber-100 text-amber-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-slate-100 text-slate-800';
+      case 'High':
+        return 'bg-red-100 text-red-800';
+      case 'Medium':
+        return 'bg-amber-100 text-amber-800';
+      case 'Low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-slate-100 text-slate-800';
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Onboarding': return 'bg-blue-100 text-blue-800';
-      case 'Active': return 'bg-emerald-100 text-emerald-800';
-      case 'Completed': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-slate-100 text-slate-800';
+      case 'Onboarding':
+        return 'bg-blue-100 text-blue-800';
+      case 'Active':
+        return 'bg-emerald-100 text-emerald-800';
+      case 'Completed':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-slate-100 text-slate-800';
     }
   };
-
   const formatRevenue = (amount: number | null | undefined) => {
     if (amount === null || amount === undefined) return 'S/ 0.00';
     return `S/ ${amount.toFixed(2)}`;
   };
-
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
@@ -133,15 +125,9 @@ export function TableRow({
 
   // Use localProject instead of project
   const currentProject = localProject;
-
-  return (
-    <UITableRow className="hover:bg-muted/30 transition-colors">
+  return <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
-        <Checkbox 
-          checked={selectedProjects.includes(currentProject.id)}
-          onCheckedChange={() => toggleProjectSelection(currentProject.id)}
-          aria-label={`Select project ${currentProject.name}`}
-        />
+        <Checkbox checked={selectedProjects.includes(currentProject.id)} onCheckedChange={() => toggleProjectSelection(currentProject.id)} aria-label={`Select project ${currentProject.name}`} />
       </TableCell>
       <TableCell className="font-medium">{currentProject.name}</TableCell>
       <TableCell className="text-sm">{currentProject.client_name}</TableCell>
@@ -151,44 +137,22 @@ export function TableRow({
           <PopoverTrigger asChild>
             <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
               <Badge className={getStatusColor(currentProject.status)}>
-                {updatingProjectId === currentProject.id ? (
-                  <span className="flex items-center">
+                {updatingProjectId === currentProject.id ? <span className="flex items-center">
                     <Loader2 className="h-3 w-3 animate-spin mr-1" />
                     Updating...
-                  </span>
-                ) : (
-                  currentProject.status
-                )}
+                  </span> : currentProject.status}
               </Badge>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-2">
             <div className="flex flex-col gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`justify-start ${currentProject.status === 'Onboarding' ? 'bg-blue-50' : ''}`}
-                onClick={() => updateProjectStatus(currentProject.id, 'Onboarding')}
-                disabled={updatingProjectId === currentProject.id}
-              >
+              <Button variant="ghost" size="sm" className={`justify-start ${currentProject.status === 'Onboarding' ? 'bg-blue-50' : ''}`} onClick={() => updateProjectStatus(currentProject.id, 'Onboarding')} disabled={updatingProjectId === currentProject.id}>
                 <Badge className={getStatusColor('Onboarding')}>Onboarding</Badge>
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`justify-start ${currentProject.status === 'Active' ? 'bg-blue-50' : ''}`}
-                onClick={() => updateProjectStatus(currentProject.id, 'Active')}
-                disabled={updatingProjectId === currentProject.id}
-              >
+              <Button variant="ghost" size="sm" className={`justify-start ${currentProject.status === 'Active' ? 'bg-blue-50' : ''}`} onClick={() => updateProjectStatus(currentProject.id, 'Active')} disabled={updatingProjectId === currentProject.id}>
                 <Badge className={getStatusColor('Active')}>Active</Badge>
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`justify-start ${currentProject.status === 'Completed' ? 'bg-blue-50' : ''}`}
-                onClick={() => updateProjectStatus(currentProject.id, 'Completed')}
-                disabled={updatingProjectId === currentProject.id}
-              >
+              <Button variant="ghost" size="sm" className={`justify-start ${currentProject.status === 'Completed' ? 'bg-blue-50' : ''}`} onClick={() => updateProjectStatus(currentProject.id, 'Completed')} disabled={updatingProjectId === currentProject.id}>
                 <Badge className={getStatusColor('Completed')}>Completed</Badge>
               </Button>
             </div>
@@ -212,14 +176,10 @@ export function TableRow({
       </TableCell>
       
       <TableCell>
-        {currentProject.package_name ? (
-          <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
+        {currentProject.package_name ? <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
             <Package className="h-3 w-3 shrink-0" />
             <span className="truncate">{currentProject.package_name}</span>
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground text-xs">No package</span>
-        )}
+          </Badge> : <span className="text-muted-foreground text-xs">No package</span>}
       </TableCell>
       
       <TableCell>
@@ -230,7 +190,7 @@ export function TableRow({
       
       <TableCell className="text-sm text-muted-foreground">{formatDate(currentProject.start_date)}</TableCell>
       <TableCell className="text-sm text-muted-foreground">{formatDate(currentProject.due_date)}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -244,18 +204,14 @@ export function TableRow({
             <DropdownMenuItem onClick={() => console.log('Edit', currentProject.id)}>
               Edit Project
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => {
-                setSelectedProjects([currentProject.id]);
-                setShowDeleteModal(true);
-              }}
-              className="text-destructive focus:text-destructive"
-            >
+            <DropdownMenuItem onClick={() => {
+            setSelectedProjects([currentProject.id]);
+            setShowDeleteModal(true);
+          }} className="text-destructive focus:text-destructive">
               Delete Project
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
-    </UITableRow>
-  );
+    </UITableRow>;
 }
