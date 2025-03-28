@@ -1,8 +1,6 @@
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableProjectField, SortDirection } from "../types";
-
 interface ProjectTableHeaderProps {
   onSelectAll: () => void;
   allSelected: boolean;
@@ -10,7 +8,6 @@ interface ProjectTableHeaderProps {
   sortField: SortableProjectField;
   sortDirection: SortDirection;
 }
-
 export function ProjectTableHeader({
   onSelectAll,
   allSelected,
@@ -20,22 +17,14 @@ export function ProjectTableHeader({
 }: ProjectTableHeaderProps) {
   const renderSortIndicator = (field: SortableProjectField) => {
     if (sortField === field) {
-      return sortDirection === 'asc' ? 
-        <span className="inline-flex items-center">↑</span> : 
-        <span className="inline-flex items-center">↓</span>;
+      return sortDirection === 'asc' ? <span className="inline-flex items-center">↑</span> : <span className="inline-flex items-center">↓</span>;
     }
     return <span className="inline-flex items-center opacity-40">↕</span>;
   };
-
-  return (
-    <TableHeader>
+  return <TableHeader>
       <TableRow className="bg-muted/50 hover:bg-muted/50">
         <TableHead className="w-[50px]">
-          <Checkbox 
-            checked={allSelected} 
-            onCheckedChange={onSelectAll} 
-            aria-label="Select all projects" 
-          />
+          <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
         </TableHead>
         <TableHead onClick={() => onSort('name')} className="cursor-pointer">
           Project {renderSortIndicator('name')}
@@ -58,7 +47,7 @@ export function ProjectTableHeader({
         <TableHead onClick={() => onSort('revenue')} className="cursor-pointer w-[120px]">
           Revenue {renderSortIndicator('revenue')}
         </TableHead>
-        <TableHead onClick={() => onSort('start_date')} className="cursor-pointer">
+        <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-auto">
           Start {renderSortIndicator('start_date')}
         </TableHead>
         <TableHead onClick={() => onSort('due_date')} className="cursor-pointer">
@@ -66,6 +55,5 @@ export function ProjectTableHeader({
         </TableHead>
         <TableHead className="text-center">Actions</TableHead>
       </TableRow>
-    </TableHeader>
-  );
+    </TableHeader>;
 }
