@@ -1,12 +1,10 @@
 
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
 
 interface ProjectDateCellProps {
   date: string | null;
@@ -84,7 +82,6 @@ export function ProjectDateCell({
               )}
               disabled={disabled}
             >
-              <CalendarIcon className="mr-1 h-3 w-3" />
               {dateValue ? format(parseISO(dateValue), "MM/dd") : <span>Pick</span>}
             </Button>
           </PopoverTrigger>
