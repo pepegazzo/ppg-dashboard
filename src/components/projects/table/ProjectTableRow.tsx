@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "../types";
 import { format, parseISO } from "date-fns";
@@ -14,7 +13,6 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
-
 interface ProjectTableRowProps {
   project: Project;
   selectedProjects: string[];
@@ -25,7 +23,6 @@ interface ProjectTableRowProps {
   setShowDeleteModal: (show: boolean) => void;
   fetchProjects?: () => void;
 }
-
 export function TableRow({
   project,
   selectedProjects,
@@ -36,23 +33,20 @@ export function TableRow({
   setShowDeleteModal,
   fetchProjects
 }: ProjectTableRowProps) {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [localProject, setLocalProject] = useState<Project>(project);
-
   const updateProjectField = async (projectId: string, field: string, value: string) => {
     try {
       setUpdatingProjectId(projectId);
-      
       const updateData: Record<string, any> = {
         [field]: value
       };
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .update(updateData)
-        .eq('id', projectId)
-        .select();
-        
+      const {
+        data,
+        error
+      } = await supabase.from('projects').update(updateData).eq('id', projectId).select();
       if (error) {
         console.error(`Error updating project ${field}:`, error);
         toast({
@@ -62,17 +56,13 @@ export function TableRow({
         });
         return;
       }
-
       if (data && data[0]) {
         const updatedProject = {
           ...localProject,
           [field]: data[0][field]
         };
-        
         setLocalProject(updatedProject);
-        
         console.log(`Project ${field} updated:`, data[0][field]);
-        
         toast({
           title: `${field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')} updated`,
           description: `Project ${field.replace('_', ' ')} has been updated`
@@ -89,50 +79,26 @@ export function TableRow({
       setUpdatingProjectId(null);
     }
   };
-
   const handleDeleteClick = () => {
     setSelectedProjects([localProject.id]);
     setShowDeleteModal(true);
   };
-
   const isUpdating = updatingProjectId === localProject.id;
-
-  return (
-    <UITableRow className="hover:bg-muted/30 transition-colors">
+  return <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
-        <Checkbox 
-          checked={selectedProjects.includes(localProject.id)} 
-          onCheckedChange={() => toggleProjectSelection(localProject.id)} 
-          aria-label={`Select project ${localProject.name}`} 
-        />
+        <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
       </TableCell>
       
       <TableCell className="font-medium">
-        <ProjectNameCell 
-          name={localProject.name} 
-          fieldName="name"
-          projectId={localProject.id}
-          onUpdateField={updateProjectField}
-          disabled={isUpdating}
-        />
+        <ProjectNameCell name={localProject.name} fieldName="name" projectId={localProject.id} onUpdateField={updateProjectField} disabled={isUpdating} />
       </TableCell>
       
       <TableCell className="text-sm">
-        <ProjectNameCell 
-          name={localProject.client_name} 
-          fieldName="client_name"
-          projectId={localProject.id}
-          onUpdateField={updateProjectField}
-          disabled={isUpdating}
-        />
+        <ProjectNameCell name={localProject.client_name} fieldName="client_name" projectId={localProject.id} onUpdateField={updateProjectField} disabled={isUpdating} />
       </TableCell>
       
       <TableCell>
-        <ProjectStatusCell 
-          project={localProject} 
-          updatingProjectId={updatingProjectId}
-          setUpdatingProjectId={setUpdatingProjectId}
-        />
+        <ProjectStatusCell project={localProject} updatingProjectId={updatingProjectId} setUpdatingProjectId={setUpdatingProjectId} />
       </TableCell>
       
       <TableCell>
@@ -151,32 +117,16 @@ export function TableRow({
         <ProjectRevenueCell revenue={localProject.revenue} />
       </TableCell>
       
-      <TableCell className="text-sm text-muted-foreground">
-        <ProjectDateCell 
-          date={localProject.start_date} 
-          fieldName="start_date"
-          projectId={localProject.id}
-          onUpdateDate={updateProjectField}
-          disabled={isUpdating}
-        />
+      <TableCell className="text-sm text-muted-foreground justify-items-center">
+        <ProjectDateCell date={localProject.start_date} fieldName="start_date" projectId={localProject.id} onUpdateDate={updateProjectField} disabled={isUpdating} />
       </TableCell>
       
       <TableCell className="text-sm text-muted-foreground">
-        <ProjectDateCell 
-          date={localProject.due_date} 
-          fieldName="due_date"
-          projectId={localProject.id}
-          onUpdateDate={updateProjectField}
-          disabled={isUpdating}
-        />
+        <ProjectDateCell date={localProject.due_date} fieldName="due_date" projectId={localProject.id} onUpdateDate={updateProjectField} disabled={isUpdating} />
       </TableCell>
       
       <TableCell className="text-center">
-        <ProjectActionsCell 
-          projectId={localProject.id} 
-          onDelete={handleDeleteClick} 
-        />
+        <ProjectActionsCell projectId={localProject.id} onDelete={handleDeleteClick} />
       </TableCell>
-    </UITableRow>
-  );
+    </UITableRow>;
 }
