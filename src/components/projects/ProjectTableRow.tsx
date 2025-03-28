@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Project } from "./types";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
@@ -8,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Package, Loader2, Check, X } from "lucide-react";
+import { Package, Loader2, Check, X, CalendarIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Database } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -58,6 +61,12 @@ export function TableRow({
     client_name: localProject.client_name,
     start_date: localProject.start_date || '',
     due_date: localProject.due_date || ''
+  });
+
+  // For date calendar popover
+  const [datePopoverOpen, setDatePopoverOpen] = useState({
+    start_date: false,
+    due_date: false
   });
 
   const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
@@ -152,11 +161,6 @@ export function TableRow({
           title: `${field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')} updated`,
           description: `Project ${field.replace('_', ' ')} has been updated`
         });
-        
-        // If fetchProjects is provided, refresh all projects
-        if (fetchProjects) {
-          fetchProjects();
-        }
       }
     } catch (err) {
       console.error(`Unexpected error updating ${field}:`, err);
@@ -172,6 +176,13 @@ export function TableRow({
         ...prev,
         [field]: false
       }));
+      // Close date popovers if open
+      if (field === 'start_date' || field === 'due_date') {
+        setDatePopoverOpen(prev => ({
+          ...prev,
+          [field]: false
+        }));
+      }
     }
   };
 
@@ -203,6 +214,25 @@ export function TableRow({
       ...prev,
       [field]: localProject[field] || ''
     }));
+    // Close date popovers if open
+    if (field === 'start_date' || field === 'due_date') {
+      setDatePopoverOpen(prev => ({
+        ...prev,
+        [field]: false
+      }));
+    }
+  };
+
+  const handleDateSelect = (field: 'start_date' | 'due_date', date: Date | undefined) => {
+    if (date) {
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      setEditValues(prev => ({
+        ...prev,
+        [field]: formattedDate
+      }));
+      
+      updateProjectField(localProject.id, field, formattedDate);
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -246,7 +276,7 @@ export function TableRow({
     }
   };
 
-  // Use localProject instead of project
+  // Use localProject instead of project to ensure UI updates reflect the latest state
   const currentProject = localProject;
 
   return <UITableRow className="hover:bg-muted/30 transition-colors">
@@ -376,32 +406,28 @@ export function TableRow({
       
       <TableCell className="text-sm text-muted-foreground" onDoubleClick={() => startEdit('start_date')}>
         {editMode.start_date ? (
-          <div className="flex items-center gap-2">
-            <Input
-              type="date"
-              value={editValues.start_date ? editValues.start_date.split('T')[0] : ''}
-              onChange={(e) => setEditValues({...editValues, start_date: e.target.value})}
-              onKeyDown={(e) => handleEnterKeyPress('start_date', e)}
-              autoFocus
-              className="py-1 h-9 w-36"
-            />
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => updateProjectField(currentProject.id, 'start_date', editValues.start_date)}>
-                <Check className="h-4 w-4 text-green-600" />
+          <Popover open={datePopoverOpen.start_date} onOpenChange={(open) => setDatePopoverOpen(prev => ({ ...prev, start_date: open }))}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[180px] justify-start text-left font-normal",
+                  !editValues.start_date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {editValues.start_date ? format(new Date(editValues.start_date), "PPP") : <span>Pick a date</span>}
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => cancelEdit('start_date')}>
-                <X className="h-4 w-4 text-red-600" />
-              </Button>
-            </div>
-          </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={editValues.start_date ? new Date(editValues.start_date) : undefined}
+                onSelect={(date) => handleDateSelect('start_date', date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         ) : (
           <span className="cursor-pointer">{formatDate(currentProject.start_date)}</span>
         )}
@@ -409,32 +435,28 @@ export function TableRow({
       
       <TableCell className="text-sm text-muted-foreground" onDoubleClick={() => startEdit('due_date')}>
         {editMode.due_date ? (
-          <div className="flex items-center gap-2">
-            <Input
-              type="date"
-              value={editValues.due_date ? editValues.due_date.split('T')[0] : ''}
-              onChange={(e) => setEditValues({...editValues, due_date: e.target.value})}
-              onKeyDown={(e) => handleEnterKeyPress('due_date', e)}
-              autoFocus
-              className="py-1 h-9 w-36"
-            />
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => updateProjectField(currentProject.id, 'due_date', editValues.due_date)}>
-                <Check className="h-4 w-4 text-green-600" />
+          <Popover open={datePopoverOpen.due_date} onOpenChange={(open) => setDatePopoverOpen(prev => ({ ...prev, due_date: open }))}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[180px] justify-start text-left font-normal",
+                  !editValues.due_date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {editValues.due_date ? format(new Date(editValues.due_date), "PPP") : <span>Pick a date</span>}
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => cancelEdit('due_date')}>
-                <X className="h-4 w-4 text-red-600" />
-              </Button>
-            </div>
-          </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={editValues.due_date ? new Date(editValues.due_date) : undefined}
+                onSelect={(date) => handleDateSelect('due_date', date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         ) : (
           <span className="cursor-pointer">{formatDate(currentProject.due_date)}</span>
         )}
