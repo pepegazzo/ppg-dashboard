@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Project } from "./types";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
