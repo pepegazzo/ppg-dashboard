@@ -85,7 +85,7 @@ export function ProjectDateCell({
               {dateValue ? format(parseISO(dateValue), "MM/dd") : <span>Pick</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
             <Calendar
               mode="single"
               selected={dateValue ? parseISO(dateValue) : undefined}

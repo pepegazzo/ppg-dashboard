@@ -40,7 +40,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
               <Calendar
                 mode="single"
                 selected={field.value ? new Date(field.value) : undefined}
