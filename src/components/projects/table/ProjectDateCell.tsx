@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 interface ProjectDateCellProps {
   date: string | null;
   fieldName: "start_date" | "due_date";
@@ -12,6 +13,7 @@ interface ProjectDateCellProps {
   onUpdateDate: (projectId: string, field: string, value: string) => Promise<void>;
   disabled: boolean;
 }
+
 export function ProjectDateCell({
   date,
   fieldName,
@@ -22,6 +24,7 @@ export function ProjectDateCell({
   const [editMode, setEditMode] = useState(false);
   const [dateValue, setDateValue] = useState(date || '');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
@@ -31,6 +34,7 @@ export function ProjectDateCell({
       return dateString || '-';
     }
   };
+  
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       const year = date.getUTCFullYear();
@@ -46,38 +50,54 @@ export function ProjectDateCell({
       });
     }
   };
+  
   const startEdit = () => {
     if (!disabled) {
       setEditMode(true);
       setIsPopoverOpen(true);
     }
   };
-  return <div onDoubleClick={startEdit} className="cursor-pointer min-w-[80px] align-center ">
-      {editMode ? <Popover open={isPopoverOpen} onOpenChange={open => {
-      setIsPopoverOpen(open);
-      if (!open) {
-        setEditMode(false);
-      }
-    }}>
+  
+  return (
+    <div onDoubleClick={startEdit} className="cursor-pointer min-w-[80px] align-center">
+      {editMode ? (
+        <Popover 
+          open={isPopoverOpen} 
+          onOpenChange={open => {
+            setIsPopoverOpen(open);
+            if (!open) {
+              setEditMode(false);
+            }
+          }}
+        >
           <PopoverTrigger asChild>
-            <Button variant="outline" className={cn("min-w-[80px] px-2 text-left justify-start font-normal text-xs", !dateValue && "text-muted-foreground")} disabled={disabled}>
+            <Button 
+              variant="outline" 
+              className={cn(
+                "min-w-[80px] px-2 text-left justify-start font-normal text-xs", 
+                !dateValue && "text-muted-foreground"
+              )} 
+              disabled={disabled}
+            >
               {dateValue ? format(parseISO(dateValue), "MM/dd/yyyy") : <span>Pick</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={12} alignOffset={-50}>
+          <PopoverContent 
+            className="w-auto p-0" 
+            align="start" 
+            sideOffset={4}
+          >
             <Calendar 
               mode="single" 
               selected={dateValue ? parseISO(dateValue) : undefined} 
               onSelect={handleDateSelect} 
-              initialFocus 
-              className="pointer-events-auto" 
-              classNames={{
-                day: cn("h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left cursor-pointer"),
-                caption: "flex justify-start pt-1 relative items-center",
-                caption_label: "text-sm font-medium text-left"
-              }} 
+              initialFocus
             />
           </PopoverContent>
-        </Popover> : <span className="object-left text-left">{formatDate(date)}</span>}
-    </div>;
+        </Popover>
+      ) : (
+        <span className="object-left text-left">{formatDate(date)}</span>
+      )}
+    </div>
+  );
 }

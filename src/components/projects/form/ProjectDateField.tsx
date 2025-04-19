@@ -41,9 +41,9 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
               </FormControl>
             </PopoverTrigger>
             <PopoverContent 
-              className="w-auto p-0 z-50" 
+              className="w-auto p-0" 
               align="start" 
-              sideOffset={12}
+              sideOffset={4}
             >
               <Calendar
                 mode="single"
@@ -58,14 +58,6 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                   }
                 }}
                 initialFocus
-                className="pointer-events-auto"
-                classNames={{
-                  day: cn(
-                    "h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left cursor-pointer"
-                  ),
-                  caption: "flex justify-start pt-1 relative items-center",
-                  caption_label: "text-sm font-medium text-left"
-                }}
               />
             </PopoverContent>
           </Popover>
