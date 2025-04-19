@@ -25,6 +25,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     // Initial size
     handleResize();
 
+    // Set up event listener for the sidebar toggle button to ensure immediate response
+    const toggleButton = document.querySelector('button[aria-label="Toggle sidebar"]');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', () => {
+        // Start animation immediately
+        setIsAnimating(true);
+        
+        // Force an immediate calculation of the new width
+        setTimeout(() => {
+          handleResize();
+          
+          // End animation after transition completes
+          setTimeout(() => {
+            setIsAnimating(false);
+          }, 300);
+        }, 0);
+      });
+    }
+
     // Create a MutationObserver to watch for changes to the sidebar's width
     const observer = new MutationObserver(() => {
       // Start animation
@@ -50,6 +69,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     window.addEventListener('resize', handleResize);
     
     return () => {
+      if (toggleButton) {
+        toggleButton.removeEventListener('click', handleResize);
+      }
       observer.disconnect();
       window.removeEventListener('resize', handleResize);
     };

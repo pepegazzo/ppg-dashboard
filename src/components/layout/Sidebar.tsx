@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,6 +82,7 @@ const Sidebar = () => {
           )}
           <button 
             onClick={toggleSidebar} 
+            aria-label="Toggle sidebar"
             className={`
               w-8 h-8 rounded-full flex items-center justify-center 
               text-zinc-400 hover:text-amber-500 hover:bg-zinc-800/50
