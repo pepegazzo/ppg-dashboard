@@ -103,7 +103,7 @@ const Sidebar = () => {
                 <SidebarMenuButton
                   asChild
                   isActive={isActive}
-                  tooltip={item.title}
+                  tooltip={isCollapsed ? item.title : undefined}
                   className={`
                     menu-item
                     ${isActive ? 'menu-item-active' : ''}
@@ -111,9 +111,11 @@ const Sidebar = () => {
                 >
                   <Link to={item.path}>
                     <item.icon className="menu-item-icon" />
-                    <span className="font-medium transition-opacity duration-200">
-                      {item.title}
-                    </span>
+                    {!isCollapsed && (
+                      <span className="font-medium">
+                        {item.title}
+                      </span>
+                    )}
                     {isActive && (
                       <span className="absolute left-0 w-1 h-full bg-amber-500 rounded-r-full" />
                     )}
