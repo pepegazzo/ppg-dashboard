@@ -41,7 +41,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
               </FormControl>
             </PopoverTrigger>
             <PopoverContent 
-              className="w-auto p-0" 
+              className="w-auto p-0 z-50" 
               align="start" 
               sideOffset={12}
             >
@@ -58,10 +58,10 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                   }
                 }}
                 initialFocus
-                className="p-0 pointer-events-auto scale-80"
+                className="pointer-events-auto"
                 classNames={{
                   day: cn(
-                    "h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left"
+                    "h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left cursor-pointer"
                   ),
                   caption: "flex justify-start pt-1 relative items-center",
                   caption_label: "text-sm font-medium text-left"

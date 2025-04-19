@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -63,13 +64,20 @@ export function ProjectDateCell({
               {dateValue ? format(parseISO(dateValue), "MM/dd/yyyy") : <span>Pick</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start" sideOffset={12} alignOffset={-50}>
-            <Calendar mode="single" selected={dateValue ? parseISO(dateValue) : undefined} onSelect={handleDateSelect} initialFocus className="p-0 pointer-events-auto scale-80" classNames={{
-          day: cn("h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left"),
-          caption: "flex justify-start pt-1 relative items-center",
-          caption_label: "text-sm font-medium text-left"
-        }} />
+          <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={12} alignOffset={-50}>
+            <Calendar 
+              mode="single" 
+              selected={dateValue ? parseISO(dateValue) : undefined} 
+              onSelect={handleDateSelect} 
+              initialFocus 
+              className="pointer-events-auto" 
+              classNames={{
+                day: cn("h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-left cursor-pointer"),
+                caption: "flex justify-start pt-1 relative items-center",
+                caption_label: "text-sm font-medium text-left"
+              }} 
+            />
           </PopoverContent>
-        </Popover> : <span className="object-center">{formatDate(date)}</span>}
+        </Popover> : <span className="object-left text-left">{formatDate(date)}</span>}
     </div>;
 }
