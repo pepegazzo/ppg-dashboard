@@ -10,8 +10,7 @@ import {
   FileText, 
   Users, 
   LogOut,
-  LogIn,
-  UserPlus
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,18 +129,20 @@ const Sidebar = () => {
       
       <SidebarFooter className="px-3 pb-6 space-y-3">
         {user ? (
-          <>
+          <div className="flex flex-col items-center space-y-3">
             <div className={`
-              flex items-center gap-3 p-3 
-              rounded-lg bg-zinc-800/30 
-              border border-zinc-700/30
-              ${isCollapsed ? 'justify-center' : ''}
+              flex items-center justify-center w-full
+              ${isCollapsed ? 'flex-col' : 'gap-3'}
             `}>
-              <div className="w-9 h-9 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
-                {user.email?.charAt(0).toUpperCase() || "U"}
+              <div className={`
+                w-9 h-9 rounded-full bg-amber-500/20 
+                flex items-center justify-center text-amber-500
+                ${isCollapsed ? 'mb-2' : ''}
+              `}>
+                <User className="w-5 h-5" />
               </div>
               {!isCollapsed && (
-                <div className="overflow-hidden">
+                <div className="overflow-hidden text-center w-full">
                   <h4 className="text-sm font-medium text-zinc-200 truncate">{user.email}</h4>
                   <p className="text-xs text-zinc-500">
                     {isOwner ? "Owner" : "User"}
@@ -153,12 +154,15 @@ const Sidebar = () => {
             <Button 
               onClick={() => signOut()} 
               variant="ghost" 
-              className="w-full justify-start text-zinc-400 hover:text-zinc-100"
+              className={`
+                w-full justify-center text-zinc-400 hover:text-zinc-100
+                ${isCollapsed ? 'px-2' : 'px-4'}
+              `}
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              {!isCollapsed && "Sign Out"}
+              <LogOut className="w-4 h-4" />
+              {!isCollapsed && <span className="ml-2">Sign Out</span>}
             </Button>
-          </>
+          </div>
         ) : (
           <>
             <Link to="/login">
