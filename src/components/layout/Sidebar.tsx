@@ -75,6 +75,7 @@ const Sidebar = () => {
     <ShadcnSidebar
       className="bg-sidebar border-sidebar-border" 
       variant="sidebar"
+      collapsible="icon"
     >
       <SidebarRail />
       <SidebarHeader className="h-16 flex items-center px-4 justify-between border-b border-zinc-800/30">
