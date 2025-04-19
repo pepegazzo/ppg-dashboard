@@ -9,6 +9,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [sidebarWidth, setSidebarWidth] = useState(256); // 64 = 16rem (w-64)
+  const [isAnimating, setIsAnimating] = useState(false);
   const { user } = useAuth();
 
   // Listen for sidebar toggle events
@@ -16,7 +17,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const handleResize = () => {
       const sidebar = document.querySelector('.sidebar-glass');
       if (sidebar) {
-        setSidebarWidth(sidebar.clientWidth);
+        const newWidth = sidebar.clientWidth;
+        setSidebarWidth(newWidth);
       }
     };
 
@@ -24,7 +26,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     handleResize();
 
     // Create a MutationObserver to watch for changes to the sidebar's width
-    const observer = new MutationObserver(handleResize);
+    const observer = new MutationObserver(() => {
+      // Start animation
+      setIsAnimating(true);
+      handleResize();
+      
+      // End animation after transition completes
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 300); // Match this with your transition duration
+    });
+    
     const sidebar = document.querySelector('.sidebar-glass');
     
     if (sidebar) {
@@ -47,10 +59,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="flex min-h-screen bg-zinc-50">
       <Sidebar />
       <main 
-        className="flex-1 transition-all duration-300 ease-in-out"
+        className={`flex-1 transition-all duration-300 ease-in-out ${isAnimating ? 'will-change-auto' : ''}`}
         style={{ marginLeft: sidebarWidth + 'px' }}
       >
-        <div className="container py-8 px-6">
+        <div className="container py-8 px-6 w-full">
           {children}
         </div>
       </main>
