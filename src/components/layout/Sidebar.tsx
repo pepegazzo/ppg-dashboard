@@ -10,7 +10,9 @@ import {
   FileText, 
   Users, 
   LogOut,
-  User
+  User,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
