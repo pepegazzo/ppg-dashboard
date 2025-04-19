@@ -35,8 +35,9 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar: 240 5.9% 10%;
     --sidebar-foreground: 0 0% 98%;
+    --sidebar-background: 240 5.9% 10%;
     --sidebar-primary: 48 96% 53%;
     --sidebar-primary-foreground: 240 5.9% 10%;
     --sidebar-accent: 240 3.7% 15.9%;
@@ -84,5 +85,9 @@
   
   .menu-item-icon {
     @apply w-5 h-5;
+  }
+
+  .bg-sidebar {
+    @apply bg-zinc-900/90 backdrop-blur-md;
   }
 }
