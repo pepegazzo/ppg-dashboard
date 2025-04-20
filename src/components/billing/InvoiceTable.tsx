@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { BillingFilter } from "./BillingFilter";
+import { DeleteInvoiceDialog } from "./DeleteInvoiceDialog";
 
 interface Invoice {
   id: string;
@@ -41,6 +42,8 @@ export function InvoiceTable() {
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sortBy, setSortBy] = useState<{ field: SortableField; direction: 'asc' | 'desc' }>({ 
     field: 'issue_date', 
     direction: 'desc'
@@ -66,7 +69,6 @@ export function InvoiceTable() {
       }
 
       if (searchQuery && searchQuery.trim() !== '') {
-        // Fix: properly format the OR conditions and use parentheses to group them
         query = query.or(
           `invoice_number.ilike.%${searchQuery}%,` +
           `description.ilike.%${searchQuery}%`
@@ -88,10 +90,8 @@ export function InvoiceTable() {
       
       console.log("Raw data returned:", data); // Debug log
       
-      // First get all the data from Supabase
       let filteredData = [...(data as Invoice[])];
       
-      // Then manually filter for project and client fields if search query exists
       if (searchQuery && searchQuery.trim() !== '') {
         const lowerSearchQuery = searchQuery.toLowerCase();
         filteredData = filteredData.filter(invoice => 
@@ -104,7 +104,6 @@ export function InvoiceTable() {
       
       console.log("Filtered data:", filteredData.length); // Debug log
       
-      // Sort the filtered data
       if (sortBy.field === 'project.name') {
         filteredData.sort((a, b) => {
           const aValue = a.project?.name || '';
@@ -202,6 +201,29 @@ export function InvoiceTable() {
     }
   };
 
+  const toggleInvoiceSelection = (invoiceId: string) => {
+    setSelectedInvoices(prev => 
+      prev.includes(invoiceId) 
+        ? prev.filter(id => id !== invoiceId)
+        : [...prev, invoiceId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (invoices) {
+      if (selectedInvoices.length === invoices.length) {
+        setSelectedInvoices([]);
+      } else {
+        setSelectedInvoices(invoices.map(invoice => invoice.id));
+      }
+    }
+  };
+
+  const handleDeleteSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    queryClient.invalidateQueries({ queryKey: ['billing-stats'] });
+  };
+
   if (error) {
     return (
       <div className="bg-white border border-red-200 rounded-md p-4 text-center shadow-sm">
@@ -222,10 +244,17 @@ export function InvoiceTable() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="w-[50px]">
+                <Checkbox 
+                  checked={invoices && invoices.length > 0 && selectedInvoices.length === invoices.length}
+                  onCheckedChange={toggleSelectAll}
+                  aria-label="Select all invoices"
+                />
+              </TableHead>
               <TableHead onClick={() => toggleSort('invoice_number')} className="cursor-pointer">
                 Invoice # {renderSortIndicator('invoice_number')}
               </TableHead>
-              <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer w-1/4"> {/* Increased width */}
+              <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer w-1/4">
                 Project {renderSortIndicator('project.name')}
               </TableHead>
               <TableHead onClick={() => toggleSort('project.client_name')} className="cursor-pointer">
@@ -249,18 +278,25 @@ export function InvoiceTable() {
             {isLoading ? (
               Array(5).fill(0).map((_, index) => (
                 <TableRow key={index}>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-4" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
                 </TableRow>
               ))
             ) : invoices && invoices.length > 0 ? (
               invoices.map((invoice) => (
                 <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell>
+                    <Checkbox 
+                      checked={selectedInvoices.includes(invoice.id)}
+                      onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
+                      aria-label={`Select invoice ${invoice.invoice_number}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                   <TableCell className="text-sm">{invoice.project.name}</TableCell>
                   <TableCell className="text-sm">{invoice.project.client_name}</TableCell>
@@ -332,7 +368,7 @@ export function InvoiceTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground h-[200px]">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground h-[200px]">
                   No invoices found
                 </TableCell>
               </TableRow>
@@ -340,6 +376,14 @@ export function InvoiceTable() {
           </TableBody>
         </Table>
       </div>
+
+      <DeleteInvoiceDialog
+        showDeleteModal={showDeleteModal}
+        setShowDeleteModal={setShowDeleteModal}
+        selectedInvoices={selectedInvoices}
+        setSelectedInvoices={setSelectedInvoices}
+        onSuccess={handleDeleteSuccess}
+      />
     </div>
   );
 }
