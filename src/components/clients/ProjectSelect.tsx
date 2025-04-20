@@ -15,11 +15,11 @@ import {
 
 interface ProjectSelectProps {
   clientId: string;
-  activeProjects: Project[] | null;
+  activeProject: Project | null;
   onUpdate?: () => void;
 }
 
-export function ProjectSelect({ clientId, activeProjects, onUpdate }: ProjectSelectProps) {
+export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSelectProps) {
   const { toast } = useToast();
 
   const { data: allProjects, isLoading } = useQuery({
@@ -35,39 +35,29 @@ export function ProjectSelect({ clientId, activeProjects, onUpdate }: ProjectSel
     }
   });
 
-  const toggleProject = async (projectId: string) => {
+  const setProjectClient = async (projectId: string) => {
     try {
-      // Remove any existing project first
-      if (activeProjects?.length) {
-        await supabase
-          .from('client_active_projects')
-          .delete()
-          .match({ client_id: clientId });
-      }
-      
-      // Add new project
+      // Update the project to set this client as its client
       const { error } = await supabase
-        .from('client_active_projects')
-        .insert({
-          client_id: clientId,
-          project_id: projectId
-        });
+        .from('projects')
+        .update({ client_id: clientId })
+        .eq('id', projectId);
       
       if (error) throw error;
       
       toast({
         title: "Success",
-        description: "Active project updated",
+        description: "Project assignment updated",
       });
       
       if (onUpdate) {
         onUpdate();
       }
     } catch (error) {
-      console.error("Error toggling project:", error);
+      console.error("Error setting project client:", error);
       toast({
         title: "Error",
-        description: "Failed to update active project",
+        description: "Failed to update project assignment",
         variant: "destructive",
       });
     }
@@ -84,8 +74,8 @@ export function ProjectSelect({ clientId, activeProjects, onUpdate }: ProjectSel
 
   return (
     <Select
-      value={activeProjects?.[0]?.id || ""}
-      onValueChange={toggleProject}
+      value={activeProject?.id || ""}
+      onValueChange={setProjectClient}
     >
       <SelectTrigger className="w-[200px] h-8">
         <SelectValue placeholder="Select project" />

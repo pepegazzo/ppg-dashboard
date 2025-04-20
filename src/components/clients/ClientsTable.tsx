@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Mail, Phone, Loader2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "react-router-dom";
 import InlineEdit from "./InlineEdit";
 import { ProjectSelect } from "./ProjectSelect";
 import { Project, Client } from "@/types/clients";
@@ -144,9 +142,18 @@ export const ClientsTable = ({
                 </div>
               </TableCell>
               <TableCell>
+                {client.active_projects && client.active_projects[0] ? (
+                  <Badge variant="secondary" className="mb-2">
+                    {client.active_projects[0].name}
+                  </Badge>
+                ) : (
+                  <div className="text-sm text-muted-foreground mb-2">
+                    No active project
+                  </div>
+                )}
                 <ProjectSelect 
                   clientId={client.id}
-                  activeProjects={client.active_projects}
+                  activeProject={client.active_projects?.[0] || null}
                   onUpdate={handleProjectUpdate}
                 />
               </TableCell>

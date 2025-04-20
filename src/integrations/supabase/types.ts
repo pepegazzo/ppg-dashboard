@@ -9,42 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      client_active_projects: {
-        Row: {
-          client_id: string
-          created_at: string
-          id: string
-          project_id: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          id?: string
-          project_id: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          id?: string
-          project_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_active_projects_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_active_projects_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       clients: {
         Row: {
           company: string
