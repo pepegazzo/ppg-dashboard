@@ -17,8 +17,8 @@ export const SelectedClientsActions = ({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="p-2 bg-amber-50 border border-amber-200 rounded-md flex items-center justify-between">
-      <span className="text-sm text-amber-900">
+    <div className="p-2 bg-purple-50 border border-purple-200 rounded-md flex items-center justify-between">
+      <span className="text-sm text-purple-900">
         {selectedCount} client{selectedCount !== 1 ? 's' : ''} selected
       </span>
       <Button 
@@ -26,7 +26,7 @@ export const SelectedClientsActions = ({
         size="sm" 
         onClick={onDelete} 
         disabled={isDeleting}
-        className="border-amber-200 text-amber-800 hover:bg-amber-50"
+        className="border-purple-200 text-purple-800 hover:bg-purple-50"
       >
         {isDeleting ? (
           <>

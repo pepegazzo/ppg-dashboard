@@ -78,11 +78,11 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 <Label className="text-sm mb-2 block">Contacts</Label>
                 <div className="space-y-2">
                   {currentContacts.map(contact => (
-                    <div key={contact.id} className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 flex flex-col gap-0.5">
-                      <span className="font-medium text-amber-900">{contact.name}</span>
-                      {contact.role && <span className="text-xs text-amber-800">{contact.role}</span>}
-                      {contact.email && <span className="text-xs text-amber-700">{contact.email}</span>}
-                      {contact.phone && <span className="text-xs text-amber-700">{contact.phone}</span>}
+                    <div key={contact.id} className="bg-purple-50 border border-purple-200 rounded-md px-3 py-2 flex flex-col gap-0.5">
+                      <span className="font-medium text-purple-900">{contact.name}</span>
+                      {contact.role && <span className="text-xs text-purple-800">{contact.role}</span>}
+                      {contact.email && <span className="text-xs text-purple-700">{contact.email}</span>}
+                      {contact.phone && <span className="text-xs text-purple-700">{contact.phone}</span>}
                     </div>
                   ))}
                 </div>
@@ -92,7 +92,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
         </div>
         <form onSubmit={handleAdd} className="space-y-2 border-t pt-3 mt-2">
           <div className="font-semibold text-sm mb-2 flex items-center gap-1">
-            <Plus className="h-4 w-4 text-amber-500" /> Add Contact
+            <Plus className="h-4 w-4 text-purple-500" /> Add Contact
           </div>
           <div className="space-y-2">
             <div>
@@ -104,7 +104,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 onChange={handleChange} 
                 required 
                 placeholder="Contact Name"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                className="border-purple-200 focus-visible:ring-purple-500"
               />
             </div>
             <div>
@@ -115,7 +115,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 value={form.role} 
                 onChange={handleChange} 
                 placeholder="Role"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                className="border-purple-200 focus-visible:ring-purple-500"
               />
             </div>
             <div>
@@ -127,7 +127,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 value={form.email} 
                 onChange={handleChange} 
                 placeholder="Email"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                className="border-purple-200 focus-visible:ring-purple-500"
               />
             </div>
             <div>
@@ -138,13 +138,13 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 value={form.phone} 
                 onChange={handleChange} 
                 placeholder="Phone"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                className="border-purple-200 focus-visible:ring-purple-500"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" className="border-amber-200 text-amber-800 hover:bg-amber-50" onClick={onClose}>Close</Button>
-            <Button type="submit" className="bg-amber-500 text-white hover:bg-amber-600" disabled={isSubmitting}>
+            <Button type="button" variant="outline" className="border-purple-200 text-purple-800 hover:bg-purple-50" onClick={onClose}>Close</Button>
+            <Button type="submit" className="bg-purple-500 text-white hover:bg-purple-600" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-3 w-3 mr-2 animate-spin" />}
               Add Contact
             </Button>

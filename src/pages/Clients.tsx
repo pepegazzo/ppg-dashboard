@@ -19,7 +19,7 @@ const Clients = () => {
     <DashboardLayout>
       <div className="animate-fade-in">
         <div className="flex flex-col gap-2 mb-8">
-          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
+          <span className="text-xs font-medium px-2.5 py-1 bg-purple-100 text-purple-800 rounded-full w-fit">
             Relationships
           </span>
           <div className="flex justify-between items-center">
@@ -27,7 +27,7 @@ const Clients = () => {
             <div className="flex gap-2">
               <Button 
                 onClick={() => setIsModalOpen(true)} 
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+                className="bg-purple-500 hover:bg-purple-600 text-white"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Client
@@ -36,7 +36,7 @@ const Clients = () => {
                 variant="outline" 
                 onClick={handleRefresh} 
                 disabled={isRefreshing} 
-                className="border-amber-200 text-amber-800 hover:bg-amber-50"
+                className="border-purple-200 text-purple-800 hover:bg-purple-50"
               >
                 {isRefreshing ? (
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
