@@ -355,7 +355,7 @@ const Clients = () => {
               resetFilters={resetFilters}
             />
             
-            <Card>
+            <Card className="border-none shadow-none">
               {selectedClients.length > 0 && (
                 <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
                   <span className="text-sm">
@@ -381,7 +381,7 @@ const Clients = () => {
                   </Button>
                 </div>
               )}
-              <div className="rounded-md border">
+              <div className="rounded-lg border shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
