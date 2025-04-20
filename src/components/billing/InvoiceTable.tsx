@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowUpDown, CheckCircle, Clock, AlertCircle, ChevronUp, ChevronDown } from "lucide-react";
+import { Loader2, ArrowUpDown, CheckCircle, Clock, AlertCircle, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -234,12 +234,27 @@ export function InvoiceTable() {
 
   return (
     <div className="space-y-4">
-      <BillingFilter 
-        selectedStatus={selectedStatus} 
-        onStatusChange={setSelectedStatus}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      <div className="flex items-center justify-between">
+        <BillingFilter 
+          selectedStatus={selectedStatus} 
+          onStatusChange={setSelectedStatus}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+        
+        {selectedInvoices.length > 0 && (
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => setShowDeleteModal(true)}
+            className="flex items-center gap-1"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete ({selectedInvoices.length})
+          </Button>
+        )}
+      </div>
+      
       <div className="rounded-md border">
         <Table>
           <TableHeader>
