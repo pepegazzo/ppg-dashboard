@@ -48,7 +48,7 @@ const Clients = () => {
   const [companyFilter, setCompanyFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof Client | 'company' | 'email';
+    key: keyof Client | 'company' | 'email' | 'active_projects';
     direction: 'asc' | 'desc';
   }>({
     key: 'name',
@@ -81,14 +81,14 @@ const Clients = () => {
     setProjectFilter("all");
   };
 
-  const handleSort = (key: keyof Client | 'company' | 'email') => {
+  const handleSort = (key: keyof Client | 'company' | 'email' | 'active_projects') => {
     setSortConfig(current => ({
       key,
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
     }));
   };
 
-  const renderSortIndicator = (key: keyof Client | 'company' | 'email') => {
+  const renderSortIndicator = (key: keyof Client | 'company' | 'email' | 'active_projects') => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'asc' ? 
         <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
@@ -136,6 +136,12 @@ const Clients = () => {
       }
 
       filteredData.sort((a, b) => {
+        if (sortConfig.key === 'active_projects') {
+          const aLength = a.active_projects?.length || 0;
+          const bLength = b.active_projects?.length || 0;
+          const comparison = aLength - bLength;
+          return sortConfig.direction === 'asc' ? comparison : -comparison;
+        }
         const aValue = String(a[sortConfig.key]);
         const bValue = String(b[sortConfig.key]);
         const comparison = aValue.localeCompare(bValue);
@@ -391,7 +397,12 @@ const Clients = () => {
                       >
                         Contact {renderSortIndicator('email')}
                       </TableHead>
-                      <TableHead className="w-[200px]">Active Projects</TableHead>
+                      <TableHead 
+                        onClick={() => handleSort('active_projects')} 
+                        className="w-[200px] cursor-pointer"
+                      >
+                        Active Projects {renderSortIndicator('active_projects')}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
