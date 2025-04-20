@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -231,6 +231,19 @@ const Clients = () => {
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
+        <div className="flex flex-col gap-2 mb-8">
+          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
+            Relationships
+          </span>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Client
+            </Button>
+          </div>
+        </div>
+
         {clients && clients.length === 0 ? (
           <EmptyState 
             setIsCreating={() => setIsModalOpen(true)}
@@ -246,153 +259,138 @@ const Clients = () => {
             }}
           />
         ) : (
-          <>
-            <div className="flex flex-col gap-2 mb-8">
-              <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
-                Relationships
-              </span>
-              <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
-                <Button onClick={() => setIsModalOpen(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Client
+          <Card>
+            {selectedClients.length > 0 && (
+              <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+                <span className="text-sm">
+                  {selectedClients.length} client{selectedClients.length !== 1 ? 's' : ''} selected
+                </span>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => setShowDeleteModal(true)} 
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Selected
+                    </>
+                  )}
                 </Button>
               </div>
-            </div>
-
-            <Card>
-              {selectedClients.length > 0 && (
-                <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
-                  <span className="text-sm">
-                    {selectedClients.length} client{selectedClients.length !== 1 ? 's' : ''} selected
-                  </span>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    onClick={() => setShowDeleteModal(true)} 
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Deleting...
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Selected
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
+            )}
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox 
+                        checked={clients?.length > 0 && selectedClients.length === clients?.length}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all clients"
+                      />
+                    </TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Company & Role</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Active Projects</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clients?.map((client) => (
+                    <TableRow key={client.id}>
+                      <TableCell>
                         <Checkbox 
-                          checked={clients?.length > 0 && selectedClients.length === clients?.length}
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Select all clients"
+                          checked={selectedClients.includes(client.id)}
+                          onCheckedChange={() => toggleClientSelection(client.id)}
+                          aria-label={`Select client ${client.name}`}
                         />
-                      </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Company & Role</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Active Projects</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clients?.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell>
-                          <Checkbox 
-                            checked={selectedClients.includes(client.id)}
-                            onCheckedChange={() => toggleClientSelection(client.id)}
-                            aria-label={`Select client ${client.name}`}
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          <InlineEdit
-                            value={client.name}
-                            onSave={async (value) => {
-                              await updateClient(client.id, { name: value });
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <Briefcase className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit
-                                value={client.company}
-                                onSave={async (value) => {
-                                  await updateClient(client.id, { company: value });
-                                }}
-                              />
-                            </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <InlineEdit
+                          value={client.name}
+                          onSave={async (value) => {
+                            await updateClient(client.id, { name: value });
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Briefcase className="h-4 w-4 text-muted-foreground" />
                             <InlineEdit
-                              value={client.role}
+                              value={client.company}
                               onSave={async (value) => {
-                                await updateClient(client.id, { role: value });
+                                await updateClient(client.id, { company: value });
                               }}
-                              className="text-sm text-muted-foreground"
                             />
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit
-                                value={client.email}
-                                onSave={async (value) => {
-                                  await updateClient(client.id, { email: value });
-                                }}
-                                className="text-amber-600 hover:text-amber-700"
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit
-                                value={client.phone}
-                                onSave={async (value) => {
-                                  await updateClient(client.id, { phone: value });
-                                }}
-                                className="text-amber-600 hover:text-amber-700"
-                              />
-                            </div>
+                          <InlineEdit
+                            value={client.role}
+                            onSave={async (value) => {
+                              await updateClient(client.id, { role: value });
+                            }}
+                            className="text-sm text-muted-foreground"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <InlineEdit
+                              value={client.email}
+                              onSave={async (value) => {
+                                await updateClient(client.id, { email: value });
+                              }}
+                              className="text-amber-600 hover:text-amber-700"
+                            />
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-2">
-                            {client.active_projects && client.active_projects.length > 0 ? (
-                              client.active_projects.map(project => (
-                                <Link 
-                                  key={project.id} 
-                                  to={`/projects?project=${project.id}`}
-                                  className="group"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="group-hover:bg-secondary/70">
-                                      {project.name}
-                                    </Badge>
-                                  </div>
-                                </Link>
-                              ))
-                            ) : (
-                              <span className="text-sm text-muted-foreground">No active projects</span>
-                            )}
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <InlineEdit
+                              value={client.phone}
+                              onSave={async (value) => {
+                                await updateClient(client.id, { phone: value });
+                              }}
+                              className="text-amber-600 hover:text-amber-700"
+                            />
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-          </>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-2">
+                          {client.active_projects && client.active_projects.length > 0 ? (
+                            client.active_projects.map(project => (
+                              <Link 
+                                key={project.id} 
+                                to={`/projects?project=${project.id}`}
+                                className="group"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="group-hover:bg-secondary/70">
+                                    {project.name}
+                                  </Badge>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No active projects</span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         )}
         
         <ClientModal
