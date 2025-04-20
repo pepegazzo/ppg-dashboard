@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCcw } from "lucide-react";
@@ -43,22 +42,22 @@ const Billing = () => {
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <div>
-              <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Finance</span>
-              <h1 className="text-3xl font-bold text-zinc-900 mt-2">Billing</h1>
+        <div className="flex flex-col gap-2 mb-8">
+          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Finance</span>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-zinc-900">Billing</h1>
+            <div className="flex gap-2">
+              <CreateInvoiceForm onSuccess={handleInvoiceCreated} />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
           </div>
-          <CreateInvoiceForm onSuccess={handleInvoiceCreated} />
         </div>
         
         <div className="space-y-8">

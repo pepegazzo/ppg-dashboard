@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -311,8 +312,12 @@ const Clients = () => {
             Relationships
           </span>
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
+            <div className="flex gap-2">
+              <Button onClick={() => setIsModalOpen(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Client
+              </Button>
               <Button 
                 variant="outline" 
                 size="icon" 
@@ -322,10 +327,6 @@ const Clients = () => {
                 <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               </Button>
             </div>
-            <Button onClick={() => setIsModalOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Client
-            </Button>
           </div>
         </div>
 
