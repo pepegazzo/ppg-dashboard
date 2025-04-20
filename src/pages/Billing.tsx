@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { RefreshCcw } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { BillingStats } from "@/components/billing/BillingStats";
 import { InvoiceTable } from "@/components/billing/InvoiceTable";
@@ -53,17 +52,7 @@ const Billing = () => {
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                {isRefreshing ? (
-                  <>
-                    <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
-                    Refreshing...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCcw className="mr-2 h-4 w-4" />
-                    Refresh
-                  </>
-                )}
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </Button>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -323,17 +322,7 @@ const Clients = () => {
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                {isRefreshing ? (
-                  <>
-                    <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
-                    Refreshing...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCcw className="mr-2 h-4 w-4" />
-                    Refresh
-                  </>
-                )}
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </Button>
             </div>
           </div>
@@ -538,4 +527,3 @@ const Clients = () => {
 };
 
 export default Clients;
-
