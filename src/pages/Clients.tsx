@@ -415,7 +415,6 @@ const Clients = () => {
                                 onSave={async (value) => {
                                   await updateClient(client.id, { email: value });
                                 }}
-                                className="text-amber-600 hover:text-amber-700"
                               />
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -425,7 +424,6 @@ const Clients = () => {
                                 onSave={async (value) => {
                                   await updateClient(client.id, { phone: value });
                                 }}
-                                className="text-amber-600 hover:text-amber-700"
                               />
                             </div>
                           </div>
