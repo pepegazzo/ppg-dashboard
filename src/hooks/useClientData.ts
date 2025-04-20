@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,7 @@ export function useClientData() {
     key: keyof Client | 'company' | 'email' | 'active_projects';
     direction: 'asc' | 'desc';
   }>({
-    key: 'name',
+    key: 'company_name',
     direction: 'asc'
   });
 

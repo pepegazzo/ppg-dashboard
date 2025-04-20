@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -58,12 +59,17 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
   }) => {
     try {
       setIsSubmitting(true);
+      // For clients table, need to include required fields from database schema
       const { data, error } = await supabase.from('clients').insert({
         company_name: clientData.company_name,
         company: clientData.company ?? "",
         website: clientData.website,
         address: clientData.address,
         notes: clientData.notes,
+        // Required fields for the clients table
+        email: clientData.contact?.email || "",
+        phone: clientData.contact?.phone || "",
+        role: clientData.contact?.role || ""
       }).select();
 
       if (error) {

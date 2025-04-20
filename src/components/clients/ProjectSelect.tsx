@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +48,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const { data: availableProjects, isLoading: isLoadingAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId],
     queryFn: async () => {
-      // Get the IDs of projects already assigned to this client
       const { data: assignedIds, error: assignedError } = await supabase
         .from('client_project_assignments')
         .select('project_id')
@@ -57,16 +55,13 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       
       if (assignedError) throw assignedError;
       
-      // Convert to array of IDs or use a placeholder if empty
       const excludeIds = assignedIds?.map(item => item.project_id) || [];
       
-      // Fetch all projects that aren't already assigned to this client
       let query = supabase
         .from('projects')
         .select('id, name')
         .order('name');
         
-      // Only filter if there are projects to exclude
       if (excludeIds.length > 0) {
         query = query.not('id', 'in', excludeIds);
       }
@@ -77,14 +72,21 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       console.log("Available projects for selection:", data);
       return data || [];
     },
-    enabled: isPopoverOpen // Only fetch when popover is opened
+    enabled: isPopoverOpen
   });
 
   const assignProjectToClient = async (projectId: string, projectName: string) => {
     try {
       setIsUpdating(true);
       
-      const clientName = document.querySelector(`[data-client-id="${clientId}"]`)?.getAttribute('data-client-name') || 'Unknown';
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('company_name')
+        .eq('id', clientId)
+        .single();
+      
+      if (clientError) throw clientError;
+      const clientName = clientData?.company_name || 'Unknown';
       
       const { error: assignError } = await supabase
         .from('client_project_assignments')

@@ -33,4 +33,3 @@ export interface Client {
   contacts: Contact[] | null; // new: list of associated contacts (people)
   active_projects: Project[] | null;
 }
-

@@ -17,7 +17,7 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .order('name');
+        .order('company_name');
       
       if (error) throw error;
       return data;
@@ -43,7 +43,7 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
               <SelectContent>
                 {clients?.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
-                    {client.name} - {client.company}
+                    {client.company_name} - {client.company}
                   </SelectItem>
                 ))}
               </SelectContent>
