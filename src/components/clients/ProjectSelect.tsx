@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -160,12 +161,13 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         .single();
         
       if (projectData?.client_id === clientId) {
+        // Here we need to change the query to use company_name instead of name
         const { data: nextClient } = await supabase
           .from('client_project_assignments')
           .select(`
             clients (
               id,
-              name
+              company_name
             )
           `)
           .eq('project_id', projectId)
@@ -178,7 +180,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
             .from('projects')
             .update({ 
               client_id: nextClient.clients.id,
-              client_name: nextClient.clients.name
+              client_name: nextClient.clients.company_name
             })
             .eq('id', projectId);
         } else {

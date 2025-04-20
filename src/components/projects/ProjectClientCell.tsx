@@ -37,7 +37,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
           client_id,
           clients (
             id,
-            name,
+            company_name,
             company
           )
         `)
@@ -80,6 +80,87 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
     }
   };
 
+  const handleClientFormSubmit = async (clientData: {
+    company_name: string;
+    company: string;
+    website?: string;
+    address?: string;
+    notes?: string;
+    contact: {
+      name: string;
+      role?: string;
+      email?: string;
+      phone?: string;
+    }
+  }) => {
+    try {
+      setIsSubmitting(true);
+      
+      // First, create the client
+      const { data: newClient, error: clientError } = await supabase
+        .from('clients')
+        .insert({
+          company_name: clientData.company_name,
+          company: clientData.company,
+          website: clientData.website || null,
+          address: clientData.address || null,
+          notes: clientData.notes || null,
+          // These fields are still required in the database schema
+          role: clientData.contact.role || "Primary Contact",
+          email: clientData.contact.email || "",
+          phone: clientData.contact.phone || "",
+        })
+        .select()
+        .single();
+      
+      if (clientError) throw clientError;
+      
+      // Then create the primary contact
+      const { error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          company_id: newClient.id,
+          name: clientData.contact.name,
+          role: clientData.contact.role || null,
+          email: clientData.contact.email || null,
+          phone: clientData.contact.phone || null,
+          is_primary: true
+        });
+      
+      if (contactError) throw contactError;
+      
+      // Assign the client to the project
+      const { error: assignmentError } = await supabase
+        .from('client_project_assignments')
+        .insert({
+          client_id: newClient.id,
+          project_id: projectId
+        });
+      
+      if (assignmentError) throw assignmentError;
+      
+      // Set as primary client for the project
+      await setPrimaryClient(newClient.id, newClient.company_name);
+      
+      setIsModalOpen(false);
+      toast({
+        title: "Success",
+        description: `${clientData.company_name} has been created and assigned to this project`,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['project-assigned-clients'] });
+    } catch (error) {
+      console.error("Error creating client:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create client",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoadingAssigned) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -108,10 +189,10 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
           assignedClients.map((client: any) => (
             <DropdownMenuItem 
               key={client.id}
-              onClick={() => setPrimaryClient(client.id, client.name)}
+              onClick={() => setPrimaryClient(client.id, client.company_name)}
             >
-              <span className="flex-1">{client.name}</span>
-              {clientName === client.name && (
+              <span className="flex-1">{client.company_name}</span>
+              {clientName === client.company_name && (
                 <Badge variant="secondary" className="ml-2">Current</Badge>
               )}
             </DropdownMenuItem>
