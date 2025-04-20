@@ -41,11 +41,10 @@ export const ClientsTable = ({
   handleSort,
   sortConfig,
 }: ClientsTableProps) => {
-  const [projectSelectClient, setProjectSelectClient] = useState<{
-    id: string;
-    name: string;
-    active_projects: Project[] | null;
-  } | null>(null);
+  const handleProjectUpdate = () => {
+    // Force a refresh of the clients data after project update
+    window.location.reload();
+  };
 
   return (
     <div className="rounded-md border">
@@ -146,42 +145,28 @@ export const ClientsTable = ({
                 </div>
               </TableCell>
               <TableCell>
-                <div 
-                  className="flex flex-col gap-2 cursor-pointer"
-                  onClick={() => setProjectSelectClient(client)}
-                >
-                  {client.active_projects && client.active_projects.length > 0 ? (
-                    <div className="flex flex-col gap-1">
-                      {client.active_projects.map(project => (
-                        <div key={project.id} className="group">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="group-hover:bg-secondary/70">
-                              {project.name}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      No active projects
-                    </span>
-                  )}
-                </div>
+                {/* Display active projects above the dropdown */}
+                {client.active_projects && client.active_projects.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-1">
+                    {client.active_projects.map(project => (
+                      <Badge key={project.id} variant="secondary" className="mb-1">
+                        {project.name}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Use the new dropdown-based ProjectSelect */}
+                <ProjectSelect 
+                  clientId={client.id}
+                  activeProjects={client.active_projects}
+                  onUpdate={handleProjectUpdate}
+                />
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
-      {projectSelectClient && (
-        <ProjectSelect
-          isOpen={true}
-          onClose={() => setProjectSelectClient(null)}
-          clientId={projectSelectClient.id}
-          activeProjects={projectSelectClient.active_projects}
-        />
-      )}
     </div>
   );
 };
