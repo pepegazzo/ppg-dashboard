@@ -146,7 +146,7 @@ export function InvoiceTable() {
         return;
       }
 
-      // Update the cache with the new data
+      // Update the invoices cache with the new data
       queryClient.setQueryData(['invoices', sortBy], (oldData: Invoice[] | undefined) => {
         if (!oldData) return oldData;
         
@@ -154,6 +154,9 @@ export function InvoiceTable() {
           invoice.id === invoiceId ? { ...invoice, status: newStatus } : invoice
         );
       });
+
+      // Also invalidate the billing-stats query to update the stat cards
+      queryClient.invalidateQueries({ queryKey: ['billing-stats'] });
 
       toast({
         title: "Status updated",
