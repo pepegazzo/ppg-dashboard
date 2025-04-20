@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@/types/clients";
@@ -82,9 +83,13 @@ export function ProjectSelect({ isOpen, onClose, clientId, activeProjects }: Pro
         description: "Active projects have been updated successfully",
       });
       
-      // Refresh data
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      onClose();
+      // Refresh data with a stronger invalidation approach
+      await queryClient.invalidateQueries({ queryKey: ['clients'] });
+      
+      // Small delay to ensure the invalidation has time to trigger refetch
+      setTimeout(() => {
+        onClose();
+      }, 100);
     } catch (error) {
       console.error("Error updating projects:", error);
       toast({
@@ -102,6 +107,9 @@ export function ProjectSelect({ isOpen, onClose, clientId, activeProjects }: Pro
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Select Active Projects</DialogTitle>
+          <DialogDescription>
+            Choose which projects this client is actively involved with.
+          </DialogDescription>
         </DialogHeader>
         
         <ScrollArea className="h-[300px] pr-4">
