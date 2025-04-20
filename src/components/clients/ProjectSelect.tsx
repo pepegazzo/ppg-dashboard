@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +21,11 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [localProject, setLocalProject] = useState<Project | null>(activeProject);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalProject(activeProject);
+  }, [activeProject]);
 
   const { data: availableProjects, isLoading } = useQuery({
     queryKey: ['available-projects', clientId],
@@ -54,13 +59,16 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
       const { error } = await supabase
         .from('projects')
         .update({ 
-          client_id: clientId
+          client_id: clientId,
+          client_name: document.querySelector(`[data-client-id="${clientId}"]`)?.getAttribute('data-client-name') || 'Unknown'
         })
         .eq('id', projectId);
       
       if (error) throw error;
       
-      setLocalProject({ id: projectId, name: projectName });
+      // Update local state
+      const newProject = { id: projectId, name: projectName };
+      setLocalProject(newProject);
       setIsPopoverOpen(false);
       
       toast({
@@ -69,6 +77,7 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
       });
       
       if (onUpdate) {
+        // Call the parent update handler but prevent its default behavior
         onUpdate();
       }
     } catch (error) {

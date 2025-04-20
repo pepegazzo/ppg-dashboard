@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Mail, Phone, Loader2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import InlineEdit from "./InlineEdit";
 import { ProjectSelect } from "./ProjectSelect";
 import { Project, Client } from "@/types/clients";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ClientsTableProps {
   filteredAndSortedClients: Client[];
@@ -39,9 +40,12 @@ export const ClientsTable = ({
   handleSort,
   sortConfig,
 }: ClientsTableProps) => {
+  const queryClient = useQueryClient();
+
   const handleProjectUpdate = () => {
-    // Force a refresh of the clients data after project update
-    window.location.reload();
+    // Instead of reloading the page, we invalidate the clients query
+    // This will trigger a refetch of the clients data
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
 
   return (
@@ -92,7 +96,11 @@ export const ClientsTable = ({
                   aria-label={`Select client ${client.name}`} 
                 />
               </TableCell>
-              <TableCell className="font-medium">
+              <TableCell 
+                className="font-medium"
+                data-client-id={client.id}
+                data-client-name={client.name}
+              >
                 <InlineEdit 
                   value={client.name} 
                   onSave={async value => {
