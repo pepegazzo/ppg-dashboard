@@ -139,6 +139,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
     }
   };
 
+  // If there's no client assigned, show the "Add Client" button
   if (clientName === "No Client" && (!availableClients || availableClients.length === 0)) {
     return (
       <>
@@ -162,6 +163,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
     );
   }
 
+  // For existing clients, show the dropdown with available clients but no "Add New Client" option if client already exists
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -187,11 +189,21 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
             {client.name} - {client.company}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add New Client
-        </DropdownMenuItem>
+        {/* Only show "Add New Client" option when the current clientName is "No Client" */}
+        {clientName === "No Client" && (
+          <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add New Client
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
+      
+      <ClientModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateClient}
+        isSubmitting={isSubmitting}
+      />
     </DropdownMenu>
   );
 }
