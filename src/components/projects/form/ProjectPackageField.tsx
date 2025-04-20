@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
-import { Package } from "lucide-react";
+import { Wrench, Palette, Video, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,21 @@ interface PackageType {
 interface ProjectPackageFieldProps {
   control: Control<ProjectFormValues>;
 }
+
+const getPackageIcon = (packageName: string) => {
+  switch(packageName.toLowerCase()) {
+    case 'custom':
+      return <Wrench className="h-4 w-4 mr-2 opacity-70" />;
+    case 'design':
+      return <Palette className="h-4 w-4 mr-2 opacity-70" />;
+    case 'video':
+      return <Video className="h-4 w-4 mr-2 opacity-70" />;
+    case 'website':
+      return <Globe className="h-4 w-4 mr-2 opacity-70" />;
+    default:
+      return <Wrench className="h-4 w-4 mr-2 opacity-70" />;
+  }
+};
 
 export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -76,7 +91,11 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
             variant="outline" 
             className="w-full justify-start h-auto min-h-10 py-2"
           >
-            <Package className="h-4 w-4 mr-2 opacity-70" />
+            {field.value ? (
+              getPackageIcon(getSelectedPackageName())
+            ) : (
+              <Wrench className="h-4 w-4 mr-2 opacity-70" />
+            )}
             <span className="font-normal">
               {field.value 
                 ? getSelectedPackageName()
@@ -107,11 +126,14 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
                     {field.value === pkg.id && (
                       <span className="absolute left-2">•</span>
                     )}
-                    <div className="flex flex-col items-start">
-                      <span>{pkg.name}</span>
-                      {pkg.description && (
-                        <span className="text-xs text-muted-foreground">{pkg.description}</span>
-                      )}
+                    <div className="flex items-center w-full">
+                      {getPackageIcon(pkg.name)}
+                      <div className="flex flex-col items-start">
+                        <span>{pkg.name}</span>
+                        {pkg.description && (
+                          <span className="text-xs text-muted-foreground">{pkg.description}</span>
+                        )}
+                      </div>
                     </div>
                   </Button>
                 ))}
