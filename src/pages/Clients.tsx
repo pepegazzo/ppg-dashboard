@@ -355,9 +355,9 @@ const Clients = () => {
               resetFilters={resetFilters}
             />
             
-            <Card className="border-none shadow-none">
+            <div className="space-y-4">
               {selectedClients.length > 0 && (
-                <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+                <div className="p-2 bg-muted rounded-md flex items-center justify-between">
                   <span className="text-sm">
                     {selectedClients.length} client{selectedClients.length !== 1 ? 's' : ''} selected
                   </span>
@@ -384,7 +384,7 @@ const Clients = () => {
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <TableRow>
                       <TableHead className="w-[50px]">
                         <Checkbox 
                           checked={clients?.length > 0 && selectedClients.length === clients?.length}
@@ -400,10 +400,7 @@ const Clients = () => {
                   </TableHeader>
                   <TableBody>
                     {clients?.map((client) => (
-                      <TableRow 
-                        key={client.id} 
-                        className="border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted"
-                      >
+                      <TableRow key={client.id}>
                         <TableCell>
                           <Checkbox 
                             checked={selectedClients.includes(client.id)}
@@ -487,7 +484,7 @@ const Clients = () => {
                   </TableBody>
                 </Table>
               </div>
-            </Card>
+            </div>
           </>
         )}
         
