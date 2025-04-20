@@ -21,7 +21,13 @@ export const SelectedClientsActions = ({
       <span className="text-sm text-amber-900">
         {selectedCount} client{selectedCount !== 1 ? 's' : ''} selected
       </span>
-      <Button variant="destructive" size="sm" onClick={onDelete} disabled={isDeleting}>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onDelete} 
+        disabled={isDeleting}
+        className="border-amber-200 text-amber-800 hover:bg-amber-50"
+      >
         {isDeleting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

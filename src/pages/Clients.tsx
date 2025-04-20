@@ -25,11 +25,19 @@ const Clients = () => {
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
             <div className="flex gap-2">
-              <Button onClick={() => setIsModalOpen(true)} className="bg-amber-500 hover:bg-amber-600 text-white">
+              <Button 
+                onClick={() => setIsModalOpen(true)} 
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+              >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Client
               </Button>
-              <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} className="border-amber-200 text-amber-800 hover:bg-amber-50">
+              <Button 
+                variant="outline" 
+                onClick={handleRefresh} 
+                disabled={isRefreshing} 
+                className="border-amber-200 text-amber-800 hover:bg-amber-50"
+              >
                 {isRefreshing ? (
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 ) : (

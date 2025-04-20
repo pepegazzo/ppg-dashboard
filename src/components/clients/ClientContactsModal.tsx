@@ -92,24 +92,54 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
         </div>
         <form onSubmit={handleAdd} className="space-y-2 border-t pt-3 mt-2">
           <div className="font-semibold text-sm mb-2 flex items-center gap-1">
-            <Plus className="h-4 w-4 text-amber-600" /> Add Contact
+            <Plus className="h-4 w-4 text-amber-500" /> Add Contact
           </div>
           <div className="space-y-2">
             <div>
               <Label htmlFor="contact_name">Name*</Label>
-              <Input id="contact_name" name="name" value={form.name} onChange={handleChange} required placeholder="Contact Name" />
+              <Input 
+                id="contact_name" 
+                name="name" 
+                value={form.name} 
+                onChange={handleChange} 
+                required 
+                placeholder="Contact Name"
+                className="border-amber-200 focus-visible:ring-amber-500"
+              />
             </div>
             <div>
               <Label htmlFor="contact_role">Role</Label>
-              <Input id="contact_role" name="role" value={form.role} onChange={handleChange} placeholder="Role" />
+              <Input 
+                id="contact_role" 
+                name="role" 
+                value={form.role} 
+                onChange={handleChange} 
+                placeholder="Role"
+                className="border-amber-200 focus-visible:ring-amber-500"
+              />
             </div>
             <div>
               <Label htmlFor="contact_email">Email</Label>
-              <Input id="contact_email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" />
+              <Input 
+                id="contact_email" 
+                name="email" 
+                type="email" 
+                value={form.email} 
+                onChange={handleChange} 
+                placeholder="Email"
+                className="border-amber-200 focus-visible:ring-amber-500"
+              />
             </div>
             <div>
               <Label htmlFor="contact_phone">Phone</Label>
-              <Input id="contact_phone" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
+              <Input 
+                id="contact_phone" 
+                name="phone" 
+                value={form.phone} 
+                onChange={handleChange} 
+                placeholder="Phone"
+                className="border-amber-200 focus-visible:ring-amber-500"
+              />
             </div>
           </div>
           <DialogFooter>

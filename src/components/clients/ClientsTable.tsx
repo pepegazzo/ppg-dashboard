@@ -27,7 +27,7 @@ interface ClientsTableProps {
 
 const renderSortIndicator = (key: keyof Client | 'company' | 'email' | 'active_projects', sortConfig: ClientsTableProps['sortConfig']) => {
   if (sortConfig.key === key) {
-    return sortConfig.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4 inline" /> : <ChevronDown className="ml-1 h-4 w-4 inline" />;
+    return sortConfig.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4 inline text-amber-500" /> : <ChevronDown className="ml-1 h-4 w-4 inline text-amber-500" />;
   }
   return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
 };
@@ -124,12 +124,17 @@ export const ClientsTable = ({
     }
   };
 
-  return <div className="rounded-md border">
+  return (
+    <div className="rounded-md border border-amber-200">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
+          <TableRow className="bg-amber-50/50 hover:bg-amber-50/50">
             <TableHead className="w-[50px]">
-              <Checkbox checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} onCheckedChange={handleSelectAll} aria-label="Select all clients" />
+              <Checkbox 
+                checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
+                onCheckedChange={handleSelectAll} 
+                aria-label="Select all clients" 
+              />
             </TableHead>
             <TableHead className="w-[220px] cursor-pointer" onClick={() => handleSort('company_name')}>
               Company / Brand {renderSortIndicator('company_name', sortConfig)}
@@ -142,13 +147,17 @@ export const ClientsTable = ({
         <TableBody>
           {filteredAndSortedClients?.map(client => (
             <React.Fragment key={client.id}>
-              <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
+              <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-amber-50/20' : ''}`} onClick={() => handleRowClick(client.id)}>
                 <TableCell>
-                  <Checkbox checked={selectedClients.includes(client.id)} onCheckedChange={() => toggleClientSelection(client.id)} aria-label={`Select client ${client.company_name}`} />
+                  <Checkbox 
+                    checked={selectedClients.includes(client.id)} 
+                    onCheckedChange={() => toggleClientSelection(client.id)} 
+                    aria-label={`Select client ${client.company_name}`} 
+                  />
                 </TableCell>
-                <TableCell className="font-medium flex items-center gap-">
+                <TableCell className="font-medium flex items-center gap-2">
                   {client.company_name}
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="ml-2 text-amber-500">
                     {openAccordionId === client.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </TableCell>
@@ -182,36 +191,47 @@ export const ClientsTable = ({
                   </div>
                 </TableCell>
               </TableRow>
-              {openAccordionId === client.id && <TableRow className="bg-muted/10">
+              {openAccordionId === client.id && (
+                <TableRow className="bg-amber-50/10">
                   <TableCell />
                   <TableCell colSpan={2}>
                     <div className="py-3">
-                      <div className="font-semibold mb-1">Contacts</div>
-                      {client.contacts && client.contacts.length > 0 ? <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-amber-50/30">
-                          {client.contacts.map((contact: Contact) => <div key={contact.id} className="p-3 flex flex-col gap-2">
-                              <span className="font-medium">{contact.name}</span>
-                              <div className="grid grid-cols-3 gap-3 mt-1 text-zinc-700 text-[13px]">
+                      <div className="font-semibold mb-1 text-amber-900">Contacts</div>
+                      {client.contacts && client.contacts.length > 0 ? (
+                        <div className="divide-y divide-amber-100 rounded border border-amber-200 bg-amber-50/30">
+                          {client.contacts.map((contact: Contact) => (
+                            <div key={contact.id} className="p-3 flex flex-col gap-2">
+                              <span className="font-medium text-amber-900">{contact.name}</span>
+                              <div className="grid grid-cols-3 gap-3 mt-1 text-amber-800 text-[13px]">
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Briefcase className="h-4 w-4 text-amber-700" />
+                                    <Briefcase className="h-4 w-4 text-amber-500" />
                                   </span>
-                                  <span className="truncate">{contact.role || <span className="text-muted-foreground">—</span>}</span>
+                                  <span className="truncate">{contact.role || <span className="text-amber-400">—</span>}</span>
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Mail className="h-4 w-4 text-amber-700" />
+                                    <Mail className="h-4 w-4 text-amber-500" />
                                   </span>
-                                  {contact.email ? <span className="underline truncate">{contact.email}</span> : <span className="text-muted-foreground">—</span>}
+                                  {contact.email ? (
+                                    <span className="underline truncate text-amber-700">{contact.email}</span>
+                                  ) : (
+                                    <span className="text-amber-400">—</span>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Phone className="h-4 w-4 text-amber-700" />
+                                    <Phone className="h-4 w-4 text-amber-500" />
                                   </span>
-                                  <span className="truncate">{contact.phone || <span className="text-muted-foreground">—</span>}</span>
+                                  <span className="truncate">{contact.phone || <span className="text-amber-400">—</span>}</span>
                                 </div>
                               </div>
-                            </div>)}
-                        </div> : <span className="text-muted-foreground text-xs">No contacts</span>}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-amber-400 text-xs">No contacts</span>
+                      )}
                       <Button 
                         onClick={e => {
                           e.stopPropagation();
@@ -224,18 +244,27 @@ export const ClientsTable = ({
                       >
                         <Plus className="h-3 w-3 mr-1" /> Manage Contacts
                       </Button>
-                      {openModalClientId === client.id && <ClientContactsModal clientId={client.id} currentContacts={client.contacts || []} onClose={() => setOpenModalClientId(null)} onChanged={() => {
-                        setOpenModalClientId(null);
-                        queryClient.invalidateQueries({
-                          queryKey: ['clients']
-                        });
-                      }} />}
+                      {openModalClientId === client.id && (
+                        <ClientContactsModal 
+                          clientId={client.id} 
+                          currentContacts={client.contacts || []} 
+                          onClose={() => setOpenModalClientId(null)} 
+                          onChanged={() => {
+                            setOpenModalClientId(null);
+                            queryClient.invalidateQueries({
+                              queryKey: ['clients']
+                            });
+                          }} 
+                        />
+                      )}
                     </div>
                   </TableCell>
-                </TableRow>}
+                </TableRow>
+              )}
             </React.Fragment>
           ))}
         </TableBody>
       </Table>
-    </div>;
+    </div>
+  );
 };

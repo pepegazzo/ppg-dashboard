@@ -41,12 +41,12 @@ export function ClientFilter({
     <div className="flex flex-col sm:flex-row gap-3 mb-4">
       <div className="flex-1">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-amber-500" />
           <Input
             placeholder="Filter by client name..."
             value={nameFilter}
             onChange={(e) => setNameFilter(e.target.value)}
-            className="pl-8"
+            className="pl-8 border-amber-200 focus-visible:ring-amber-500"
           />
         </div>
       </div>
@@ -55,11 +55,12 @@ export function ClientFilter({
           placeholder="Filter by company..."
           value={companyFilter}
           onChange={(e) => setCompanyFilter(e.target.value)}
+          className="border-amber-200 focus-visible:ring-amber-500"
         />
       </div>
       <div className="w-[200px]">
         <Select value={projectFilter} onValueChange={setProjectFilter}>
-          <SelectTrigger className="border-amber-200 text-amber-900 hover:bg-amber-50">
+          <SelectTrigger className="border-amber-200 text-amber-900 hover:bg-amber-50 focus:ring-amber-500">
             <SelectValue placeholder="Project" />
           </SelectTrigger>
           <SelectContent className="border-amber-200">
@@ -77,7 +78,12 @@ export function ClientFilter({
           </SelectContent>
         </Select>
       </div>
-      <Button variant="outline" size="icon" onClick={resetFilters} className="shrink-0 border-amber-200 text-amber-800 hover:bg-amber-50">
+      <Button 
+        variant="outline" 
+        size="icon" 
+        onClick={resetFilters} 
+        className="shrink-0 border-amber-200 text-amber-800 hover:bg-amber-50"
+      >
         ✕
       </Button>
     </div>
