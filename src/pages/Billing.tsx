@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -6,6 +7,7 @@ import { InvoiceTable } from "@/components/billing/InvoiceTable";
 import { CreateInvoiceForm } from "@/components/billing/CreateInvoiceForm";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { RefreshCw } from "lucide-react";
 
 const Billing = () => {
   const queryClient = useQueryClient();
@@ -52,7 +54,8 @@ const Billing = () => {
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh
               </Button>
             </div>
           </div>

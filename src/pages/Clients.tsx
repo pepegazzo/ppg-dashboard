@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, RefreshCcw } from "lucide-react";
+import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InlineEdit from "@/components/clients/InlineEdit";
 import ClientModal from "@/components/clients/ClientModal";
@@ -14,11 +14,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Link } from "react-router-dom";
 import { EmptyState } from "@/components/clients/EmptyState";
 import { ClientFilter } from "@/components/clients/ClientFilter";
+
 interface Project {
   id: string;
   name: string;
   status?: 'Onboarding' | 'Active' | 'Completed';
 }
+
 interface Client {
   id: string;
   name: string;
@@ -28,6 +30,7 @@ interface Client {
   phone: string;
   active_projects: Project[] | null;
 }
+
 const Clients = () => {
   const {
     toast
@@ -43,9 +46,11 @@ const Clients = () => {
   const [nameFilter, setNameFilter] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
+
   useEffect(() => {
     fetchAllProjects();
   }, []);
+
   const fetchAllProjects = async () => {
     try {
       const {
@@ -61,11 +66,13 @@ const Clients = () => {
       console.error('Unexpected error fetching projects:', error);
     }
   };
+
   const resetFilters = () => {
     setNameFilter("");
     setCompanyFilter("");
     setProjectFilter("all");
   };
+
   const {
     data: clients,
     isLoading,
@@ -99,6 +106,7 @@ const Clients = () => {
       return filteredData;
     }
   });
+
   const updateClient = async (clientId: string, updates: Partial<Client>) => {
     try {
       const {
@@ -141,6 +149,7 @@ const Clients = () => {
       console.error("Error in updateClient:", error);
     }
   };
+
   const createClient = async (clientData: {
     name: string;
     company: string;
@@ -176,6 +185,7 @@ const Clients = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleSelectAll = () => {
     if (selectedClients.length === clients?.length) {
       setSelectedClients([]);
@@ -183,6 +193,7 @@ const Clients = () => {
       setSelectedClients(clients?.map(client => client.id) || []);
     }
   };
+
   const toggleClientSelection = (clientId: string) => {
     setSelectedClients(prev => {
       if (prev.includes(clientId)) {
@@ -192,6 +203,7 @@ const Clients = () => {
       }
     });
   };
+
   const deleteSelectedClients = async () => {
     try {
       setIsDeleting(true);
@@ -226,6 +238,7 @@ const Clients = () => {
       setShowDeleteModal(false);
     }
   };
+
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
@@ -246,6 +259,7 @@ const Clients = () => {
       setIsRefreshing(false);
     }
   };
+
   if (isLoading) {
     return <DashboardLayout>
         <div className="flex justify-center items-center h-64">
@@ -253,11 +267,13 @@ const Clients = () => {
         </div>
       </DashboardLayout>;
   }
+
   if (error) {
     return <DashboardLayout>
         <div className="text-red-500">Error loading clients</div>
       </DashboardLayout>;
   }
+
   return <DashboardLayout>
       <div className="animate-fade-in">
         <div className="flex flex-col gap-2 mb-8">
@@ -272,7 +288,8 @@ const Clients = () => {
                 Add Client
               </Button>
               <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh
               </Button>
             </div>
           </div>
@@ -412,4 +429,5 @@ const Clients = () => {
       </div>
     </DashboardLayout>;
 };
+
 export default Clients;
