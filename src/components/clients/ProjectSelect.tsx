@@ -119,15 +119,12 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button 
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="h-7 px-1 text-muted-foreground hover:bg-amber-50 rounded-full border border-amber-100 shadow-none"
+          className="h-7 px-2 text-xs text-amber-800 hover:bg-amber-50 border-amber-200"
           disabled={isUpdating}
-          style={{ boxShadow: 'none', background: "#fff" }}
         >
-          <span className="text-xs flex items-center gap-1">
-            <Plus className="h-3 w-3" /> Add Project
-          </span>
+          <Plus className="h-3 w-3 mr-1" /> Add Project
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-2 rounded shadow-lg min-w-[180px]" align="start">

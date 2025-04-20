@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,6 @@ import { Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/clients";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ClientContactsModalProps {
   clientId: string;
@@ -79,11 +78,11 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 <Label className="text-sm mb-2 block">Contacts</Label>
                 <div className="space-y-2">
                   {currentContacts.map(contact => (
-                    <div key={contact.id} className="bg-muted/20 rounded px-3 py-2 flex flex-col gap-0.5">
-                      <span className="font-medium">{contact.name}</span>
-                      {contact.role && <span className="text-xs">{contact.role}</span>}
-                      {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
-                      {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
+                    <div key={contact.id} className="bg-amber-50/50 border border-amber-100 rounded-md px-3 py-2 flex flex-col gap-0.5">
+                      <span className="font-medium text-amber-900">{contact.name}</span>
+                      {contact.role && <span className="text-xs text-amber-800">{contact.role}</span>}
+                      {contact.email && <span className="text-xs text-amber-700">{contact.email}</span>}
+                      {contact.phone && <span className="text-xs text-amber-700">{contact.phone}</span>}
                     </div>
                   ))}
                 </div>
@@ -93,7 +92,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
         </div>
         <form onSubmit={handleAdd} className="space-y-2 border-t pt-3 mt-2">
           <div className="font-semibold text-sm mb-2 flex items-center gap-1">
-            <Plus className="h-4 w-4" /> Add Contact
+            <Plus className="h-4 w-4 text-amber-600" /> Add Contact
           </div>
           <div className="space-y-2">
             <div>
@@ -114,8 +113,8 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Close</Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="button" variant="outline" className="border-amber-200 text-amber-800 hover:bg-amber-50" onClick={onClose}>Close</Button>
+            <Button type="submit" className="bg-amber-500 text-white hover:bg-amber-600" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-3 w-3 mr-2 animate-spin" />}
               Add Contact
             </Button>

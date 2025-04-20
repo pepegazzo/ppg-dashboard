@@ -155,27 +155,15 @@ export const ClientsTable = ({
                 <TableCell>
                   <div className="flex flex-wrap gap-2 items-center">
                     {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").map((project: any) => (
-                      <div
+                      <Badge
                         key={project.id}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium bg-muted"
-                        style={{
-                          background: "#F1F0FB", // Soft Gray from palette
-                          color: "#403E43", // Charcoal Gray
-                          borderColor: "#e4e4e7"
-                        }}
+                        variant="outline"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-800 border-amber-200"
                       >
                         {project.name}
                         <button
                           type="button"
-                          className="ml-1 p-1 rounded-full hover:bg-amber-100 transition-colors"
-                          style={{
-                            width: 22,
-                            height: 22,
-                            lineHeight: 0,
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                          }}
+                          className="ml-1 p-0.5 rounded-full hover:bg-amber-100 transition-colors"
                           aria-label={`Remove ${project.name}`}
                           tabIndex={0}
                           onClick={e => {
@@ -183,9 +171,9 @@ export const ClientsTable = ({
                             removeProjectFromClient(client.id, project.id, project.name);
                           }}
                         >
-                          <X className="w-3 h-3 text-[#9F9EA1] group-hover:text-[#f59e0b] transition-colors" />
+                          <X className="w-3 h-3 text-amber-500" />
                         </button>
-                      </div>
+                      </Badge>
                     ))}
                     {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").length === 0 && 
                       <span className="text-xs text-muted-foreground">No active projects</span>
@@ -224,18 +212,24 @@ export const ClientsTable = ({
                               </div>
                             </div>)}
                         </div> : <span className="text-muted-foreground text-xs">No contacts</span>}
-                      <button onClick={e => {
-                  e.stopPropagation();
-                  setOpenModalClientId(client.id);
-                }} type="button" className="inline-flex items-center mt-3 text-xs text-blue-600 hover:underline gap-1">
-                        <Plus className="h-3 w-3" /> Manage Contacts
-                      </button>
+                      <Button 
+                        onClick={e => {
+                          e.stopPropagation();
+                          setOpenModalClientId(client.id);
+                        }} 
+                        type="button" 
+                        variant="outline"
+                        size="sm"
+                        className="mt-3 text-xs text-amber-800 hover:bg-amber-50 border-amber-200"
+                      >
+                        <Plus className="h-3 w-3 mr-1" /> Manage Contacts
+                      </Button>
                       {openModalClientId === client.id && <ClientContactsModal clientId={client.id} currentContacts={client.contacts || []} onClose={() => setOpenModalClientId(null)} onChanged={() => {
-                  setOpenModalClientId(null);
-                  queryClient.invalidateQueries({
-                    queryKey: ['clients']
-                  });
-                }} />}
+                        setOpenModalClientId(null);
+                        queryClient.invalidateQueries({
+                          queryKey: ['clients']
+                        });
+                      }} />}
                     </div>
                   </TableCell>
                 </TableRow>}
