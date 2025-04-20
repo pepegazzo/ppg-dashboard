@@ -8,6 +8,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/clients";
+import { Badge } from "@/components/ui/badge"; // Added import for Badge
 
 interface ClientContactsModalProps {
   clientId: string;
@@ -78,7 +79,9 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
             )}
             {currentContacts.map(contact => (
               <div key={contact.id} className="bg-muted/20 rounded px-3 py-2 mb-2 flex flex-col gap-0.5">
-                <span className="font-medium">{contact.name} {contact.is_primary && <Badge className="ml-2" variant="secondary">Primary</Badge>}</span>
+                <span className="font-medium">
+                  {contact.name} {contact.is_primary && <Badge className="ml-2" variant="secondary">Primary</Badge>}
+                </span>
                 {contact.role && <span className="text-xs">{contact.role}</span>}
                 {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
                 {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
@@ -127,3 +130,4 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
     </Dialog>
   );
 }
+
