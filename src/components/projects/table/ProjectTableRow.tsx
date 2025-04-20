@@ -127,7 +127,10 @@ export function TableRow({
       </TableCell>
       
       <TableCell>
-        <ProjectRevenueCell revenue={localProject.revenue} />
+        <ProjectRevenueCell 
+          revenue={localProject.revenue} 
+          projectName={localProject.name}
+        />
       </TableCell>
       
       <TableCell className="text-sm text-muted-foreground justify-items-center">

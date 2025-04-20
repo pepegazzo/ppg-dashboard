@@ -69,7 +69,7 @@ const Billing = () => {
           
           <div>
             <h2 className="text-xl font-semibold mb-4">Invoices</h2>
-            <InvoiceTable initialProjectFilter={projectFromUrl} />
+            <InvoiceTable initialProjectFilter={projectFromUrl || ""} />
           </div>
         </div>
       </div>
