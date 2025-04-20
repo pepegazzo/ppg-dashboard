@@ -83,13 +83,19 @@ export function ProjectSelect({ isOpen, onClose, clientId, activeProjects }: Pro
         description: "Active projects have been updated successfully",
       });
       
-      // Refresh data with a stronger invalidation approach
+      // Force a hard refresh of all client data to ensure UI updates
       await queryClient.invalidateQueries({ queryKey: ['clients'] });
       
-      // Small delay to ensure the invalidation has time to trigger refetch
+      // Also invalidate any other related queries
+      await queryClient.invalidateQueries({ queryKey: ['available-projects'] });
+      
+      // Close modal after a short delay to ensure invalidation completes
       setTimeout(() => {
         onClose();
-      }, 100);
+        
+        // This additional refetch helps ensure the UI is updated
+        queryClient.refetchQueries({ queryKey: ['clients'] });
+      }, 300);
     } catch (error) {
       console.error("Error updating projects:", error);
       toast({
