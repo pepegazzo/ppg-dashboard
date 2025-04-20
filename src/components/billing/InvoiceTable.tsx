@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowUpDown, CheckCircle, Clock, AlertCircle, ChevronUp, ChevronDown } from "lucide-react";
 import {
@@ -36,6 +36,7 @@ type SortableField = keyof Invoice | 'project.name' | 'project.client_name';
 
 export function InvoiceTable() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<{ field: SortableField; direction: 'asc' | 'desc' }>({ 
     field: 'issue_date', 
@@ -144,6 +145,15 @@ export function InvoiceTable() {
         });
         return;
       }
+
+      // Update the cache with the new data
+      queryClient.setQueryData(['invoices', sortBy], (oldData: Invoice[] | undefined) => {
+        if (!oldData) return oldData;
+        
+        return oldData.map(invoice => 
+          invoice.id === invoiceId ? { ...invoice, status: newStatus } : invoice
+        );
+      });
 
       toast({
         title: "Status updated",
