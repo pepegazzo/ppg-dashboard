@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, User, Briefcase } from "lucide-react";
@@ -94,10 +93,8 @@ export const ClientsTable = ({
                     {openAccordionId === client.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </TableCell>
-                {/* Active Projects column */}
                 <TableCell>
                   <div className="flex flex-wrap gap-2 items-center">
-                    {/* Show only projects not completed/cancelled */}
                     {client.active_projects
                       ?.filter(p => p.status !== "Completed" && p.status !== "Cancelled")
                       .map((p: any) => (
@@ -114,7 +111,6 @@ export const ClientsTable = ({
                   </div>
                 </TableCell>
               </TableRow>
-              {/* Accordion: expand contacts on row open */}
               {openAccordionId === client.id && (
                 <TableRow className="bg-muted/10">
                   <TableCell />
@@ -124,29 +120,33 @@ export const ClientsTable = ({
                       {client.contacts && client.contacts.length > 0 ? (
                         <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-muted/30">
                           {client.contacts.map((contact: Contact) => (
-                            <div key={contact.id} className="p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                            <div key={contact.id} className="p-3 flex flex-col gap-2">
                               <span className="font-medium flex items-center gap-2">
-                                <User className="h-4 w-4 text-purple-400" />{contact.name}
+                                <User className="h-4 w-4 text-amber-500" />
+                                {contact.name}
                               </span>
-                              <div className="flex flex-col md:flex-row md:gap-4 gap-1 text-zinc-700 text-[13px]">
-                                {contact.role && (
-                                  <span className="flex items-center gap-1 text-[13px]">
-                                    <Briefcase className="h-4 w-4 text-[#7E69AB]" />
-                                    <span className="">{contact.role}</span>
+                              <div className="grid grid-cols-3 gap-3 mt-1 text-zinc-700 text-[13px]">
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span>
+                                    <Briefcase className="h-4 w-4 text-amber-500" />
                                   </span>
-                                )}
-                                {contact.email && (
-                                  <span className="flex items-center gap-1 text-[13px]">
-                                    <Mail className="h-4 w-4 text-[#8B5CF6]" />
-                                    <span className="underline">{contact.email}</span>
+                                  <span className="truncate">{contact.role || <span className="text-muted-foreground">—</span>}</span>
+                                </div>
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span>
+                                    <Mail className="h-4 w-4 text-amber-500" />
                                   </span>
-                                )}
-                                {contact.phone && (
-                                  <span className="flex items-center gap-1 text-[13px]">
-                                    <Phone className="h-4 w-4 text-[#0FA0CE]" />
-                                    <span>{contact.phone}</span>
+                                  {contact.email 
+                                    ? <span className="underline truncate">{contact.email}</span>
+                                    : <span className="text-muted-foreground">—</span>
+                                  }
+                                </div>
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span>
+                                    <Phone className="h-4 w-4 text-amber-500" />
                                   </span>
-                                )}
+                                  <span className="truncate">{contact.phone || <span className="text-muted-foreground">—</span>}</span>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -154,7 +154,6 @@ export const ClientsTable = ({
                       ) : (
                         <span className="text-muted-foreground text-xs">No contacts</span>
                       )}
-                      {/* Add contact/manage button */}
                       <button
                         onClick={(e) => { e.stopPropagation(); setOpenModalClientId(client.id); }}
                         type="button"
