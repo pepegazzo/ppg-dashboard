@@ -50,6 +50,7 @@ const Clients = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const [nameFilter, setNameFilter] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
@@ -266,7 +267,7 @@ const Clients = () => {
 
   const handleRefresh = async () => {
     try {
-      setIsDeleting(true);
+      setIsRefreshing(true);
       await queryClient.invalidateQueries({ queryKey: ['clients'] });
       
       toast({
@@ -280,7 +281,7 @@ const Clients = () => {
         variant: "destructive"
       });
     } finally {
-      setIsDeleting(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -316,9 +317,9 @@ const Clients = () => {
                 variant="outline" 
                 size="icon" 
                 onClick={handleRefresh}
-                disabled={isDeleting}
+                disabled={isRefreshing}
               >
-                <RefreshCcw className={`h-4 w-4 ${isDeleting ? 'animate-spin' : ''}`} />
+                <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               </Button>
             </div>
             <Button onClick={() => setIsModalOpen(true)}>
