@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Mail, Phone } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+
+interface Project {
+  id: string;
+  name: string;
+  status: 'Onboarding' | 'Active' | 'Completed';
+}
 
 interface Client {
   id: string;
@@ -16,28 +24,28 @@ interface Client {
   role: string;
   email: string;
   phone: string;
-  active_projects: number;
+  active_projects: Project[];
 }
 
 const Clients = () => {
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      // Get clients with a count of their active projects
       const { data, error } = await supabase
         .from('clients')
         .select(`
           *,
-          active_projects:projects(count)
+          active_projects:projects(id, name, status)
         `)
-        .returns<(Client & { active_projects: { count: number }[] })[]>();
+        .returns<(Client & { active_projects: Project[] })[]>();
 
       if (error) throw error;
 
-      // Transform the data to match our Client interface
       return data.map(client => ({
         ...client,
-        active_projects: client.active_projects[0]?.count || 0
+        active_projects: client.active_projects.filter(project => 
+          project.status === 'Active' || project.status === 'Onboarding'
+        )
       }));
     }
   });
@@ -114,9 +122,27 @@ const Clients = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">
-                        {client.active_projects} active project{client.active_projects !== 1 ? 's' : ''}
-                      </Badge>
+                      <div className="flex flex-col gap-2">
+                        {client.active_projects.map(project => (
+                          <Link 
+                            key={project.id} 
+                            to={`/projects?project=${project.id}`}
+                            className="group"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="group-hover:bg-secondary/70">
+                                {project.name}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {project.status}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                        {client.active_projects.length === 0 && (
+                          <span className="text-sm text-muted-foreground">No active projects</span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
