@@ -54,7 +54,7 @@ export function CreateInvoiceForm({ onSuccess }: CreateInvoiceFormProps) {
 
   const generateRandomInvoiceNumber = () => {
     const prefix = "INV";
-    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const randomNum = Math.floor(100 + Math.random() * 900); // 3-digit number between 100-999
     return `${prefix}-${randomNum}`;
   };
 
