@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -227,10 +227,10 @@ const Clients = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedClients.length === clients?.length) {
+    if (selectedClients.length === filteredAndSortedClients?.length) {
       setSelectedClients([]);
     } else {
-      setSelectedClients(clients?.map(client => client.id) || []);
+      setSelectedClients(filteredAndSortedClients?.map(client => client.id) || []);
     }
   };
 
@@ -369,7 +369,7 @@ const Clients = () => {
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
                       <TableHead className="w-[50px]">
                         <Checkbox 
-                          checked={clients?.length > 0 && selectedClients.length === clients?.length} 
+                          checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
                           onCheckedChange={handleSelectAll} 
                           aria-label="Select all clients" 
                         />
