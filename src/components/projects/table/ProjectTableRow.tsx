@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "../types";
 import { format, parseISO } from "date-fns";
@@ -122,7 +123,6 @@ export function TableRow({
         <ProjectPackageCell 
           packageName={localProject.package_name} 
           projectId={localProject.id}
-          onUpdatePackage={fetchProjects}
         />
       </TableCell>
       
