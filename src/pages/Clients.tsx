@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2 } from "lucide-react";
+import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InlineEdit from "@/components/clients/InlineEdit";
 import ClientModal from "@/components/clients/ClientModal";
@@ -47,6 +47,13 @@ const Clients = () => {
   const [nameFilter, setNameFilter] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Client | 'company' | 'email';
+    direction: 'asc' | 'desc';
+  }>({
+    key: 'name',
+    direction: 'asc'
+  });
 
   useEffect(() => {
     fetchAllProjects();
@@ -74,36 +81,67 @@ const Clients = () => {
     setProjectFilter("all");
   };
 
+  const handleSort = (key: keyof Client | 'company' | 'email') => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const renderSortIndicator = (key: keyof Client | 'company' | 'email') => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'asc' ? 
+        <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
+        <ChevronDown className="ml-1 h-4 w-4 inline" />;
+    }
+    return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
+  };
+
   const {
     data: clients,
     isLoading,
     error
   } = useQuery({
-    queryKey: ['clients', nameFilter, companyFilter, projectFilter],
+    queryKey: ['clients', nameFilter, companyFilter, projectFilter, sortConfig],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('clients').select(`
+      const { data, error } = await supabase
+        .from('clients')
+        .select(`
           *,
           active_projects:projects(id, name, status)
-        `).returns<(Client & {
-        active_projects: Project[] | null;
-      })[]>();
+        `)
+        .returns<(Client & { active_projects: Project[] | null; })[]>();
+
       if (error) throw error;
+
       let filteredData = data.map(client => ({
         ...client,
         active_projects: client.active_projects || []
       }));
+
       if (nameFilter) {
-        filteredData = filteredData.filter(client => client.name.toLowerCase().includes(nameFilter.toLowerCase()));
+        filteredData = filteredData.filter(client => 
+          client.name.toLowerCase().includes(nameFilter.toLowerCase())
+        );
       }
       if (companyFilter) {
-        filteredData = filteredData.filter(client => client.company.toLowerCase().includes(companyFilter.toLowerCase()));
+        filteredData = filteredData.filter(client => 
+          client.company.toLowerCase().includes(companyFilter.toLowerCase())
+        );
       }
       if (projectFilter !== 'all') {
-        filteredData = filteredData.filter(client => client.active_projects?.some(project => project.id === projectFilter));
+        filteredData = filteredData.filter(client => 
+          client.active_projects?.some(project => project.id === projectFilter)
+        );
       }
+
+      filteredData.sort((a, b) => {
+        const aValue = String(a[sortConfig.key]);
+        const bValue = String(b[sortConfig.key]);
+        const comparison = aValue.localeCompare(bValue);
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+
       return filteredData;
     }
   });
@@ -329,11 +367,30 @@ const Clients = () => {
                   <TableHeader>
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
                       <TableHead className="w-[50px]">
-                        <Checkbox checked={clients?.length > 0 && selectedClients.length === clients?.length} onCheckedChange={handleSelectAll} aria-label="Select all clients" />
+                        <Checkbox 
+                          checked={clients?.length > 0 && selectedClients.length === clients?.length} 
+                          onCheckedChange={handleSelectAll} 
+                          aria-label="Select all clients" 
+                        />
                       </TableHead>
-                      <TableHead className="w-[220px]">Name</TableHead>
-                      <TableHead className="w-[180px]">Company & Role</TableHead>
-                      <TableHead className="w-[120px]">Contact</TableHead>
+                      <TableHead 
+                        className="w-[220px] cursor-pointer"
+                        onClick={() => handleSort('name')}
+                      >
+                        Name {renderSortIndicator('name')}
+                      </TableHead>
+                      <TableHead 
+                        className="w-[180px] cursor-pointer"
+                        onClick={() => handleSort('company')}
+                      >
+                        Company & Role {renderSortIndicator('company')}
+                      </TableHead>
+                      <TableHead 
+                        className="w-[120px] cursor-pointer"
+                        onClick={() => handleSort('email')}
+                      >
+                        Contact {renderSortIndicator('email')}
+                      </TableHead>
                       <TableHead className="w-[200px]">Active Projects</TableHead>
                     </TableRow>
                   </TableHeader>
