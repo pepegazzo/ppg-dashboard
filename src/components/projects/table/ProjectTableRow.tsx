@@ -13,6 +13,7 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
+import { ProjectClientCell } from "./ProjectClientCell";
 import { Link } from "react-router-dom";
 
 interface ProjectTableRowProps {
@@ -36,9 +37,7 @@ export function TableRow({
   setShowDeleteModal,
   fetchProjects
 }: ProjectTableRowProps) {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [localProject, setLocalProject] = useState<Project>(project);
 
   const updateProjectField = async (projectId: string, field: string, value: string) => {
@@ -101,18 +100,10 @@ export function TableRow({
       </TableCell>
       
       <TableCell className="text-sm">
-        <Link 
-          to="/clients" 
-          className="text-amber-600 hover:text-amber-700 hover:underline"
-        >
-          <ProjectNameCell 
-            name={localProject.client_name} 
-            fieldName="client_name" 
-            projectId={localProject.id} 
-            onUpdateField={updateProjectField} 
-            disabled={isUpdating}
-          />
-        </Link>
+        <ProjectClientCell 
+          clientName={localProject.client_name} 
+          projectId={localProject.id} 
+        />
       </TableCell>
       
       <TableCell>

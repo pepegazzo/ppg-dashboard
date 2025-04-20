@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone } from "lucide-react";
+import { Briefcase, Mail, Phone, PlusCircle } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import InlineEdit from "@/components/clients/InlineEdit";
+import ClientModal from "@/components/clients/ClientModal";
 
 interface Project {
   id: string;
@@ -32,6 +33,8 @@ interface Client {
 const Clients = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
@@ -104,6 +107,46 @@ const Clients = () => {
     }
   };
 
+  const createClient = async (clientData: {
+    name: string;
+    company: string;
+    role: string;
+    email: string;
+    phone: string;
+  }) => {
+    try {
+      setIsSubmitting(true);
+      
+      const { data, error } = await supabase
+        .from('clients')
+        .insert(clientData)
+        .select();
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to create client"
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "New client created"
+      });
+      
+      // Invalidate the clients query to refetch
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error in createClient:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -131,7 +174,10 @@ const Clients = () => {
           </span>
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
-            <Button>Add Client</Button>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Client
+            </Button>
           </div>
         </div>
 
@@ -228,6 +274,13 @@ const Clients = () => {
             </Table>
           </div>
         </Card>
+        
+        <ClientModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={createClient}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </DashboardLayout>
   );

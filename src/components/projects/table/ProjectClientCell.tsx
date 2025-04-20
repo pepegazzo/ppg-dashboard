@@ -1,74 +1,71 @@
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PlusCircle } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ClientModal from "@/components/clients/ClientModal";
 
 interface ProjectClientCellProps {
-  client_name: string;
-  project_id: string;
-  refreshProjects: () => void;
+  clientName: string;
+  projectId: string;
 }
 
-export function ProjectClientCell({ client_name, project_id, refreshProjects }: ProjectClientCellProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [newClientName, setNewClientName] = useState("");
-  const [newCompany, setNewCompany] = useState("");
+export function ProjectClientCell({ clientName, projectId }: ProjectClientCellProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const queryClient = useQueryClient();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const handleCreateClient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newClientName || !newCompany) return;
-    
+  const handleCreateClient = async (clientData: {
+    name: string;
+    company: string;
+    role: string;
+    email: string;
+    phone: string;
+  }) => {
     try {
       setIsSubmitting(true);
       
-      // Create new client
+      // Insert the new client
       const { data: newClient, error: clientError } = await supabase
         .from('clients')
-        .insert({
-          name: newClientName,
-          company: newCompany,
-          role: "Client",
-          email: "",
-          phone: "",
-        })
+        .insert(clientData)
         .select()
         .single();
-
+      
       if (clientError) throw clientError;
-
-      // Update project with new client
+      
+      // Update the project with the new client
       const { error: projectError } = await supabase
         .from('projects')
         .update({ 
           client_id: newClient.id,
           client_name: newClient.name
         })
-        .eq('id', project_id);
-
-      if (projectError) throw projectError;
-
-      toast({
-        title: "Success",
-        description: "Client created and linked to project",
-      });
-
-      // Refresh data
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      refreshProjects();
-      setIsOpen(false);
+        .eq('id', projectId);
       
+      if (projectError) throw projectError;
+      
+      // Success!
+      toast({
+        title: "Client created",
+        description: `${clientData.name} has been added as a client`,
+      });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error creating client:", error);
       toast({
-        title: "Error",
-        description: "Failed to create client",
+        title: "Error creating client",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -76,48 +73,35 @@ export function ProjectClientCell({ client_name, project_id, refreshProjects }: 
     }
   };
 
-  if (client_name === "No Client") {
+  if (clientName === "No Client") {
     return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button variant="ghost" className="h-8">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Client
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Client</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleCreateClient} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Client Name</label>
-              <input
-                type="text"
-                value={newClientName}
-                onChange={(e) => setNewClientName(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Company</label>
-              <input
-                type="text"
-                value={newCompany}
-                onChange={(e) => setNewCompany(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                required
-              />
-            </div>
-            <Button type="submit" disabled={isSubmitting}>
-              Create Client
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-amber-600 hover:text-amber-700 flex items-center gap-1"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <PlusCircle className="h-3.5 w-3.5" />
+          Add Client
+        </Button>
+        
+        <ClientModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateClient}
+          isSubmitting={isSubmitting}
+        />
+      </>
     );
   }
-
-  return <span>{client_name}</span>;
+  
+  return (
+    <span 
+      className="text-amber-600 hover:text-amber-700 hover:underline cursor-pointer"
+      onClick={() => navigate("/clients")}
+    >
+      {clientName}
+    </span>
+  );
 }
