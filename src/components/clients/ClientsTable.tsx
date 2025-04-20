@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Mail, Phone, Loader2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
@@ -40,6 +39,12 @@ export const ClientsTable = ({
   handleSort,
   sortConfig,
 }: ClientsTableProps) => {
+  const [projectSelectClient, setProjectSelectClient] = useState<{
+    id: string;
+    name: string;
+    active_projects: Project[] | null;
+  } | null>(null);
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -139,27 +144,25 @@ export const ClientsTable = ({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-col gap-2">
+                <div 
+                  className="flex flex-col gap-2 cursor-pointer"
+                  onClick={() => setProjectSelectClient(client)}
+                >
                   {client.active_projects && client.active_projects.length > 0 ? (
                     <div className="flex flex-col gap-1">
                       {client.active_projects.map(project => (
-                        <Link key={project.id} to={`/projects?project=${project.id}`} className="group">
+                        <div key={project.id} className="group">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className="group-hover:bg-secondary/70">
                               {project.name}
                             </Badge>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   ) : (
-                    <span className="text-sm text-muted-foreground flex items-center">
+                    <span className="text-sm text-muted-foreground">
                       No active projects
-                      <ClientProjectField 
-                        clientId={client.id} 
-                        clientName={client.name} 
-                        activeProjects={client.active_projects} 
-                      />
                     </span>
                   )}
                 </div>
@@ -168,6 +171,15 @@ export const ClientsTable = ({
           ))}
         </TableBody>
       </Table>
+
+      {projectSelectClient && (
+        <ProjectSelect
+          isOpen={true}
+          onClose={() => setProjectSelectClient(null)}
+          clientId={projectSelectClient.id}
+          activeProjects={projectSelectClient.active_projects}
+        />
+      )}
     </div>
   );
 };
