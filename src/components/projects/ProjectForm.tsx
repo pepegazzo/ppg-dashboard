@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +50,10 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         }
       }
       
+      // Format dates as ISO strings for Supabase
+      const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
+      const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
+      
       // Create properly typed data object for Supabase
       const projectPayload = {
         name: values.name,
@@ -56,8 +61,8 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         client_name: clientName || "No Client",
         status: values.status,
         priority: values.priority,
-        start_date: values.start_date || null,
-        due_date: values.due_date || null,
+        start_date: formattedStartDate,
+        due_date: formattedDueDate,
         revenue: values.revenue || null,
       };
       

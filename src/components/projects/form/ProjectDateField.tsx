@@ -33,7 +33,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                   )}
                 >
                   {field.value ? (
-                    format(new Date(field.value), "PPP")
+                    format(field.value, "PPP")
                   ) : (
                     <span>Select date</span>
                   )}
@@ -47,16 +47,8 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
             >
               <Calendar
                 mode="single"
-                selected={field.value ? new Date(field.value) : undefined}
-                onSelect={(date) => {
-                  if (date) {
-                    // Format the date in UTC to avoid timezone issues
-                    const year = date.getUTCFullYear();
-                    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(date.getUTCDate()).padStart(2, '0');
-                    field.onChange(`${year}-${month}-${day}`);
-                  }
-                }}
+                selected={field.value}
+                onSelect={field.onChange}
                 initialFocus
               />
             </PopoverContent>
