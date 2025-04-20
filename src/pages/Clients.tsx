@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2 } from "lucide-react";
+import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InlineEdit from "@/components/clients/InlineEdit";
 import ClientModal from "@/components/clients/ClientModal";
@@ -264,6 +264,26 @@ const Clients = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setIsDeleting(true);
+      await queryClient.invalidateQueries({ queryKey: ['clients'] });
+      
+      toast({
+        title: "Refreshed",
+        description: "Client information updated"
+      });
+    } catch (error) {
+      toast({
+        title: "Error refreshing",
+        description: "Could not refresh client data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -290,7 +310,17 @@ const Clients = () => {
             Relationships
           </span>
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleRefresh}
+                disabled={isDeleting}
+              >
+                <RefreshCcw className={`h-4 w-4 ${isDeleting ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
             <Button onClick={() => setIsModalOpen(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Client
