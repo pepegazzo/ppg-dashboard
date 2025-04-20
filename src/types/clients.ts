@@ -1,10 +1,11 @@
+
 export interface Project {
   id: string;
   name: string;
   status?: 'Onboarding' | 'Active' | 'Completed';
 }
 
-export interface ClientActiveProject {
+export interface ClientProjectAssignment {
   id: string;
   client_id: string;
   project_id: string;

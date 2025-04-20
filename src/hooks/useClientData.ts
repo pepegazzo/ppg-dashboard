@@ -48,20 +48,40 @@ export function useClientData() {
   } = useQuery({
     queryKey: ['clients', nameFilter, companyFilter, projectFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, let's get a list of clients with basic info
+      const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
-        .select(`
-          *,
-          active_projects:projects(id, name, status)
-        `)
-        .returns<(Client & { active_projects: Project[] | null; })[]>();
+        .select('*');
 
-      if (error) throw error;
+      if (clientsError) throw clientsError;
 
-      return data.map(client => ({
-        ...client,
-        active_projects: client.active_projects || []
-      }));
+      // Then, for each client, fetch their assigned projects
+      const clientsWithProjects = await Promise.all(
+        clientsData.map(async (client) => {
+          const { data: assignments, error: assignmentsError } = await supabase
+            .from('client_project_assignments')
+            .select(`
+              project_id,
+              projects (id, name, status)
+            `)
+            .eq('client_id', client.id);
+
+          if (assignmentsError) {
+            console.error("Error fetching client projects:", assignmentsError);
+            return {
+              ...client,
+              active_projects: []
+            };
+          }
+
+          return {
+            ...client,
+            active_projects: assignments?.map(a => a.projects) || []
+          };
+        })
+      );
+
+      return clientsWithProjects;
     }
   });
 
@@ -140,6 +160,7 @@ export function useClientData() {
       }
 
       if (updates.name) {
+        // Update any projects where this client is the primary client
         const { error: projectsUpdateError } = await supabase
           .from('projects')
           .update({

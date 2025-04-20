@@ -82,7 +82,7 @@ export const ClientsTable = ({
               onClick={() => handleSort('active_projects')} 
               className="w-[200px] cursor-pointer"
             >
-              Active Projects {renderSortIndicator('active_projects', sortConfig)}
+              Projects {renderSortIndicator('active_projects', sortConfig)}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -153,7 +153,6 @@ export const ClientsTable = ({
               <TableCell>
                 <ProjectSelect 
                   clientId={client.id}
-                  activeProject={client.active_projects?.[0] || null}
                   onUpdate={handleProjectUpdate}
                 />
               </TableCell>
