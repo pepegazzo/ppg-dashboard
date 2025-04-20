@@ -10,11 +10,17 @@ import { SelectedClientsActions } from "@/components/clients/SelectedClientsActi
 import ClientModal from "@/components/clients/ClientModal";
 import { DeleteClientsDialog } from "./DeleteClientsDialog";
 import { useClientData } from "@/hooks/useClientData";
+import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-export function ClientManager() {
+interface ClientManagerProps {
+  isModalOpen: boolean;
+  setIsModalOpen: (isOpen: boolean) => void;
+}
+
+export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

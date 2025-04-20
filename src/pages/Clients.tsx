@@ -1,10 +1,20 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, RefreshCw } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { ClientManager } from "@/components/clients/ClientManager";
 
 const Clients = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // This function will be passed to ClientManager which handles the actual refresh
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -20,13 +30,21 @@ const Clients = () => {
                 Add Client
               </Button>
               <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
+                {isRefreshing ? (
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
                 Refresh
               </Button>
             </div>
           </div>
         </div>
 
-        <ClientManager />
+        <ClientManager 
+          isModalOpen={isModalOpen} 
+          setIsModalOpen={setIsModalOpen} 
+        />
       </div>
     </DashboardLayout>
   );
