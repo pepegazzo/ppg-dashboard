@@ -13,6 +13,8 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
+import { Link } from "react-router-dom";
+
 interface ProjectTableRowProps {
   project: Project;
   selectedProjects: string[];
@@ -23,6 +25,7 @@ interface ProjectTableRowProps {
   setShowDeleteModal: (show: boolean) => void;
   fetchProjects?: () => void;
 }
+
 export function TableRow({
   project,
   selectedProjects,
@@ -37,6 +40,7 @@ export function TableRow({
     toast
   } = useToast();
   const [localProject, setLocalProject] = useState<Project>(project);
+
   const updateProjectField = async (projectId: string, field: string, value: string) => {
     try {
       setUpdatingProjectId(projectId);
@@ -79,11 +83,14 @@ export function TableRow({
       setUpdatingProjectId(null);
     }
   };
+
   const handleDeleteClick = () => {
     setSelectedProjects([localProject.id]);
     setShowDeleteModal(true);
   };
+
   const isUpdating = updatingProjectId === localProject.id;
+
   return <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
         <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
@@ -94,7 +101,18 @@ export function TableRow({
       </TableCell>
       
       <TableCell className="text-sm">
-        <ProjectNameCell name={localProject.client_name} fieldName="client_name" projectId={localProject.id} onUpdateField={updateProjectField} disabled={isUpdating} />
+        <Link 
+          to="/clients" 
+          className="text-amber-600 hover:text-amber-700 hover:underline"
+        >
+          <ProjectNameCell 
+            name={localProject.client_name} 
+            fieldName="client_name" 
+            projectId={localProject.id} 
+            onUpdateField={updateProjectField} 
+            disabled={isUpdating}
+          />
+        </Link>
       </TableCell>
       
       <TableCell>
