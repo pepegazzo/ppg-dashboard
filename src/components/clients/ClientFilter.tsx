@@ -9,6 +9,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+
+interface Project {
+  id: string;
+  name: string;
+}
 
 interface ClientFilterProps {
   nameFilter: string;
@@ -17,6 +31,7 @@ interface ClientFilterProps {
   setCompanyFilter: (value: string) => void;
   projectFilter: string;
   setProjectFilter: (value: string) => void;
+  projects: Project[];
   resetFilters: () => void;
 }
 
@@ -27,6 +42,7 @@ export function ClientFilter({
   setCompanyFilter,
   projectFilter,
   setProjectFilter,
+  projects,
   resetFilters,
 }: ClientFilterProps) {
   return (
@@ -49,17 +65,24 @@ export function ClientFilter({
           onChange={(e) => setCompanyFilter(e.target.value)}
         />
       </div>
-      <div className="w-[180px]">
+      <div className="w-[200px]">
         <Select value={projectFilter} onValueChange={setProjectFilter}>
           <SelectTrigger>
             <SelectValue placeholder="Project" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Projects</SelectItem>
-            <SelectItem value="active">Active Projects</SelectItem>
-            <SelectItem value="onboarding">Onboarding</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="none">No Projects</SelectItem>
+            {projects && projects.length > 0 && (
+              <>
+                <SelectSeparator />
+                {projects.map(project => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>

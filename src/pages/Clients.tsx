@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -49,10 +50,33 @@ const Clients = () => {
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   
   const [nameFilter, setNameFilter] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
+  
+  useEffect(() => {
+    fetchAllProjects();
+  }, []);
+  
+  const fetchAllProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching projects:', error);
+        return;
+      }
+      
+      setAllProjects(data || []);
+    } catch (error) {
+      console.error('Unexpected error fetching projects:', error);
+    }
+  };
   
   const resetFilters = () => {
     setNameFilter("");
@@ -75,9 +99,7 @@ const Clients = () => {
 
       let filteredData = data.map(client => ({
         ...client,
-        active_projects: client.active_projects ? client.active_projects.filter(project => 
-          project.status === 'Active' || project.status === 'Onboarding'
-        ) : []
+        active_projects: client.active_projects || []
       }));
 
       if (nameFilter) {
@@ -98,7 +120,7 @@ const Clients = () => {
             return !client.active_projects || client.active_projects.length === 0;
           }
           return client.active_projects?.some(project => 
-            project.status.toLowerCase() === projectFilter.toLowerCase()
+            project.id === projectFilter
           );
         });
       }
@@ -303,6 +325,7 @@ const Clients = () => {
               setCompanyFilter={setCompanyFilter}
               projectFilter={projectFilter}
               setProjectFilter={setProjectFilter}
+              projects={allProjects}
               resetFilters={resetFilters}
             />
             
