@@ -25,15 +25,24 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
   const { data: availableProjects, isLoading } = useQuery({
     queryKey: ['available-projects', clientId],
     queryFn: async () => {
-      // Get all projects that aren't already assigned to this client
+      // Get all projects where:
+      // 1. The project has no client assigned (client_id is null)
+      // OR
+      // 2. The project is already assigned to this client
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
-        .not('client_id', 'eq', clientId)
+        .or(`client_id.is.null,client_id.eq.${clientId}`)
         .order('name');
       
       if (error) throw error;
-      return data as Project[];
+      
+      // Filter out the current active project from the list if there is one
+      const filteredProjects = data.filter(project => 
+        !activeProject || project.id !== activeProject.id
+      );
+      
+      return filteredProjects as Project[];
     }
   });
 
@@ -124,7 +133,7 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
                   onClick={() => assignProjectToClient(project.id, project.name)}
                   disabled={isUpdating}
                 >
-                  <Badge className={getStatusColor(false)}>{project.name}</Badge>
+                  {project.name}
                 </Button>
               ))
             ) : (
