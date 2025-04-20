@@ -29,7 +29,7 @@ import { ClientFilter } from "@/components/clients/ClientFilter";
 interface Project {
   id: string;
   name: string;
-  status: 'Onboarding' | 'Active' | 'Completed';
+  status?: 'Onboarding' | 'Active' | 'Completed';
 }
 
 interface Client {

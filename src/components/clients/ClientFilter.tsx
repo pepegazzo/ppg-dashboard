@@ -8,6 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator
 } from "@/components/ui/select";
 import {
   DropdownMenu,
