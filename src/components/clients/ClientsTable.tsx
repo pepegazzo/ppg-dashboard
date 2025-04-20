@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-// No Badge
 import { ChevronDown, ChevronUp, ArrowUpDown, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import ClientContactsModal from "./ClientContactsModal";
@@ -69,7 +69,7 @@ export const ClientsTable = ({
             >
               Company / Brand {renderSortIndicator('company_name', sortConfig)}
             </TableHead>
-            {/* REMOVE Website col */}
+            {/* Remove Website column */}
             <TableHead>
               Projects
             </TableHead>
@@ -95,18 +95,12 @@ export const ClientsTable = ({
                     {openAccordionId === client.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </TableCell>
-                {/* Remove website col */}
+                {/* Projects column */}
                 <TableCell>
-                  {/* Projects column stays here */}
-                  {/* Assume you have a ProjectSelect component still as before, if not, remove */}
-                  {client.active_projects?.length > 0
-                    ? client.active_projects.map((p: any) => (
-                        <div key={p.id} className="inline-block px-2 py-1 bg-accent rounded text-xs mr-1 mb-1">{p.name}</div>
-                      ))
-                    : <span className="text-xs text-muted-foreground">No projects</span>
-                  }
+                  <ProjectSelect clientId={client.id} onUpdate={handleProjectUpdate} />
                 </TableCell>
               </TableRow>
+              {/* Accordion: expand contacts on row open */}
               {openAccordionId === client.id && (
                 <TableRow className="bg-muted/10">
                   <TableCell />
@@ -114,13 +108,15 @@ export const ClientsTable = ({
                     <div className="py-3">
                       <div className="font-semibold mb-1">Contacts</div>
                       {client.contacts && client.contacts.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {client.contacts.map((contact: any) => (
-                            <div key={contact.id} className="bg-muted/30 rounded px-3 py-2 flex flex-col gap-0.5">
+                        <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-muted/30">
+                          {client.contacts.map((contact: Contact) => (
+                            <div key={contact.id} className="p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                               <span className="font-medium">{contact.name}</span>
-                              {contact.role && <span className="text-xs">{contact.role}</span>}
-                              {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
-                              {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
+                              <div className="flex flex-col md:flex-row md:gap-3">
+                                {contact.role && <span className="text-xs">{contact.role}</span>}
+                                {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
+                                {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
+                              </div>
                             </div>
                           ))}
                         </div>
