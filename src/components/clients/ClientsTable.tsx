@@ -6,7 +6,6 @@ import { Briefcase, Mail, Phone, Loader2, ChevronUp, ChevronDown, ArrowUpDown } 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import InlineEdit from "./InlineEdit";
-import ClientProjectField from "./ClientProjectField";
 import { ProjectSelect } from "./ProjectSelect";
 import { Project, Client } from "@/types/clients";
 
@@ -145,8 +144,8 @@ export const ClientsTable = ({
                 </div>
               </TableCell>
               <TableCell>
-                {/* Display active projects above the dropdown */}
-                {client.active_projects && client.active_projects.length > 0 && (
+                {/* Display active projects in badges */}
+                {client.active_projects && client.active_projects.length > 0 ? (
                   <div className="mb-2 flex flex-wrap gap-1">
                     {client.active_projects.map(project => (
                       <Badge key={project.id} variant="secondary" className="mb-1">
@@ -154,9 +153,11 @@ export const ClientsTable = ({
                       </Badge>
                     ))}
                   </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground mb-2">No active projects</div>
                 )}
                 
-                {/* Use the new dropdown-based ProjectSelect */}
+                {/* The ProjectSelect dropdown */}
                 <ProjectSelect 
                   clientId={client.id}
                   activeProjects={client.active_projects}
