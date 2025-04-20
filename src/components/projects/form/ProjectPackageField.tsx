@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
 import { Wrench, Palette, Video, Globe } from "lucide-react";
@@ -22,8 +21,10 @@ interface ProjectPackageFieldProps {
   control: Control<ProjectFormValues>;
 }
 
-const getPackageIcon = (packageName: string) => {
+export const getServiceIcon = (packageName: string) => {
   switch(packageName.toLowerCase()) {
+    case 'branding':
+      return <Palette className="h-4 w-4 mr-2 opacity-70" />;
     case 'custom':
       return <Wrench className="h-4 w-4 mr-2 opacity-70" />;
     case 'design':
@@ -83,7 +84,7 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
 
   return (
     <div className="space-y-2">
-      <Label>Package</Label>
+      <Label>Service</Label>
       
       <Popover>
         <PopoverTrigger asChild>
@@ -92,14 +93,14 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
             className="w-full justify-start h-auto min-h-10 py-2"
           >
             {field.value ? (
-              getPackageIcon(getSelectedPackageName())
+              getServiceIcon(getSelectedPackageName())
             ) : (
               <Wrench className="h-4 w-4 mr-2 opacity-70" />
             )}
             <span className="font-normal">
               {field.value 
                 ? getSelectedPackageName()
-                : "Select package..."
+                : "Select service..."
               }
             </span>
           </Button>
@@ -107,13 +108,13 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
         
         <PopoverContent className="w-full p-0" align="start">
           <div className="p-2">
-            <div className="font-medium text-sm mb-2">Available Packages</div>
+            <div className="font-medium text-sm mb-2">Available Services</div>
             {loading ? (
-              <div className="p-2 text-sm text-muted-foreground">Loading packages...</div>
+              <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
             ) : error ? (
               <div className="p-2 text-sm text-red-500">Error: {error}</div>
             ) : packages.length === 0 ? (
-              <div className="p-2 text-sm text-muted-foreground">No packages available</div>
+              <div className="p-2 text-sm text-muted-foreground">No services available</div>
             ) : (
               <div className="max-h-[300px] overflow-auto">
                 {packages.map((pkg) => (
@@ -127,7 +128,7 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
                       <span className="absolute left-2">•</span>
                     )}
                     <div className="flex items-center w-full">
-                      {getPackageIcon(pkg.name)}
+                      {getServiceIcon(pkg.name)}
                       <div className="flex flex-col items-start">
                         <span>{pkg.name}</span>
                         {pkg.description && (

@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from "react";
 import { Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getServiceIcon } from "../form/ProjectPackageField";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Popover,
@@ -99,11 +99,11 @@ export function ProjectPackageCell({
         >
           {currentPackageName ? (
             <Badge variant="outline" className="inline-flex items-center text-xs w-fit">
-              <Package className="h-3 w-3 mr-1" />
+              {getServiceIcon(currentPackageName)}
               <span className="truncate">{currentPackageName}</span>
             </Badge>
           ) : (
-            <span className="text-muted-foreground text-xs">No package</span>
+            <span className="text-muted-foreground text-xs">No service</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -119,7 +119,7 @@ export function ProjectPackageCell({
               disabled={loading}
             >
               <Badge variant="outline" className="w-full justify-start">
-                <Package className="h-3 w-3 mr-1" />
+                {getServiceIcon(pkg.name)}
                 {pkg.name}
               </Badge>
             </Button>
