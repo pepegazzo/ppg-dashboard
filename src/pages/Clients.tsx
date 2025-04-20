@@ -311,7 +311,7 @@ const Clients = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
-                      <TableHead className="w-[25px]">
+                      <TableHead className="w-[50px]">
                         <Checkbox checked={clients?.length > 0 && selectedClients.length === clients?.length} onCheckedChange={handleSelectAll} aria-label="Select all clients" />
                       </TableHead>
                       <TableHead className="w-[220px]">Name</TableHead>
