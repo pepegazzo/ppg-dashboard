@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +25,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch projects assigned to this client
   const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
     queryKey: ['client-assigned-projects', clientId],
     queryFn: async () => {
@@ -47,11 +45,9 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     }
   });
 
-  // Fetch available projects that could be assigned to this client
   const { data: availableProjects, isLoading: isLoadingAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId],
     queryFn: async () => {
-      // Get all assigned project IDs
       const { data: assignedIds } = await supabase
         .from('client_project_assignments')
         .select('project_id')
@@ -59,7 +55,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       
       const excludeIds = assignedIds?.map(item => item.project_id) || [];
       
-      // Get all projects that aren't already assigned to this client
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
@@ -76,10 +71,8 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     try {
       setIsUpdating(true);
       
-      // Get client name from data attribute for better reliability
       const clientName = document.querySelector(`[data-client-id="${clientId}"]`)?.getAttribute('data-client-name') || 'Unknown';
       
-      // Add the assignment to the join table
       const { error: assignError } = await supabase
         .from('client_project_assignments')
         .insert({ 
@@ -89,7 +82,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       
       if (assignError) throw assignError;
       
-      // If this is the first project for this client, also update the project's primary client
       const { data: projectData } = await supabase
         .from('projects')
         .select('client_id')
@@ -97,7 +89,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         .single();
         
       if (!projectData?.client_id) {
-        // Update the project to use this client as its primary client
         const { error: updateError } = await supabase
           .from('projects')
           .update({ 
@@ -109,7 +100,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         if (updateError) throw updateError;
       }
       
-      // Close popover and show toast
       setIsPopoverOpen(false);
       
       toast({
@@ -117,12 +107,10 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         description: `${projectName} has been assigned to this client`,
       });
       
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       
-      // Trigger parent update if provided
       if (onUpdate) {
         onUpdate();
       }
@@ -137,12 +125,11 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       setIsUpdating(false);
     }
   };
-  
+
   const removeProjectFromClient = async (projectId: string, projectName: string) => {
     try {
       setIsUpdating(true);
       
-      // Remove the assignment
       const { error: deleteError } = await supabase
         .from('client_project_assignments')
         .delete()
@@ -151,7 +138,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       
       if (deleteError) throw deleteError;
       
-      // Check if this client is the primary client for the project
       const { data: projectData } = await supabase
         .from('projects')
         .select('client_id, client_name')
@@ -159,7 +145,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         .single();
         
       if (projectData?.client_id === clientId) {
-        // Find another client assigned to this project to make primary
         const { data: nextClient } = await supabase
           .from('client_project_assignments')
           .select(`
@@ -169,11 +154,11 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
             )
           `)
           .eq('project_id', projectId)
+          .neq('client_id', clientId)
           .limit(1)
           .single();
           
         if (nextClient) {
-          // Update the project with the new primary client
           await supabase
             .from('projects')
             .update({ 
@@ -182,7 +167,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
             })
             .eq('id', projectId);
         } else {
-          // No more clients assigned, set to "No Client"
           await supabase
             .from('projects')
             .update({ 
@@ -198,12 +182,10 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         description: `${projectName} is no longer assigned to this client`,
       });
       
-      // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       
-      // Trigger parent update if provided
       if (onUpdate) {
         onUpdate();
       }
