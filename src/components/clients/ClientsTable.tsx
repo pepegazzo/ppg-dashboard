@@ -144,20 +144,6 @@ export const ClientsTable = ({
                 </div>
               </TableCell>
               <TableCell>
-                {/* Display active projects in badges */}
-                {client.active_projects && client.active_projects.length > 0 ? (
-                  <div className="mb-2 flex flex-wrap gap-1">
-                    {client.active_projects.map(project => (
-                      <Badge key={project.id} variant="secondary" className="mb-1">
-                        {project.name}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground mb-2">No active projects</div>
-                )}
-                
-                {/* The ProjectSelect dropdown */}
                 <ProjectSelect 
                   clientId={client.id}
                   activeProjects={client.active_projects}
