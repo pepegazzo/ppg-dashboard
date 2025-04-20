@@ -186,9 +186,6 @@ const Clients = () => {
                               <Badge variant="secondary" className="group-hover:bg-secondary/70">
                                 {project.name}
                               </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {project.status}
-                              </span>
                             </div>
                           </Link>
                         ))}
