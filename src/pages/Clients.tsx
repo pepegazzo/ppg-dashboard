@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Briefcase, Mail, Phone } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import InlineEdit from "@/components/clients/InlineEdit";
 
 interface Project {
   id: string;
@@ -28,6 +29,9 @@ interface Client {
 }
 
 const Clients = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
@@ -49,6 +53,29 @@ const Clients = () => {
       }));
     }
   });
+
+  const updateClient = async (clientId: string, updates: Partial<Client>) => {
+    const { error } = await supabase
+      .from('clients')
+      .update(updates)
+      .eq('id', clientId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update client information"
+      });
+      throw error;
+    }
+
+    toast({
+      title: "Success",
+      description: "Client information updated"
+    });
+
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+  };
 
   if (isLoading) {
     return (
@@ -95,29 +122,55 @@ const Clients = () => {
               <TableBody>
                 {clients?.map((client) => (
                   <TableRow key={client.id}>
-                    <TableCell className="font-medium">{client.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <InlineEdit
+                        value={client.name}
+                        onSave={async (value) => {
+                          await updateClient(client.id, { name: value });
+                        }}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5">
                           <Briefcase className="h-4 w-4 text-muted-foreground" />
-                          <span>{client.company}</span>
+                          <InlineEdit
+                            value={client.company}
+                            onSave={async (value) => {
+                              await updateClient(client.id, { company: value });
+                            }}
+                          />
                         </div>
-                        <span className="text-sm text-muted-foreground">{client.role}</span>
+                        <InlineEdit
+                          value={client.role}
+                          onSave={async (value) => {
+                            await updateClient(client.id, { role: value });
+                          }}
+                          className="text-sm text-muted-foreground"
+                        />
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5">
                           <Mail className="h-4 w-4 text-muted-foreground" />
-                          <a href={`mailto:${client.email}`} className="text-amber-600 hover:text-amber-700">
-                            {client.email}
-                          </a>
+                          <InlineEdit
+                            value={client.email}
+                            onSave={async (value) => {
+                              await updateClient(client.id, { email: value });
+                            }}
+                            className="text-amber-600 hover:text-amber-700"
+                          />
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Phone className="h-4 w-4 text-muted-foreground" />
-                          <a href={`tel:${client.phone}`} className="text-amber-600 hover:text-amber-700">
-                            {client.phone}
-                          </a>
+                          <InlineEdit
+                            value={client.phone}
+                            onSave={async (value) => {
+                              await updateClient(client.id, { phone: value });
+                            }}
+                            className="text-amber-600 hover:text-amber-700"
+                          />
                         </div>
                       </div>
                     </TableCell>
