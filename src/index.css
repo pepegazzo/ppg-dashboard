@@ -90,4 +90,20 @@
   .bg-sidebar {
     @apply bg-zinc-900/90 backdrop-blur-md;
   }
+  
+  .app-table {
+    @apply w-full text-sm border rounded-lg overflow-hidden;
+  }
+  
+  .app-table-row {
+    @apply border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted;
+  }
+  
+  .app-table-cell {
+    @apply p-4 align-middle;
+  }
+  
+  .app-table-head {
+    @apply h-10 px-4 text-left align-middle font-medium text-muted-foreground;
+  }
 }

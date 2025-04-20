@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -380,34 +381,38 @@ const Clients = () => {
                   </Button>
                 </div>
               )}
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <Table>
+              
+              <div className="relative w-full">
+                <Table className="w-full caption-bottom text-sm border rounded-lg">
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
+                    <TableRow className="border-b hover:bg-muted/30 data-[state=selected]:bg-muted">
+                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground w-[50px]">
                         <Checkbox 
                           checked={clients?.length > 0 && selectedClients.length === clients?.length}
                           onCheckedChange={handleSelectAll}
                           aria-label="Select all clients"
                         />
                       </TableHead>
-                      <TableHead className="font-medium">Name</TableHead>
-                      <TableHead className="font-medium">Company & Role</TableHead>
-                      <TableHead className="font-medium">Contact</TableHead>
-                      <TableHead className="font-medium">Active Projects</TableHead>
+                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Name</TableHead>
+                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Company & Role</TableHead>
+                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Contact</TableHead>
+                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Active Projects</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {clients?.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell>
+                      <TableRow 
+                        key={client.id} 
+                        className="border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted"
+                      >
+                        <TableCell className="p-4 align-middle">
                           <Checkbox 
                             checked={selectedClients.includes(client.id)}
                             onCheckedChange={() => toggleClientSelection(client.id)}
                             aria-label={`Select client ${client.name}`}
                           />
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="p-4 align-middle font-medium">
                           <InlineEdit
                             value={client.name}
                             onSave={async (value) => {
@@ -415,7 +420,7 @@ const Clients = () => {
                             }}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="p-4 align-middle">
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1.5">
                               <Briefcase className="h-4 w-4 text-muted-foreground" />
@@ -435,7 +440,7 @@ const Clients = () => {
                             />
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="p-4 align-middle">
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1.5">
                               <Mail className="h-4 w-4 text-muted-foreground" />
@@ -457,7 +462,7 @@ const Clients = () => {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="p-4 align-middle">
                           <div className="flex flex-col gap-2">
                             {client.active_projects && client.active_projects.length > 0 ? (
                               client.active_projects.map(project => (
