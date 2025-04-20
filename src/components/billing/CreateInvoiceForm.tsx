@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,6 @@ export function CreateInvoiceForm({ onSuccess }: CreateInvoiceFormProps) {
   };
 
   useEffect(() => {
-    // Generate random invoice number when dialog opens
     if (open) {
       setInvoiceData(prev => ({
         ...prev,
@@ -101,13 +99,11 @@ export function CreateInvoiceForm({ onSuccess }: CreateInvoiceFormProps) {
         throw error;
       }
       
-      // Update project revenue after creating invoice
       await updateProjectRevenue(invoiceData.project_id);
       
       toast.success('Invoice created successfully');
       setOpen(false);
       
-      // Reset form
       setInvoiceData({
         invoice_number: "",
         project_id: "",
@@ -118,7 +114,6 @@ export function CreateInvoiceForm({ onSuccess }: CreateInvoiceFormProps) {
         description: ""
       });
       
-      // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess();
       }
@@ -150,8 +145,8 @@ export function CreateInvoiceForm({ onSuccess }: CreateInvoiceFormProps) {
                 id="invoice_number"
                 name="invoice_number"
                 value={invoiceData.invoice_number}
-                onChange={handleInputChange}
-                required
+                readOnly
+                className="bg-muted"
               />
             </div>
             <div className="space-y-2">
