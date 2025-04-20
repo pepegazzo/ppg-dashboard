@@ -2,7 +2,7 @@
 export interface Project {
   id: string;
   name: string;
-  status?: 'Onboarding' | 'Active' | 'Completed';
+  status?: 'Onboarding' | 'Active' | 'Completed' | 'Cancelled';
 }
 
 export interface ClientProjectAssignment {
