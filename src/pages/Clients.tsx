@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,12 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone, PlusCircle } from "lucide-react";
-import { Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InlineEdit from "@/components/clients/InlineEdit";
 import ClientModal from "@/components/clients/ClientModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Project {
   id: string;
@@ -35,6 +43,9 @@ const Clients = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedClients, setSelectedClients] = useState<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
@@ -60,7 +71,6 @@ const Clients = () => {
 
   const updateClient = async (clientId: string, updates: Partial<Client>) => {
     try {
-      // First update the client record
       const { error: clientUpdateError } = await supabase
         .from('clients')
         .update(updates)
@@ -75,7 +85,6 @@ const Clients = () => {
         throw clientUpdateError;
       }
 
-      // If we're updating the client name, also update any projects associated with this client
       if (updates.name) {
         const { error: projectsUpdateError } = await supabase
           .from('projects')
@@ -84,8 +93,6 @@ const Clients = () => {
 
         if (projectsUpdateError) {
           console.error("Error updating associated projects:", projectsUpdateError);
-          // We don't throw here to avoid failing the entire operation
-          // but we do notify the user
           toast({
             variant: "destructive",
             title: "Warning",
@@ -99,7 +106,6 @@ const Clients = () => {
         description: "Client information updated"
       });
 
-      // Invalidate both clients and projects queries to refresh all relevant data
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
@@ -136,7 +142,6 @@ const Clients = () => {
         description: "New client created"
       });
       
-      // Invalidate the clients query to refetch
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       
       setIsModalOpen(false);
@@ -144,6 +149,62 @@ const Clients = () => {
       console.error("Error in createClient:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedClients.length === clients?.length) {
+      setSelectedClients([]);
+    } else {
+      setSelectedClients(clients?.map(client => client.id) || []);
+    }
+  };
+
+  const toggleClientSelection = (clientId: string) => {
+    setSelectedClients(prev => {
+      if (prev.includes(clientId)) {
+        return prev.filter(id => id !== clientId);
+      } else {
+        return [...prev, clientId];
+      }
+    });
+  };
+
+  const deleteSelectedClients = async () => {
+    try {
+      setIsDeleting(true);
+      
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .in('id', selectedClients);
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error deleting clients",
+          description: error.message || "Please try again later.",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Success",
+        description: `${selectedClients.length} client(s) deleted successfully`,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      setSelectedClients([]);
+    } catch (error) {
+      console.error("Error in deleteSelectedClients:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while deleting clients",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -182,10 +243,42 @@ const Clients = () => {
         </div>
 
         <Card>
+          {selectedClients.length > 0 && (
+            <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+              <span className="text-sm">
+                {selectedClients.length} client{selectedClients.length !== 1 ? 's' : ''} selected
+              </span>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => setShowDeleteModal(true)} 
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Selected
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox 
+                      checked={clients?.length > 0 && selectedClients.length === clients?.length}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all clients"
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Company & Role</TableHead>
                   <TableHead>Contact</TableHead>
@@ -195,6 +288,13 @@ const Clients = () => {
               <TableBody>
                 {clients?.map((client) => (
                   <TableRow key={client.id}>
+                    <TableCell>
+                      <Checkbox 
+                        checked={selectedClients.includes(client.id)}
+                        onCheckedChange={() => toggleClientSelection(client.id)}
+                        aria-label={`Select client ${client.name}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       <InlineEdit
                         value={client.name}
@@ -281,6 +381,33 @@ const Clients = () => {
           onSubmit={createClient}
           isSubmitting={isSubmitting}
         />
+
+        <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {selectedClients.length > 1 ? 'Clients' : 'Client'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {selectedClients.length === 1 ? 'this client' : `these ${selectedClients.length} clients`}? 
+                This action cannot be undone and all associated data will be permanently removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={deleteSelectedClients}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );
