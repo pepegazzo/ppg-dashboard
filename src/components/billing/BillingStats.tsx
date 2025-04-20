@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, Clock, CheckCircle, AlertCircle, BarChart2, Zap } from "lucide-react";
+import { DollarSign, CheckCircle, AlertCircle, BarChart2, Zap } from "lucide-react";
 
 interface BillingStats {
   totalInvoiced: number;
   totalPaid: number;
   totalPending: number;
   totalOverdue: number;
-  totalProjectRevenue: number;
+  totalProjectedRevenue: number;
   uninvoicedRevenue: number;
 }
 
@@ -31,34 +31,31 @@ export function BillingStats() {
       
       if (projectsError) throw projectsError;
 
-      // Calculate stats
       const result: BillingStats = {
         totalInvoiced: 0,
         totalPaid: 0,
         totalPending: 0,
         totalOverdue: 0,
-        totalProjectRevenue: 0,
+        totalProjectedRevenue: 0,
         uninvoicedRevenue: 0
       };
 
-      // Calculate total project revenue
+      // Calculate total projected revenue and uninvoiced revenue
       projects?.forEach(project => {
         if (project.revenue) {
-          result.totalProjectRevenue += Number(project.revenue);
+          const projectRevenue = Number(project.revenue);
+          result.totalProjectedRevenue += projectRevenue;
         }
       });
 
-      // Track projects that have invoices
+      // Track invoiced projects and calculate invoice stats
       const invoicedProjectIds = new Set<string>();
 
-      // Calculate invoice stats
       invoices?.forEach(invoice => {
         const amount = Number(invoice.amount);
         
-        // Add to total invoiced
         result.totalInvoiced += amount;
         
-        // Add to respective status total
         switch (invoice.status.toLowerCase()) {
           case 'paid':
             result.totalPaid += amount;
@@ -71,13 +68,12 @@ export function BillingStats() {
             break;
         }
 
-        // Track which projects have invoices
         if (invoice.project_id) {
           invoicedProjectIds.add(invoice.project_id);
         }
       });
 
-      // Calculate uninvoiced revenue
+      // Calculate true uninvoiced revenue
       projects?.forEach(project => {
         if (project.revenue && !invoicedProjectIds.has(project.id)) {
           result.uninvoicedRevenue += Number(project.revenue);
@@ -97,7 +93,7 @@ export function BillingStats() {
         description="Total amount invoiced" 
         icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
         isLoading={isLoading}
-        className="lg:col-span-1"
+        className="lg:col-span-2"
       />
       <StatsCard 
         title="Paid" 
@@ -106,16 +102,7 @@ export function BillingStats() {
         icon={<CheckCircle className="h-5 w-5 text-green-500" />}
         isLoading={isLoading}
         color="text-green-600"
-        className="lg:col-span-1"
-      />
-      <StatsCard 
-        title="Pending" 
-        value={stats?.totalPending ?? 0} 
-        description="Amount pending payment" 
-        icon={<Clock className="h-5 w-5 text-amber-500" />}
-        isLoading={isLoading}
-        color="text-amber-600"
-        className="lg:col-span-1"
+        className="lg:col-span-2"
       />
       <StatsCard 
         title="Overdue" 
@@ -124,25 +111,25 @@ export function BillingStats() {
         icon={<AlertCircle className="h-5 w-5 text-red-500" />}
         isLoading={isLoading}
         color="text-red-600"
-        className="lg:col-span-1"
+        className="lg:col-span-2"
       />
       <StatsCard 
-        title="Total Project Revenue" 
-        value={stats?.totalProjectRevenue ?? 0} 
-        description="Sum of all project revenues" 
+        title="Projected Revenue" 
+        value={stats?.totalProjectedRevenue ?? 0} 
+        description="Total expected project revenue" 
         icon={<BarChart2 className="h-5 w-5 text-blue-500" />}
         isLoading={isLoading}
         color="text-blue-600"
-        className="lg:col-span-1"
+        className="lg:col-span-3"
       />
       <StatsCard 
         title="Uninvoiced Revenue" 
         value={stats?.uninvoicedRevenue ?? 0} 
-        description="Revenue not yet invoiced" 
+        description="Projects not yet invoiced" 
         icon={<Zap className="h-5 w-5 text-purple-500" />}
         isLoading={isLoading}
         color="text-purple-600"
-        className="lg:col-span-1"
+        className="lg:col-span-3"
       />
     </div>
   );
