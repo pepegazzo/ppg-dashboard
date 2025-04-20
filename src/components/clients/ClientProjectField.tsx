@@ -32,11 +32,17 @@ export default function ClientProjectField({
   const { data: availableProjects } = useQuery({
     queryKey: ['available-projects', clientId],
     queryFn: async () => {
-      // Get all projects that don't already have this client assigned
+      const { data: activeProjectIds } = await supabase
+        .from('client_active_projects')
+        .select('project_id')
+        .eq('client_id', clientId);
+
+      const excludedIds = activeProjectIds?.map(p => p.project_id) || [];
+      
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name, client_id')
-        .is('client_id', null)
+        .select('id, name')
+        .not('id', 'in', excludedIds)
         .order('name');
       
       if (error) throw error;
@@ -44,24 +50,22 @@ export default function ClientProjectField({
     }
   });
 
-  const assignClientToProject = async (projectId: string, projectName: string) => {
+  const assignProjectToClient = async (projectId: string, projectName: string) => {
     try {
       setIsUpdating(true);
       
-      // Update the project with the client info
       const { error } = await supabase
-        .from('projects')
-        .update({ 
+        .from('client_active_projects')
+        .insert({ 
           client_id: clientId,
-          client_name: clientName
-        })
-        .eq('id', projectId);
+          project_id: projectId
+        });
       
       if (error) throw error;
       
       toast({
-        title: "Client assigned to project",
-        description: `${clientName} has been assigned to ${projectName}`,
+        title: "Project assigned",
+        description: `${projectName} has been added to ${clientName}'s active projects`,
       });
       
       // Refresh data
@@ -69,10 +73,10 @@ export default function ClientProjectField({
       queryClient.invalidateQueries({ queryKey: ['available-projects', clientId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
-      console.error("Error assigning client to project:", error);
+      console.error("Error assigning project to client:", error);
       toast({
         title: "Error",
-        description: "Failed to assign client to project",
+        description: "Failed to assign project to client",
         variant: "destructive",
       });
     } finally {
@@ -108,7 +112,7 @@ export default function ClientProjectField({
         {availableProjects.map((project) => (
           <DropdownMenuItem 
             key={project.id}
-            onClick={() => assignClientToProject(project.id, project.name)}
+            onClick={() => assignProjectToClient(project.id, project.name)}
             className="cursor-pointer"
           >
             <Check className="h-4 w-4 mr-2 opacity-0" />
