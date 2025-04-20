@@ -50,19 +50,18 @@ const Clients = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Add new filter states
   const [nameFilter, setNameFilter] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState("all");
   
   const resetFilters = () => {
     setNameFilter("");
     setCompanyFilter("");
-    setRoleFilter("all");
+    setProjectFilter("all");
   };
   
   const { data: clients, isLoading, error } = useQuery({
-    queryKey: ['clients', nameFilter, companyFilter, roleFilter],
+    queryKey: ['clients', nameFilter, companyFilter, projectFilter],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('clients')
@@ -81,7 +80,6 @@ const Clients = () => {
         ) : []
       }));
 
-      // Apply filters
       if (nameFilter) {
         filteredData = filteredData.filter(client => 
           client.name.toLowerCase().includes(nameFilter.toLowerCase())
@@ -94,10 +92,15 @@ const Clients = () => {
         );
       }
 
-      if (roleFilter !== 'all') {
-        filteredData = filteredData.filter(client => 
-          client.role === roleFilter
-        );
+      if (projectFilter !== 'all') {
+        filteredData = filteredData.filter(client => {
+          if (projectFilter === 'none') {
+            return !client.active_projects || client.active_projects.length === 0;
+          }
+          return client.active_projects?.some(project => 
+            project.status.toLowerCase() === projectFilter.toLowerCase()
+          );
+        });
       }
 
       return filteredData;
@@ -298,8 +301,8 @@ const Clients = () => {
               setNameFilter={setNameFilter}
               companyFilter={companyFilter}
               setCompanyFilter={setCompanyFilter}
-              roleFilter={roleFilter}
-              setRoleFilter={setRoleFilter}
+              projectFilter={projectFilter}
+              setProjectFilter={setProjectFilter}
               resetFilters={resetFilters}
             />
             

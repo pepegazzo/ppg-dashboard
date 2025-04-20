@@ -15,8 +15,8 @@ interface ClientFilterProps {
   setNameFilter: (value: string) => void;
   companyFilter: string;
   setCompanyFilter: (value: string) => void;
-  roleFilter: string;
-  setRoleFilter: (value: string) => void;
+  projectFilter: string;
+  setProjectFilter: (value: string) => void;
   resetFilters: () => void;
 }
 
@@ -25,8 +25,8 @@ export function ClientFilter({
   setNameFilter,
   companyFilter,
   setCompanyFilter,
-  roleFilter,
-  setRoleFilter,
+  projectFilter,
+  setProjectFilter,
   resetFilters,
 }: ClientFilterProps) {
   return (
@@ -50,17 +50,16 @@ export function ClientFilter({
         />
       </div>
       <div className="w-[180px]">
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
+        <Select value={projectFilter} onValueChange={setProjectFilter}>
           <SelectTrigger>
-            <SelectValue placeholder="Role" />
+            <SelectValue placeholder="Project" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="CEO">CEO</SelectItem>
-            <SelectItem value="Manager">Manager</SelectItem>
-            <SelectItem value="Director">Director</SelectItem>
-            <SelectItem value="Developer">Developer</SelectItem>
-            <SelectItem value="Designer">Designer</SelectItem>
+            <SelectItem value="all">All Projects</SelectItem>
+            <SelectItem value="active">Active Projects</SelectItem>
+            <SelectItem value="onboarding">Onboarding</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="none">No Projects</SelectItem>
           </SelectContent>
         </Select>
       </div>
