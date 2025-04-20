@@ -3,34 +3,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import InlineEdit from "@/components/clients/InlineEdit";
-import ClientModal from "@/components/clients/ClientModal";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Link } from "react-router-dom";
 import { EmptyState } from "@/components/clients/EmptyState";
 import { ClientFilter } from "@/components/clients/ClientFilter";
-import ClientProjectField from "@/components/clients/ClientProjectField";
-
-interface Project {
-  id: string;
-  name: string;
-  status?: 'Onboarding' | 'Active' | 'Completed';
-}
-
-interface Client {
-  id: string;
-  name: string;
-  company: string;
-  role: string;
-  email: string;
-  phone: string;
-  active_projects: Project[] | null;
-}
+import { ClientsTable } from "@/components/clients/ClientsTable";
+import { SelectedClientsActions } from "@/components/clients/SelectedClientsActions";
+import ClientModal from "@/components/clients/ClientModal";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Client } from "@/types/clients";
 
 const Clients = () => {
   const {
@@ -226,14 +207,6 @@ const Clients = () => {
     }
   };
 
-  const handleSelectAll = () => {
-    if (selectedClients.length === filteredAndSortedClients?.length) {
-      setSelectedClients([]);
-    } else {
-      setSelectedClients(filteredAndSortedClients?.map(client => client.id) || []);
-    }
-  };
-
   const toggleClientSelection = (clientId: string) => {
     setSelectedClients(prev => {
       if (prev.includes(clientId)) {
@@ -242,6 +215,14 @@ const Clients = () => {
         return [...prev, clientId];
       }
     });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedClients.length === filteredAndSortedClients?.length) {
+      setSelectedClients([]);
+    } else {
+      setSelectedClients(filteredAndSortedClients?.map(client => client.id) || []);
+    }
   };
 
   const deleteSelectedClients = async () => {
@@ -301,20 +282,25 @@ const Clients = () => {
   };
 
   if (isLoading) {
-    return <DashboardLayout>
+    return (
+      <DashboardLayout>
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      </DashboardLayout>;
+      </DashboardLayout>
+    );
   }
 
   if (error) {
-    return <DashboardLayout>
+    return (
+      <DashboardLayout>
         <div className="text-red-500">Error loading clients</div>
-      </DashboardLayout>;
+      </DashboardLayout>
+    );
   }
 
-  return <DashboardLayout>
+  return (
+    <DashboardLayout>
       <div className="animate-fade-in">
         <div className="flex flex-col gap-2 mb-8">
           <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
@@ -334,160 +320,66 @@ const Clients = () => {
           </div>
         </div>
 
-        {filteredAndSortedClients && filteredAndSortedClients.length === 0 ? <EmptyState setIsCreating={() => setIsModalOpen(true)} handleRefreshClients={() => queryClient.invalidateQueries({
-        queryKey: ['clients']
-      })} testCreateClient={async () => {
-        await createClient({
-          name: "Test Client",
-          company: "Test Company",
-          role: "Test Role",
-          email: "test@example.com",
-          phone: "123-456-7890"
-        });
-      }} /> : <>
-            <ClientFilter nameFilter={nameFilter} setNameFilter={setNameFilter} companyFilter={companyFilter} setCompanyFilter={setCompanyFilter} projectFilter={projectFilter} setProjectFilter={setProjectFilter} projects={allProjects} resetFilters={resetFilters} />
+        {filteredAndSortedClients && filteredAndSortedClients.length === 0 ? (
+          <EmptyState 
+            setIsCreating={() => setIsModalOpen(true)} 
+            handleRefreshClients={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
+            testCreateClient={async () => {
+              await createClient({
+                name: "Test Client",
+                company: "Test Company",
+                role: "Test Role",
+                email: "test@example.com",
+                phone: "123-456-7890"
+              });
+            }} 
+          />
+        ) : (
+          <>
+            <ClientFilter 
+              nameFilter={nameFilter}
+              setNameFilter={setNameFilter}
+              companyFilter={companyFilter}
+              setCompanyFilter={setCompanyFilter}
+              projectFilter={projectFilter}
+              setProjectFilter={setProjectFilter}
+              projects={allProjects}
+              resetFilters={resetFilters}
+            />
             
             <div className="space-y-4">
-              {selectedClients.length > 0 && <div className="p-2 bg-muted rounded-md flex items-center justify-between">
-                  <span className="text-sm">
-                    {selectedClients.length} client{selectedClients.length !== 1 ? 's' : ''} selected
-                  </span>
-                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteModal(true)} disabled={isDeleting}>
-                    {isDeleting ? <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Deleting...
-                      </> : <>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Selected
-                      </>}
-                  </Button>
-                </div>}
+              <SelectedClientsActions 
+                selectedCount={selectedClients.length}
+                isDeleting={isDeleting}
+                onDelete={() => setShowDeleteModal(true)}
+              />
               
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/50 hover:bg-muted/50">
-                      <TableHead className="w-[50px]">
-                        <Checkbox 
-                          checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
-                          onCheckedChange={handleSelectAll} 
-                          aria-label="Select all clients" 
-                        />
-                      </TableHead>
-                      <TableHead 
-                        className="w-[220px] cursor-pointer"
-                        onClick={() => handleSort('name')}
-                      >
-                        Name {renderSortIndicator('name')}
-                      </TableHead>
-                      <TableHead 
-                        className="w-[180px] cursor-pointer"
-                        onClick={() => handleSort('company')}
-                      >
-                        Company & Role {renderSortIndicator('company')}
-                      </TableHead>
-                      <TableHead 
-                        className="w-[120px] cursor-pointer"
-                        onClick={() => handleSort('email')}
-                      >
-                        Contact {renderSortIndicator('email')}
-                      </TableHead>
-                      <TableHead 
-                        onClick={() => handleSort('active_projects')} 
-                        className="w-[200px] cursor-pointer"
-                      >
-                        Active Projects {renderSortIndicator('active_projects')}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAndSortedClients?.map(client => <TableRow key={client.id} className="border-b">
-                        <TableCell>
-                          <Checkbox checked={selectedClients.includes(client.id)} onCheckedChange={() => toggleClientSelection(client.id)} aria-label={`Select client ${client.name}`} />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          <InlineEdit value={client.name} onSave={async value => {
-                      await updateClient(client.id, {
-                        name: value
-                      });
-                    }} />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <Briefcase className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit value={client.company} onSave={async value => {
-                          await updateClient(client.id, {
-                            company: value
-                          });
-                        }} />
-                            </div>
-                            <InlineEdit value={client.role} onSave={async value => {
-                        await updateClient(client.id, {
-                          role: value
-                        });
-                      }} className="text-sm text-muted-foreground" />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit value={client.email} onSave={async value => {
-                          await updateClient(client.id, {
-                            email: value
-                          });
-                        }} />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit value={client.phone} onSave={async value => {
-                          await updateClient(client.id, {
-                            phone: value
-                          });
-                        }} />
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-2">
-                            {client.active_projects && client.active_projects.length > 0 ? (
-                              <div className="flex flex-col gap-1">
-                                {client.active_projects.map(project => (
-                                  <Link key={project.id} to={`/projects?project=${project.id}`} className="group">
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="secondary" className="group-hover:bg-secondary/70">
-                                        {project.name}
-                                      </Badge>
-                                    </div>
-                                  </Link>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-sm text-muted-foreground flex items-center">
-                                No active projects
-                                <ClientProjectField 
-                                  clientId={client.id} 
-                                  clientName={client.name} 
-                                  activeProjects={client.active_projects} 
-                                />
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>)}
-                  </TableBody>
-                </Table>
-              </div>
+              <ClientsTable 
+                filteredAndSortedClients={filteredAndSortedClients}
+                selectedClients={selectedClients}
+                toggleClientSelection={toggleClientSelection}
+                handleSelectAll={handleSelectAll}
+                updateClient={updateClient}
+                handleSort={handleSort}
+                sortConfig={sortConfig}
+              />
             </div>
-          </>}
+          </>
+        )}
         
-        <ClientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={createClient} isSubmitting={isSubmitting} />
+        <ClientModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onSubmit={createClient} 
+          isSubmitting={isSubmitting} 
+        />
 
         <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete {selectedClients.length > 1 ? 'Clients' : 'Client'}</AlertDialogTitle>
+              <AlertDialogTitle>
+                Delete {selectedClients.length > 1 ? 'Clients' : 'Client'}
+              </AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete {selectedClients.length === 1 ? 'this client' : `these ${selectedClients.length} clients`}? 
                 This action cannot be undone and all associated data will be permanently removed.
@@ -495,17 +387,24 @@ const Clients = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={deleteSelectedClients} disabled={isDeleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                {isDeleting ? <>
+              <AlertDialogAction 
+                onClick={deleteSelectedClients} 
+                disabled={isDeleting} 
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? (
+                  <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Deleting...
-                  </> : 'Delete'}
+                  </>
+                ) : 'Delete'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
 
 export default Clients;
