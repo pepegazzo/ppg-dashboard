@@ -26,6 +26,8 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // We'll only fetch the data but not display it again in this component
+  // since it's already shown in the parent component
   const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
     queryKey: ['client-assigned-projects', clientId],
     queryFn: async () => {
@@ -234,47 +236,12 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-auto p-0 font-normal hover:bg-transparent"
+            className="h-7 p-1 font-normal hover:bg-transparent"
             disabled={isUpdating}
           >
-            <div className="flex flex-wrap gap-2">
-              {assignedProjects && assignedProjects.length > 0 ? (
-                assignedProjects.map((project: any) => (
-                  <Badge 
-                    key={project.id} 
-                    variant="secondary"
-                    className="flex items-center gap-1 py-1 pr-1"
-                  >
-                    {project.name}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 rounded-full ml-1 hover:bg-red-100"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeProjectFromClient(project.id, project.name);
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                            <span className="sr-only">Remove</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Remove project</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-sm text-muted-foreground cursor-pointer">
-                  Click to assign projects
-                </span>
-              )}
-            </div>
+            <span className="text-xs text-muted-foreground cursor-pointer">
+              + Add Project
+            </span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-2" align="start">

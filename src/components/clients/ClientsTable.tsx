@@ -181,4 +181,3 @@ export const ClientsTable = ({
     </div>
   );
 };
-
