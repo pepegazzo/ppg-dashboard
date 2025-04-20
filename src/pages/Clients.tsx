@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Link } from "react-router-dom";
 import { EmptyState } from "@/components/clients/EmptyState";
 import { ClientFilter } from "@/components/clients/ClientFilter";
+import ClientProjectField from "@/components/clients/ClientProjectField";
 
 interface Project {
   id: string;
@@ -333,7 +334,7 @@ const Clients = () => {
                       <TableHead className="w-[220px]">Name</TableHead>
                       <TableHead className="w-[180px]">Company & Role</TableHead>
                       <TableHead className="w-[120px]">Contact</TableHead>
-                      <TableHead className="w-[130px]">Active Projects</TableHead>
+                      <TableHead className="w-[200px]">Active Projects</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -387,13 +388,28 @@ const Clients = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-2">
-                            {client.active_projects && client.active_projects.length > 0 ? client.active_projects.map(project => <Link key={project.id} to={`/projects?project=${project.id}`} className="group">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="group-hover:bg-secondary/70">
-                                      {project.name}
-                                    </Badge>
-                                  </div>
-                                </Link>) : <span className="text-sm text-muted-foreground">No active projects</span>}
+                            {client.active_projects && client.active_projects.length > 0 ? (
+                              <div className="flex flex-col gap-1">
+                                {client.active_projects.map(project => (
+                                  <Link key={project.id} to={`/projects?project=${project.id}`} className="group">
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="secondary" className="group-hover:bg-secondary/70">
+                                        {project.name}
+                                      </Badge>
+                                    </div>
+                                  </Link>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground flex items-center">
+                                No active projects
+                                <ClientProjectField 
+                                  clientId={client.id} 
+                                  clientName={client.name} 
+                                  activeProjects={client.active_projects} 
+                                />
+                              </span>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>)}

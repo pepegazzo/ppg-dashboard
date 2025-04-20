@@ -11,7 +11,7 @@ interface ProjectClientFieldProps {
 }
 
 export function ProjectClientField({ control }: ProjectClientFieldProps) {
-  const { data: clients } = useQuery({
+  const { data: clients, isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -35,6 +35,7 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
             <Select 
               onValueChange={field.onChange} 
               value={field.value || ''} 
+              disabled={isLoading}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a client (optional)" />
