@@ -46,12 +46,35 @@ export function ProjectPackageCell({
   const handleSelectPackage = async (packageId: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase
-        .from('projects')
-        .update({ package: packageId })
-        .eq('id', projectId);
-
-      if (error) throw error;
+      
+      // First, check if a project_package relation already exists
+      const { data: existingRelation, error: relationError } = await supabase
+        .from('project_packages')
+        .select('id')
+        .eq('project_id', projectId)
+        .maybeSingle();
+        
+      if (relationError) throw relationError;
+      
+      if (existingRelation) {
+        // Update the existing relation
+        const { error: updateError } = await supabase
+          .from('project_packages')
+          .update({ package_id: packageId })
+          .eq('id', existingRelation.id);
+          
+        if (updateError) throw updateError;
+      } else {
+        // Create a new relation
+        const { error: insertError } = await supabase
+          .from('project_packages')
+          .insert({
+            project_id: projectId,
+            package_id: packageId
+          });
+          
+        if (insertError) throw insertError;
+      }
       
       setIsOpen(false);
       if (onUpdatePackage) {
