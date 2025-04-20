@@ -228,9 +228,34 @@ const Clients = () => {
   const deleteSelectedClients = async () => {
     try {
       setIsDeleting(true);
-      const {
-        error
-      } = await supabase.from('clients').delete().in('id', selectedClients);
+      
+      // First, remove client_id references from any projects linked to these clients
+      for (const clientId of selectedClients) {
+        const { error: projectsUpdateError } = await supabase
+          .from('projects')
+          .update({ 
+            client_id: null,
+            client_name: 'No Client' 
+          })
+          .eq('client_id', clientId);
+          
+        if (projectsUpdateError) {
+          console.error('Error removing client reference from projects:', projectsUpdateError);
+          toast({
+            variant: "destructive",
+            title: "Error updating projects",
+            description: projectsUpdateError.message || "Please try again later."
+          });
+          return;
+        }
+      }
+      
+      // Now that the foreign key constraints are addressed, delete the clients
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .in('id', selectedClients);
+        
       if (error) {
         toast({
           variant: "destructive",
@@ -239,12 +264,16 @@ const Clients = () => {
         });
         return;
       }
+      
       toast({
         title: "Success",
         description: `${selectedClients.length} client(s) deleted successfully`
       });
       queryClient.invalidateQueries({
         queryKey: ['clients']
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['projects']
       });
       setSelectedClients([]);
     } catch (error) {
@@ -382,7 +411,10 @@ const Clients = () => {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete {selectedClients.length === 1 ? 'this client' : `these ${selectedClients.length} clients`}? 
-                This action cannot be undone and all associated data will be permanently removed.
+                This action cannot be undone and all client data will be permanently removed.
+                <p className="mt-2 font-medium">
+                  Note: Any projects associated with {selectedClients.length === 1 ? 'this client' : 'these clients'} will be preserved, but they will no longer have a client assigned.
+                </p>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
