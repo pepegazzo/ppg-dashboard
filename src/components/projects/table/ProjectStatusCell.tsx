@@ -32,6 +32,8 @@ export function ProjectStatusCell({
         return 'bg-emerald-100 text-emerald-800';
       case 'Completed':
         return 'bg-purple-100 text-purple-800';
+      case 'Cancelled':
+        return 'bg-red-100 text-red-800';
       default:
         return 'bg-slate-100 text-slate-800';
     }
@@ -122,6 +124,15 @@ export function ProjectStatusCell({
             disabled={updatingProjectId === project.id}
           >
             <Badge className={getStatusColor('Completed')}>Completed</Badge>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`justify-start ${localStatus === 'Cancelled' ? 'bg-blue-50' : ''}`} 
+            onClick={() => updateProjectStatus(project.id, 'Cancelled')} 
+            disabled={updatingProjectId === project.id}
+          >
+            <Badge className={getStatusColor('Cancelled')}>Cancelled</Badge>
           </Button>
         </div>
       </PopoverContent>
