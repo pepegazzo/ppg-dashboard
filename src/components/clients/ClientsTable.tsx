@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import InlineEdit from "./InlineEdit";
 import ClientProjectField from "./ClientProjectField";
+import { ProjectSelect } from "./ProjectSelect";
 import { Project, Client } from "@/types/clients";
 
 interface ClientsTableProps {
