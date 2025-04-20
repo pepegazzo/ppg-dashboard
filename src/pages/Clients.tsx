@@ -381,10 +381,10 @@ const Clients = () => {
                   </Button>
                 </div>
               )}
-              <div className="rounded-lg border shadow-sm">
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableRow className="border-b hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <TableHead className="w-[50px]">
                         <Checkbox 
                           checked={clients?.length > 0 && selectedClients.length === clients?.length}
@@ -400,7 +400,10 @@ const Clients = () => {
                   </TableHeader>
                   <TableBody>
                     {clients?.map((client) => (
-                      <TableRow key={client.id} className="hover:bg-muted/30 transition-colors">
+                      <TableRow 
+                        key={client.id} 
+                        className="border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted"
+                      >
                         <TableCell>
                           <Checkbox 
                             checked={selectedClients.includes(client.id)}
