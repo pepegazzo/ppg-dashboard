@@ -8,6 +8,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@/types/clients";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProjectSelectProps {
   clientId: string;
@@ -43,23 +49,35 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const { data: availableProjects, isLoading: isLoadingAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId],
     queryFn: async () => {
-      const { data: assignedIds } = await supabase
+      // Get the IDs of projects already assigned to this client
+      const { data: assignedIds, error: assignedError } = await supabase
         .from('client_project_assignments')
         .select('project_id')
         .eq('client_id', clientId);
       
+      if (assignedError) throw assignedError;
+      
+      // Convert to array of IDs or use a placeholder if empty
       const excludeIds = assignedIds?.map(item => item.project_id) || [];
       
-      const { data, error } = await supabase
+      // Fetch all projects that aren't already assigned to this client
+      let query = supabase
         .from('projects')
         .select('id, name')
-        .not('id', 'in', excludeIds.length > 0 ? excludeIds : ['00000000-0000-0000-0000-000000000000'])
         .order('name');
+        
+      // Only filter if there are projects to exclude
+      if (excludeIds.length > 0) {
+        query = query.not('id', 'in', excludeIds);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
+      console.log("Available projects for selection:", data);
       return data || [];
     },
-    enabled: !!assignedProjects
+    enabled: isPopoverOpen // Only fetch when popover is opened
   });
 
   const assignProjectToClient = async (projectId: string, projectName: string) => {
@@ -224,22 +242,31 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
                     className="flex items-center gap-1 py-1 pr-1"
                   >
                     {project.name}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5 rounded-full ml-1 hover:bg-red-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeProjectFromClient(project.id, project.name);
-                      }}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove</span>
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 rounded-full ml-1 hover:bg-red-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeProjectFromClient(project.id, project.name);
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Remove project</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </Badge>
                 ))
               ) : (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground cursor-pointer">
                   Click to assign projects
                 </span>
               )}
@@ -247,11 +274,11 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-2" align="start">
-          <div className="flex flex-col gap-1 min-w-[150px]">
+          <div className="flex flex-col gap-1 min-w-[200px]">
             {isLoadingAvailable ? (
               <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading...
+                Loading available projects...
               </div>
             ) : availableProjects && availableProjects.length > 0 ? (
               availableProjects.map((project) => (
@@ -268,7 +295,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
               ))
             ) : (
               <div className="text-sm text-muted-foreground p-2">
-                No available projects
+                No available projects to assign
               </div>
             )}
           </div>
