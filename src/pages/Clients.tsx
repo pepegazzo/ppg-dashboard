@@ -77,15 +77,6 @@ const Clients = () => {
     queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
 
-  const handleEmailClick = (email: string, event: React.MouseEvent) => {
-    // If clicking the mail icon, open mail client
-    if ((event.target as HTMLElement).closest('.mail-icon')) {
-      event.preventDefault();
-      window.location.href = `mailto:${email}`;
-    }
-    // Otherwise, the click will trigger the inline edit as normal
-  };
-
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -162,12 +153,7 @@ const Clients = () => {
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={(e) => handleEmailClick(client.email, e)}
-                            className="mail-icon hover:text-amber-600 transition-colors"
-                          >
-                            <Mail className="h-4 w-4 text-muted-foreground hover:text-amber-600" />
-                          </button>
+                          <Mail className="h-4 w-4 text-muted-foreground" />
                           <InlineEdit
                             value={client.email}
                             onSave={async (value) => {
