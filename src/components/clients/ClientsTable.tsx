@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -142,15 +143,6 @@ export const ClientsTable = ({
                 </div>
               </TableCell>
               <TableCell>
-                {client.active_projects && client.active_projects[0] ? (
-                  <Badge variant="secondary" className="mb-2">
-                    {client.active_projects[0].name}
-                  </Badge>
-                ) : (
-                  <div className="text-sm text-muted-foreground mb-2">
-                    No active project
-                  </div>
-                )}
                 <ProjectSelect 
                   clientId={client.id}
                   activeProject={client.active_projects?.[0] || null}
