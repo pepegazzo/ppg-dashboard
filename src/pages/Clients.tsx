@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,26 +56,52 @@ const Clients = () => {
   });
 
   const updateClient = async (clientId: string, updates: Partial<Client>) => {
-    const { error } = await supabase
-      .from('clients')
-      .update(updates)
-      .eq('id', clientId);
+    try {
+      // First update the client record
+      const { error: clientUpdateError } = await supabase
+        .from('clients')
+        .update(updates)
+        .eq('id', clientId);
 
-    if (error) {
+      if (clientUpdateError) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update client information"
+        });
+        throw clientUpdateError;
+      }
+
+      // If we're updating the client name, also update any projects associated with this client
+      if (updates.name) {
+        const { error: projectsUpdateError } = await supabase
+          .from('projects')
+          .update({ client_name: updates.name })
+          .eq('client_id', clientId);
+
+        if (projectsUpdateError) {
+          console.error("Error updating associated projects:", projectsUpdateError);
+          // We don't throw here to avoid failing the entire operation
+          // but we do notify the user
+          toast({
+            variant: "destructive",
+            title: "Warning",
+            description: "Client updated but failed to update associated projects"
+          });
+        }
+      }
+
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update client information"
+        title: "Success",
+        description: "Client information updated"
       });
-      throw error;
+
+      // Invalidate both clients and projects queries to refresh all relevant data
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    } catch (error) {
+      console.error("Error in updateClient:", error);
     }
-
-    toast({
-      title: "Success",
-      description: "Client information updated"
-    });
-
-    queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
 
   if (isLoading) {
