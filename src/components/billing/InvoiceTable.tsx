@@ -49,6 +49,8 @@ export function InvoiceTable() {
   const { data: invoices, isLoading, error } = useQuery({
     queryKey: ['invoices', sortBy, selectedStatus, searchQuery],
     queryFn: async () => {
+      console.log("Search query:", searchQuery); // Debug log
+      
       let query = supabase
         .from('invoices')
         .select(`
@@ -63,8 +65,12 @@ export function InvoiceTable() {
         query = query.eq('status', selectedStatus);
       }
 
-      if (searchQuery) {
-        query = query.or(`invoice_number.ilike.%${searchQuery}%,project.name.ilike.%${searchQuery}%,project.client_name.ilike.%${searchQuery}%`);
+      if (searchQuery && searchQuery.trim() !== '') {
+        // Fix: properly format the OR conditions and use parentheses to group them
+        query = query.or(
+          `invoice_number.ilike.%${searchQuery}%,` +
+          `description.ilike.%${searchQuery}%`
+        );
       }
       
       if (sortBy.field === 'project.name' || sortBy.field === 'project.client_name') {
@@ -75,12 +81,32 @@ export function InvoiceTable() {
       
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase query error:", error);
+        throw error;
+      }
       
-      let sortedData = [...(data as Invoice[])];
+      console.log("Raw data returned:", data); // Debug log
       
+      // First get all the data from Supabase
+      let filteredData = [...(data as Invoice[])];
+      
+      // Then manually filter for project and client fields if search query exists
+      if (searchQuery && searchQuery.trim() !== '') {
+        const lowerSearchQuery = searchQuery.toLowerCase();
+        filteredData = filteredData.filter(invoice => 
+          invoice.project?.name?.toLowerCase().includes(lowerSearchQuery) ||
+          invoice.project?.client_name?.toLowerCase().includes(lowerSearchQuery) ||
+          invoice.invoice_number.toLowerCase().includes(lowerSearchQuery) ||
+          (invoice.description && invoice.description.toLowerCase().includes(lowerSearchQuery))
+        );
+      }
+      
+      console.log("Filtered data:", filteredData.length); // Debug log
+      
+      // Sort the filtered data
       if (sortBy.field === 'project.name') {
-        sortedData.sort((a, b) => {
+        filteredData.sort((a, b) => {
           const aValue = a.project?.name || '';
           const bValue = b.project?.name || '';
           return sortBy.direction === 'asc' 
@@ -88,7 +114,7 @@ export function InvoiceTable() {
             : bValue.localeCompare(aValue);
         });
       } else if (sortBy.field === 'project.client_name') {
-        sortedData.sort((a, b) => {
+        filteredData.sort((a, b) => {
           const aValue = a.project?.client_name || '';
           const bValue = b.project?.client_name || '';
           return sortBy.direction === 'asc' 
@@ -97,7 +123,7 @@ export function InvoiceTable() {
         });
       }
       
-      return sortedData;
+      return filteredData;
     }
   });
 
@@ -317,4 +343,3 @@ export function InvoiceTable() {
     </div>
   );
 }
-
