@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
 
 interface Invoice {
   id: string;
@@ -31,6 +32,8 @@ interface Invoice {
 }
 
 export function InvoiceTable() {
+  const { toast } = useToast();
+  const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<{ field: keyof Invoice | 'project.name' | 'project.client_name'; direction: 'asc' | 'desc' }>({ 
     field: 'issue_date', 
     direction: 'desc'
@@ -96,6 +99,40 @@ export function InvoiceTable() {
     return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
   };
 
+  const updateInvoiceStatus = async (invoiceId: string, newStatus: string) => {
+    try {
+      setUpdatingInvoiceId(invoiceId);
+      const { data, error } = await supabase
+        .from('invoices')
+        .update({ status: newStatus })
+        .eq('id', invoiceId)
+        .select();
+
+      if (error) {
+        toast({
+          title: "Error updating status",
+          description: error.message || "Please try again later.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Status updated",
+        description: `Invoice status changed to ${newStatus}`
+      });
+    } catch (err) {
+      console.error('Error updating invoice status:', err);
+      toast({
+        title: "Error updating status",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setUpdatingInvoiceId(null);
+    }
+  };
+
   if (error) {
     return (
       <div className="bg-white border border-red-200 rounded-md p-4 text-center shadow-sm">
@@ -122,7 +159,7 @@ export function InvoiceTable() {
               Amount {renderSortIndicator('amount')}
             </TableHead>
             <TableHead onClick={() => toggleSort('status')} className="cursor-pointer">
-              Status {renderSortIndicator('status')}
+              Payment Status {renderSortIndicator('status')}
             </TableHead>
             <TableHead onClick={() => toggleSort('issue_date')} className="cursor-pointer">
               Issue Date {renderSortIndicator('issue_date')}
@@ -156,7 +193,59 @@ export function InvoiceTable() {
                     S/ {invoice.amount.toFixed(2)}
                   </Badge>
                 </TableCell>
-                <TableCell>{getStatusBadge(invoice.status)}</TableCell>
+                <TableCell>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+                        {updatingInvoiceId === invoice.id ? (
+                          <span className="flex items-center">
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            Updating...
+                          </span>
+                        ) : (
+                          getStatusBadge(invoice.status)
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2">
+                      <div className="flex flex-col gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`justify-start ${invoice.status === 'paid' ? 'bg-green-50' : ''}`}
+                          onClick={() => updateInvoiceStatus(invoice.id, 'paid')}
+                          disabled={updatingInvoiceId === invoice.id}
+                        >
+                          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" /> Paid
+                          </Badge>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`justify-start ${invoice.status === 'pending' ? 'bg-yellow-50' : ''}`}
+                          onClick={() => updateInvoiceStatus(invoice.id, 'pending')}
+                          disabled={updatingInvoiceId === invoice.id}
+                        >
+                          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Pending
+                          </Badge>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`justify-start ${invoice.status === 'overdue' ? 'bg-red-50' : ''}`}
+                          onClick={() => updateInvoiceStatus(invoice.id, 'overdue')}
+                          disabled={updatingInvoiceId === invoice.id}
+                        >
+                          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" /> Overdue
+                          </Badge>
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{format(new Date(invoice.issue_date), 'MMM d, yyyy')}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {invoice.due_date 
