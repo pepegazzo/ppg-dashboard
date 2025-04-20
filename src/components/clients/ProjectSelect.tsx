@@ -22,7 +22,7 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
   const [isUpdating, setIsUpdating] = useState(false);
   const [localProject, setLocalProject] = useState<Project | null>(activeProject);
 
-  // Update local state when prop changes
+  // Update local state when activeProject prop changes
   useEffect(() => {
     setLocalProject(activeProject);
   }, [activeProject]);
@@ -48,25 +48,30 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
       );
       
       return filteredProjects as Project[];
-    }
+    },
+    // Add staleTime to prevent frequent refetches
+    staleTime: 10000
   });
 
   const assignProjectToClient = async (projectId: string, projectName: string) => {
     try {
       setIsUpdating(true);
       
+      // Get client name from data attribute for better reliability
+      const clientName = document.querySelector(`[data-client-id="${clientId}"]`)?.getAttribute('data-client-name') || 'Unknown';
+      
       // Update the project to use this client as its client
       const { error } = await supabase
         .from('projects')
         .update({ 
           client_id: clientId,
-          client_name: document.querySelector(`[data-client-id="${clientId}"]`)?.getAttribute('data-client-name') || 'Unknown'
+          client_name: clientName
         })
         .eq('id', projectId);
       
       if (error) throw error;
       
-      // Update local state
+      // Update local state and close popover
       const newProject = { id: projectId, name: projectName };
       setLocalProject(newProject);
       setIsPopoverOpen(false);
@@ -76,8 +81,8 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
         description: `Project has been assigned to this client`,
       });
       
+      // Trigger parent update to refresh the client data
       if (onUpdate) {
-        // Call the parent update handler but prevent its default behavior
         onUpdate();
       }
     } catch (error) {
@@ -109,7 +114,7 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
             <PopoverTrigger asChild>
               <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
                 {isUpdating ? (
-                  <Badge variant="default" className="flex items-center gap-1">
+                  <Badge variant="secondary" className="flex items-center gap-1">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Updating...
                   </Badge>
