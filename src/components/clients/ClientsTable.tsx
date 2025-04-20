@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, User, Briefcase } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import ClientContactsModal from "./ClientContactsModal";
 import { Project, Client, Contact } from "@/types/clients";
@@ -100,7 +101,7 @@ export const ClientsTable = ({
                       .map((p: any) => (
                         <span
                           key={p.id}
-                          className="inline-block px-2 py-1 bg-purple-100 text-vividPurple-700 rounded text-xs font-medium"
+                          className="inline-block px-2 py-1 rounded text-xs font-medium"
                           style={{ background: "#E5DEFF", color: "#6E59A5" }}
                         >{p.name}</span>
                       ))}
@@ -121,20 +122,17 @@ export const ClientsTable = ({
                         <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-muted/30">
                           {client.contacts.map((contact: Contact) => (
                             <div key={contact.id} className="p-3 flex flex-col gap-2">
-                              <span className="font-medium flex items-center gap-2">
-                                <User className="h-4 w-4 text-amber-500" />
-                                {contact.name}
-                              </span>
+                              <span className="font-medium">{contact.name}</span>
                               <div className="grid grid-cols-3 gap-3 mt-1 text-zinc-700 text-[13px]">
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Briefcase className="h-4 w-4 text-amber-500" />
+                                    <Briefcase className="h-4 w-4 text-vividPurple-700" />
                                   </span>
                                   <span className="truncate">{contact.role || <span className="text-muted-foreground">—</span>}</span>
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Mail className="h-4 w-4 text-amber-500" />
+                                    <Mail className="h-4 w-4 text-vividPurple-700" />
                                   </span>
                                   {contact.email 
                                     ? <span className="underline truncate">{contact.email}</span>
@@ -143,7 +141,7 @@ export const ClientsTable = ({
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Phone className="h-4 w-4 text-amber-500" />
+                                    <Phone className="h-4 w-4 text-vividPurple-700" />
                                   </span>
                                   <span className="truncate">{contact.phone || <span className="text-muted-foreground">—</span>}</span>
                                 </div>
@@ -183,3 +181,4 @@ export const ClientsTable = ({
     </div>
   );
 };
+
