@@ -5,7 +5,7 @@ export type Project = {
   id: string;
   name: string;
   client_name: string;
-  status: 'Onboarding' | 'Active' | 'Completed';
+  status: 'Onboarding' | 'Active' | 'Completed' | 'Cancelled';
   priority: 'Low' | 'Medium' | 'High';
   start_date: string | null;
   due_date: string | null;

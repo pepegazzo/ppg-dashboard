@@ -29,6 +29,7 @@ export function ProjectStatusField({ control }: ProjectStatusFieldProps) {
               <SelectItem value="Onboarding">Onboarding</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Completed">Completed</SelectItem>
+              <SelectItem value="Cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
           <FormMessage />

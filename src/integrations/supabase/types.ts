@@ -327,7 +327,7 @@ export type Database = {
     }
     Enums: {
       project_priority: "Low" | "Medium" | "High"
-      project_status: "Onboarding" | "Active" | "Completed"
+      project_status: "Onboarding" | "Active" | "Completed" | "Cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -444,7 +444,7 @@ export const Constants = {
   public: {
     Enums: {
       project_priority: ["Low", "Medium", "High"],
-      project_status: ["Onboarding", "Active", "Completed"],
+      project_status: ["Onboarding", "Active", "Completed", "Cancelled"],
     },
   },
 } as const
