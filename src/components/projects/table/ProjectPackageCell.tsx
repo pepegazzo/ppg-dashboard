@@ -1,17 +1,106 @@
 
+import { useState, useEffect } from "react";
 import { Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface ProjectPackageCellProps {
   packageName: string | null | undefined;
+  projectId: string;
+  onUpdatePackage?: () => void;
 }
 
-export function ProjectPackageCell({ packageName }: ProjectPackageCellProps) {
-  return packageName ? (
-    <Badge variant="outline" className="inline-flex items-center text-xs w-fit">
-      <span className="truncate">{packageName}</span>
-    </Badge>
-  ) : (
-    <span className="text-muted-foreground text-xs">No package</span>
+export function ProjectPackageCell({ 
+  packageName, 
+  projectId,
+  onUpdatePackage 
+}: ProjectPackageCellProps) {
+  const [packages, setPackages] = useState<Array<{ id: string; name: string }>>([]);
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const fetchPackages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('package_types')
+        .select('id, name')
+        .order('name');
+        
+      if (error) throw error;
+      setPackages(data || []);
+    } catch (error) {
+      console.error('Error fetching packages:', error);
+    }
+  };
+
+  const handleSelectPackage = async (packageId: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('projects')
+        .update({ package: packageId })
+        .eq('id', projectId);
+
+      if (error) throw error;
+      
+      setIsOpen(false);
+      if (onUpdatePackage) {
+        onUpdatePackage();
+      }
+    } catch (error) {
+      console.error('Error updating package:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className="h-auto p-0 hover:bg-transparent"
+          disabled={loading}
+        >
+          {packageName ? (
+            <Badge variant="outline" className="inline-flex items-center text-xs w-fit">
+              <Package className="h-3 w-3 mr-1" />
+              <span className="truncate">{packageName}</span>
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">No package</span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-2">
+        <div className="flex flex-col gap-1">
+          {packages.map((pkg) => (
+            <Button
+              key={pkg.id}
+              variant="ghost"
+              size="sm"
+              className={`justify-start ${packageName === pkg.name ? 'bg-accent' : ''}`}
+              onClick={() => handleSelectPackage(pkg.id)}
+              disabled={loading}
+            >
+              <Badge variant="outline" className="w-full justify-start">
+                <Package className="h-3 w-3 mr-1" />
+                {pkg.name}
+              </Badge>
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }

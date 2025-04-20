@@ -119,7 +119,11 @@ export function TableRow({
       </TableCell>
       
       <TableCell>
-        <ProjectPackageCell packageName={localProject.package_name} />
+        <ProjectPackageCell 
+          packageName={localProject.package_name} 
+          projectId={localProject.id}
+          onUpdatePackage={fetchProjects}
+        />
       </TableCell>
       
       <TableCell>
