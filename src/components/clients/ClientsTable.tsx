@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ProjectSelect } from "./ProjectSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface ClientsTableProps {
   filteredAndSortedClients: Client[];
@@ -154,22 +155,36 @@ export const ClientsTable = ({
                 <TableCell>
                   <div className="flex flex-wrap gap-2 items-center">
                     {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").map((project: any) => (
-                      <div key={project.id} className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium" style={{
-                        background: "#E5DEFF",
-                        color: "#6E59A5"
-                      }}>
+                      <div
+                        key={project.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium bg-muted"
+                        style={{
+                          background: "#F1F0FB", // Soft Gray from palette
+                          color: "#403E43", // Charcoal Gray
+                          borderColor: "#e4e4e7"
+                        }}
+                      >
                         {project.name}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-4 w-4 p-0 ml-1 hover:bg-transparent" 
-                          onClick={(e) => {
+                        <button
+                          type="button"
+                          className="ml-1 p-1 rounded-full hover:bg-amber-100 transition-colors"
+                          style={{
+                            width: 22,
+                            height: 22,
+                            lineHeight: 0,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                          }}
+                          aria-label={`Remove ${project.name}`}
+                          tabIndex={0}
+                          onClick={e => {
                             e.stopPropagation();
                             removeProjectFromClient(client.id, project.id, project.name);
                           }}
                         >
-                          <X className="h-3 w-3 text-amber-700" />
-                        </Button>
+                          <X className="w-3 h-3 text-[#9F9EA1] group-hover:text-[#f59e0b] transition-colors" />
+                        </button>
                       </div>
                     ))}
                     {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").length === 0 && 
