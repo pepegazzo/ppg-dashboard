@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Client, Project } from "@/types/clients";
+import { Client, Project, Contact } from "@/types/clients";
 
 export function useClientData() {
   const { toast } = useToast();
@@ -21,6 +20,7 @@ export function useClientData() {
     direction: 'asc'
   });
 
+  // Fetch all projects
   useEffect(() => {
     fetchAllProjects();
   }, []);
@@ -41,6 +41,7 @@ export function useClientData() {
     }
   };
 
+  // MAIN QUERY: Fetch clients (companies) including contacts (people) and their projects
   const {
     data: rawClients,
     isLoading,
@@ -48,40 +49,51 @@ export function useClientData() {
   } = useQuery({
     queryKey: ['clients', nameFilter, companyFilter, projectFilter],
     queryFn: async () => {
-      // First, let's get a list of clients with basic info
-      const { data: clientsData, error: clientsError } = await supabase
+      // Get company data
+      const { data: companiesData, error: clientsError } = await supabase
         .from('clients')
-        .select('*');
+        .select('*, contacts:contacts(*), client_project_assignments:client_project_assignments(project_id), projects:projects(id, name, status)')
+        .order('company_name');
 
       if (clientsError) throw clientsError;
 
-      // Then, for each client, fetch their assigned projects
-      const clientsWithProjects = await Promise.all(
-        clientsData.map(async (client) => {
+      // For compatibility with old code: fetch active projects for each company
+      const companiesWithExtras = await Promise.all(
+        companiesData.map(async (company) => {
+          // fetch projects assigned to this company (as before)
           const { data: assignments, error: assignmentsError } = await supabase
             .from('client_project_assignments')
             .select(`
               project_id,
               projects (id, name, status)
             `)
-            .eq('client_id', client.id);
+            .eq('client_id', company.id);
+
+          // Fetch all contacts for this company
+          const { data: companyContacts } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('company_id', company.id)
+            .order('is_primary', { ascending: false });
 
           if (assignmentsError) {
             console.error("Error fetching client projects:", assignmentsError);
             return {
-              ...client,
-              active_projects: []
+              ...company,
+              contacts: companyContacts ?? [],
+              active_projects: [],
             };
           }
 
           return {
-            ...client,
+            ...company,
+            contacts: companyContacts ?? [],
             active_projects: assignments?.map(a => a.projects) || []
           };
         })
       );
 
-      return clientsWithProjects;
+      return companiesWithExtras;
     }
   });
 
@@ -89,11 +101,11 @@ export function useClientData() {
     if (!rawClients) return [];
 
     let filteredData = rawClients.filter(client => {
-      const nameMatch = client.name.toLowerCase().includes(nameFilter.toLowerCase());
-      const companyMatch = client.company.toLowerCase().includes(companyFilter.toLowerCase());
+      const nameMatch = (client.company_name ?? "").toLowerCase().includes(nameFilter.toLowerCase());
+      const companyMatch = (client.company ?? "").toLowerCase().includes(companyFilter.toLowerCase());
       const projectMatch = projectFilter === 'all' || 
         client.active_projects?.some(project => project.id === projectFilter);
-      
+
       return nameMatch && companyMatch && projectMatch;
     });
 
@@ -104,8 +116,9 @@ export function useClientData() {
         const comparison = aLength - bLength;
         return sortConfig.direction === 'asc' ? comparison : -comparison;
       }
-      const aValue = String(a[sortConfig.key]);
-      const bValue = String(b[sortConfig.key]);
+      // Use company_name for sorting
+      const aValue = String(a[sortConfig.key] ?? a.company_name);
+      const bValue = String(b[sortConfig.key] ?? b.company_name);
       const comparison = aValue.localeCompare(bValue);
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
@@ -159,12 +172,12 @@ export function useClientData() {
         throw clientUpdateError;
       }
 
-      if (updates.name) {
+      if (updates.company_name) {
         // Update any projects where this client is the primary client
         const { error: projectsUpdateError } = await supabase
           .from('projects')
           .update({
-            client_name: updates.name
+            client_name: updates.company_name
           })
           .eq('client_id', clientId);
         

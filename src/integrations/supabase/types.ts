@@ -33,6 +33,13 @@ export type Database = {
             foreignKeyName: "client_project_assignments_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_company_contacts"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "client_project_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -47,36 +54,96 @@ export type Database = {
       }
       clients: {
         Row: {
+          address: string | null
           company: string
+          company_name: string
           created_at: string
           email: string
           id: string
-          name: string
+          notes: string | null
           phone: string
           role: string
           updated_at: string
+          website: string | null
         }
         Insert: {
+          address?: string | null
           company: string
+          company_name: string
           created_at?: string
           email: string
           id?: string
-          name: string
+          notes?: string | null
           phone: string
           role: string
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          address?: string | null
           company?: string
+          company_name?: string
           created_at?: string
           email?: string
           id?: string
-          name?: string
+          notes?: string | null
           phone?: string
           role?: string
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
+      }
+      contacts: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "client_company_contacts"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
@@ -342,6 +409,13 @@ export type Database = {
             foreignKeyName: "projects_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_company_contacts"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -349,7 +423,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_company_contacts: {
+        Row: {
+          address: string | null
+          company_id: string | null
+          company_name: string | null
+          contact_email: string | null
+          contact_id: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          contact_role: string | null
+          is_primary: boolean | null
+          notes: string | null
+          website: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       debug_get_projects: {
@@ -359,6 +448,10 @@ export type Database = {
       is_owner: {
         Args: { user_id?: string }
         Returns: boolean
+      }
+      migrate_client_contacts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

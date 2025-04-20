@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -45,26 +44,63 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
   } = useClientData();
 
   const createClient = async (clientData: {
-    name: string;
+    company_name: string;
     company: string;
-    role: string;
-    email: string;
-    phone: string;
+    website?: string;
+    address?: string;
+    notes?: string;
+    contact: {
+      name: string;
+      role?: string;
+      email?: string;
+      phone?: string;
+    }
   }) => {
     try {
       setIsSubmitting(true);
-      const { data, error } = await supabase.from('clients').insert(clientData).select();
+      const { data, error } = await supabase.from('clients').insert({
+        company_name: clientData.company_name,
+        company: clientData.company ?? "",
+        website: clientData.website,
+        address: clientData.address,
+        notes: clientData.notes,
+      }).select();
+
       if (error) {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to create client"
+          description: "Failed to create company"
         });
         throw error;
       }
+
+      const newCompanyId = data[0]?.id;
+      if (!newCompanyId) throw new Error("Company creation failed");
+
+      if (clientData.contact?.name) {
+        const { error: contactError } = await supabase
+          .from('contacts')
+          .insert({
+            company_id: newCompanyId,
+            name: clientData.contact.name,
+            role: clientData.contact.role || null,
+            email: clientData.contact.email || null,
+            phone: clientData.contact.phone || null,
+            is_primary: true,
+          });
+        if (contactError) {
+          toast({
+            variant: "destructive",
+            title: "Warning",
+            description: "Company created, but failed to add primary contact"
+          });
+        }
+      }
+
       toast({
         title: "Success",
-        description: "New client created"
+        description: "Company and primary contact created"
       });
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       setIsModalOpen(false);
@@ -113,11 +149,17 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
           handleRefreshClients={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
           testCreateClient={async () => {
             await createClient({
-              name: "Test Client",
+              company_name: "Test Company",
               company: "Test Company",
-              role: "Test Role",
-              email: "test@example.com",
-              phone: "123-456-7890"
+              website: "www.testcompany.com",
+              address: "123 Test St",
+              notes: "Test notes",
+              contact: {
+                name: "Test Contact",
+                role: "Test Role",
+                email: "test@example.com",
+                phone: "123-456-7890"
+              }
             });
           }} 
         />

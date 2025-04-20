@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,7 @@ import { Briefcase, Mail, Phone, Loader2, ChevronUp, ChevronDown, ArrowUpDown } 
 import { Checkbox } from "@/components/ui/checkbox";
 import InlineEdit from "./InlineEdit";
 import { ProjectSelect } from "./ProjectSelect";
-import { Project, Client } from "@/types/clients";
+import { Project, Client, Contact } from "@/types/clients";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface ClientsTableProps {
@@ -43,8 +42,6 @@ export const ClientsTable = ({
   const queryClient = useQueryClient();
 
   const handleProjectUpdate = () => {
-    // Instead of reloading the page, we invalidate the clients query
-    // This will trigger a refetch of the clients data
     queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
 
@@ -62,21 +59,29 @@ export const ClientsTable = ({
             </TableHead>
             <TableHead 
               className="w-[220px] cursor-pointer"
-              onClick={() => handleSort('name')}
+              onClick={() => handleSort('company_name')}
             >
-              Name {renderSortIndicator('name', sortConfig)}
+              Company / Brand {renderSortIndicator('company_name', sortConfig)}
             </TableHead>
             <TableHead 
               className="w-[180px] cursor-pointer"
               onClick={() => handleSort('company')}
             >
-              Company & Role {renderSortIndicator('company', sortConfig)}
+              Legal Entity {renderSortIndicator('company', sortConfig)}
             </TableHead>
             <TableHead 
-              className="w-[120px] cursor-pointer"
-              onClick={() => handleSort('email')}
+              className="w-[160px] cursor-pointer"
             >
-              Contact {renderSortIndicator('email', sortConfig)}
+              Primary Contact
+            </TableHead>
+            <TableHead>
+              Website
+            </TableHead>
+            <TableHead>
+              Address
+            </TableHead>
+            <TableHead>
+              Notes
             </TableHead>
             <TableHead 
               onClick={() => handleSort('active_projects')} 
@@ -93,62 +98,52 @@ export const ClientsTable = ({
                 <Checkbox 
                   checked={selectedClients.includes(client.id)} 
                   onCheckedChange={() => toggleClientSelection(client.id)} 
-                  aria-label={`Select client ${client.name}`} 
+                  aria-label={`Select client ${client.company_name}`} 
                 />
               </TableCell>
-              <TableCell 
-                className="font-medium"
-                data-client-id={client.id}
-                data-client-name={client.name}
-              >
-                <InlineEdit 
-                  value={client.name} 
-                  onSave={async value => {
-                    await updateClient(client.id, { name: value });
-                  }} 
-                />
+              <TableCell className="font-medium">{client.company_name}</TableCell>
+              <TableCell>{client.company}</TableCell>
+              {/* Primary Contact */}
+              <TableCell>
+                {client.contacts?.length > 0
+                  ? (
+                    <div className="flex flex-col gap-1">
+                      <span className="font-semibold">{client.contacts.find(c => c.is_primary)?.name ?? client.contacts[0].name}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {client.contacts.find(c => c.is_primary)?.role || client.contacts[0].role}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        {client.contacts.find(c => c.is_primary)?.email || client.contacts[0].email}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        {client.contacts.find(c => c.is_primary)?.phone || client.contacts[0].phone}
+                      </span>
+                      {client.contacts.length > 1 && (
+                        <span className="text-xs text-amber-700 mt-1">
+                          +{client.contacts.length - 1} other contact(s)
+                        </span>
+                      )}
+                    </div>
+                  )
+                  : <span className="text-muted-foreground text-xs">No contacts</span>}
               </TableCell>
               <TableCell>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5">
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                    <InlineEdit 
-                      value={client.company} 
-                      onSave={async value => {
-                        await updateClient(client.id, { company: value });
-                      }} 
-                    />
-                  </div>
-                  <InlineEdit 
-                    value={client.role} 
-                    onSave={async value => {
-                      await updateClient(client.id, { role: value });
-                    }} 
-                    className="text-sm text-muted-foreground" 
-                  />
-                </div>
+                {client.website && (
+                  <a 
+                    href={client.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:underline text-blue-700"
+                  >
+                    {client.website}
+                  </a>
+                )}
               </TableCell>
               <TableCell>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <InlineEdit 
-                      value={client.email} 
-                      onSave={async value => {
-                        await updateClient(client.id, { email: value });
-                      }} 
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <InlineEdit 
-                      value={client.phone} 
-                      onSave={async value => {
-                        await updateClient(client.id, { phone: value });
-                      }} 
-                    />
-                  </div>
-                </div>
+                <span className="text-xs">{client.address}</span>
+              </TableCell>
+              <TableCell>
+                <span className="text-xs">{client.notes}</span>
               </TableCell>
               <TableCell>
                 <ProjectSelect 

@@ -11,11 +11,17 @@ interface ClientModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (clientData: {
-    name: string;
+    company_name: string;
     company: string;
-    role: string;
-    email: string;
-    phone: string;
+    website?: string;
+    address?: string;
+    notes?: string;
+    contact: {
+      name: string;
+      role?: string;
+      email?: string;
+      phone?: string;
+    }
   }) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -28,9 +34,9 @@ export default function ClientModal({
 }: ClientModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Client</DialogTitle>
+          <DialogTitle>Add New Company / Client</DialogTitle>
         </DialogHeader>
         <ClientForm 
           onSubmit={onSubmit}
