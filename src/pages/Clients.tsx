@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -382,112 +381,110 @@ const Clients = () => {
                 </div>
               )}
               
-              <div className="relative w-full">
-                <Table className="w-full caption-bottom text-sm border rounded-lg">
-                  <TableHeader>
-                    <TableRow className="border-b hover:bg-muted/30 data-[state=selected]:bg-muted">
-                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground w-[50px]">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <Checkbox 
+                        checked={clients?.length > 0 && selectedClients.length === clients?.length}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all clients"
+                      />
+                    </TableHead>
+                    <TableHead className="w-[220px]">Name</TableHead>
+                    <TableHead className="w-[180px]">Company & Role</TableHead>
+                    <TableHead className="w-[120px]">Contact</TableHead>
+                    <TableHead className="w-[130px]">Active Projects</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clients?.map((client) => (
+                    <TableRow 
+                      key={client.id} 
+                      className="border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted"
+                    >
+                      <TableCell className="p-4 align-middle">
                         <Checkbox 
-                          checked={clients?.length > 0 && selectedClients.length === clients?.length}
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Select all clients"
+                          checked={selectedClients.includes(client.id)}
+                          onCheckedChange={() => toggleClientSelection(client.id)}
+                          aria-label={`Select client ${client.name}`}
                         />
-                      </TableHead>
-                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Name</TableHead>
-                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Company & Role</TableHead>
-                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Contact</TableHead>
-                      <TableHead className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Active Projects</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clients?.map((client) => (
-                      <TableRow 
-                        key={client.id} 
-                        className="border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted"
-                      >
-                        <TableCell className="p-4 align-middle">
-                          <Checkbox 
-                            checked={selectedClients.includes(client.id)}
-                            onCheckedChange={() => toggleClientSelection(client.id)}
-                            aria-label={`Select client ${client.name}`}
-                          />
-                        </TableCell>
-                        <TableCell className="p-4 align-middle font-medium">
-                          <InlineEdit
-                            value={client.name}
-                            onSave={async (value) => {
-                              await updateClient(client.id, { name: value });
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell className="p-4 align-middle">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <Briefcase className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit
-                                value={client.company}
-                                onSave={async (value) => {
-                                  await updateClient(client.id, { company: value });
-                                }}
-                              />
-                            </div>
+                      </TableCell>
+                      <TableCell className="p-4 align-middle font-medium">
+                        <InlineEdit
+                          value={client.name}
+                          onSave={async (value) => {
+                            await updateClient(client.id, { name: value });
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell className="p-4 align-middle">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Briefcase className="h-4 w-4 text-muted-foreground" />
                             <InlineEdit
-                              value={client.role}
+                              value={client.company}
                               onSave={async (value) => {
-                                await updateClient(client.id, { role: value });
+                                await updateClient(client.id, { company: value });
                               }}
-                              className="text-sm text-muted-foreground"
                             />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-4 align-middle">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit
-                                value={client.email}
-                                onSave={async (value) => {
-                                  await updateClient(client.id, { email: value });
-                                }}
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <InlineEdit
-                                value={client.phone}
-                                onSave={async (value) => {
-                                  await updateClient(client.id, { phone: value });
-                                }}
-                              />
-                            </div>
+                          <InlineEdit
+                            value={client.role}
+                            onSave={async (value) => {
+                              await updateClient(client.id, { role: value });
+                            }}
+                            className="text-sm text-muted-foreground"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-4 align-middle">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <InlineEdit
+                              value={client.email}
+                              onSave={async (value) => {
+                                await updateClient(client.id, { email: value });
+                              }}
+                            />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-4 align-middle">
-                          <div className="flex flex-col gap-2">
-                            {client.active_projects && client.active_projects.length > 0 ? (
-                              client.active_projects.map(project => (
-                                <Link 
-                                  key={project.id} 
-                                  to={`/projects?project=${project.id}`}
-                                  className="group"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="secondary" className="group-hover:bg-secondary/70">
-                                      {project.name}
-                                    </Badge>
-                                  </div>
-                                </Link>
-                              ))
-                            ) : (
-                              <span className="text-sm text-muted-foreground">No active projects</span>
-                            )}
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <InlineEdit
+                              value={client.phone}
+                              onSave={async (value) => {
+                                await updateClient(client.id, { phone: value });
+                              }}
+                            />
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-4 align-middle">
+                        <div className="flex flex-col gap-2">
+                          {client.active_projects && client.active_projects.length > 0 ? (
+                            client.active_projects.map(project => (
+                              <Link 
+                                key={project.id} 
+                                to={`/projects?project=${project.id}`}
+                                className="group"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="group-hover:bg-secondary/70">
+                                    {project.name}
+                                  </Badge>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No active projects</span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </>
         )}
