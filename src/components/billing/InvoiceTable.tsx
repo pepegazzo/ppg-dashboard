@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -198,7 +199,7 @@ export function InvoiceTable() {
               <TableHead onClick={() => toggleSort('invoice_number')} className="cursor-pointer">
                 Invoice # {renderSortIndicator('invoice_number')}
               </TableHead>
-              <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer">
+              <TableHead onClick={() => toggleSort('project.name')} className="cursor-pointer w-1/4"> {/* Increased width */}
                 Project {renderSortIndicator('project.name')}
               </TableHead>
               <TableHead onClick={() => toggleSort('project.client_name')} className="cursor-pointer">
@@ -316,3 +317,4 @@ export function InvoiceTable() {
     </div>
   );
 }
+
