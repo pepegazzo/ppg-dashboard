@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Package } from "lucide-react";
+import { Package, Wrench, Palette, Video, Globe, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getServiceIcon } from "../form/ProjectPackageField";

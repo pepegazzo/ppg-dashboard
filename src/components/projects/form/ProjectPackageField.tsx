@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
-import { Wrench, Palette, Video, Globe } from "lucide-react";
+import { Wrench, Palette, Video, Globe, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,7 @@ interface ProjectPackageFieldProps {
 export const getServiceIcon = (packageName: string) => {
   switch(packageName.toLowerCase()) {
     case 'branding':
-      return <Palette className="h-4 w-4 mr-2 opacity-70" />;
+      return <Heart className="h-4 w-4 mr-2 opacity-70" />;
     case 'custom':
       return <Wrench className="h-4 w-4 mr-2 opacity-70" />;
     case 'design':
