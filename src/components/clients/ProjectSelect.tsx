@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Heart, Video, Briefcase, PenLine } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@/types/clients";
@@ -18,13 +18,6 @@ interface ProjectSelectProps {
   activeProjects: Project[] | null;
   onUpdate?: () => void;
 }
-
-const PROJECT_ICONS = {
-  "Branding": Heart,
-  "Video": Video,
-  "Website": Briefcase,
-  "Design": PenLine,
-};
 
 export function ProjectSelect({ clientId, activeProjects, onUpdate }: ProjectSelectProps) {
   const { toast } = useToast();
@@ -89,16 +82,6 @@ export function ProjectSelect({ clientId, activeProjects, onUpdate }: ProjectSel
     );
   }
 
-  // Use a function to get the proper icon based on project type, defaulting to PenLine
-  const getIconForProject = (projectName: string) => {
-    // This is a simple example - you could enhance this to match project types
-    const projectType = Object.keys(PROJECT_ICONS).find(type => 
-      projectName.toLowerCase().includes(type.toLowerCase())
-    );
-    
-    return projectType ? PROJECT_ICONS[projectType as keyof typeof PROJECT_ICONS] : PenLine;
-  };
-
   return (
     <Select
       value={activeProjects?.[0]?.id || ""}
@@ -109,19 +92,14 @@ export function ProjectSelect({ clientId, activeProjects, onUpdate }: ProjectSel
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {allProjects?.map((project) => {
-            const IconComponent = getIconForProject(project.name);
-            return (
-              <SelectItem 
-                key={project.id} 
-                value={project.id}
-                className="flex items-center gap-2"
-              >
-                <IconComponent className="h-4 w-4 mr-2" />
-                {project.name}
-              </SelectItem>
-            );
-          })}
+          {allProjects?.map((project) => (
+            <SelectItem 
+              key={project.id} 
+              value={project.id}
+            >
+              {project.name}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
