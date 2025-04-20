@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -234,26 +235,29 @@ export function InvoiceTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <BillingFilter 
-          selectedStatus={selectedStatus} 
-          onStatusChange={setSelectedStatus}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-        
-        {selectedInvoices.length > 0 && (
+      {selectedInvoices.length > 0 && (
+        <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+          <span className="text-sm">
+            {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''} selected
+          </span>
           <Button 
             variant="destructive" 
-            size="sm"
-            onClick={() => setShowDeleteModal(true)}
-            className="flex items-center gap-1"
+            size="sm" 
+            onClick={() => setShowDeleteModal(true)} 
+            disabled={false}
           >
-            <Trash2 className="h-4 w-4" />
-            Delete ({selectedInvoices.length})
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Selected
           </Button>
-        )}
-      </div>
+        </div>
+      )}
+
+      <BillingFilter 
+        selectedStatus={selectedStatus} 
+        onStatusChange={setSelectedStatus}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
       
       <div className="rounded-md border">
         <Table>
@@ -397,7 +401,10 @@ export function InvoiceTable() {
         setShowDeleteModal={setShowDeleteModal}
         selectedInvoices={selectedInvoices}
         setSelectedInvoices={setSelectedInvoices}
-        onSuccess={handleDeleteSuccess}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['invoices'] });
+          queryClient.invalidateQueries({ queryKey: ['billing-stats'] });
+        }}
       />
     </div>
   );
