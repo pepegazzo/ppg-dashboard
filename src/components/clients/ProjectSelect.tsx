@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, X } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -26,8 +26,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // We'll only fetch the data but not display it again in this component
-  // since it's already shown in the parent component
+  // Fetch assigned projects 
   const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
     queryKey: ['client-assigned-projects', clientId],
     queryFn: async () => {
@@ -48,6 +47,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     }
   });
 
+  // Fetch available projects (not yet assigned to this client)
   const { data: availableProjects, isLoading: isLoadingAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId],
     queryFn: async () => {
@@ -72,7 +72,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       const { data, error } = await query;
       
       if (error) throw error;
-      console.log("Available projects for selection:", data);
       return data || [];
     },
     enabled: isPopoverOpen
@@ -128,6 +127,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       
       if (onUpdate) {
         onUpdate();
@@ -204,6 +204,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       
       if (onUpdate) {
         onUpdate();
@@ -239,8 +240,8 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
             className="h-7 p-1 font-normal hover:bg-transparent"
             disabled={isUpdating}
           >
-            <span className="text-xs text-muted-foreground cursor-pointer">
-              + Add Project
+            <span className="text-xs text-muted-foreground cursor-pointer flex items-center">
+              <Plus className="h-3 w-3 mr-1" /> Add Project
             </span>
           </Button>
         </PopoverTrigger>

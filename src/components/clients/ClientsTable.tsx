@@ -1,11 +1,16 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import ClientContactsModal from "./ClientContactsModal";
 import { Project, Client, Contact } from "@/types/clients";
 import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import { ProjectSelect } from "./ProjectSelect";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
 interface ClientsTableProps {
   filteredAndSortedClients: Client[];
   selectedClients: string[];
@@ -18,12 +23,14 @@ interface ClientsTableProps {
     direction: 'asc' | 'desc';
   };
 }
+
 const renderSortIndicator = (key: keyof Client | 'company' | 'email' | 'active_projects', sortConfig: ClientsTableProps['sortConfig']) => {
   if (sortConfig.key === key) {
     return sortConfig.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4 inline" /> : <ChevronDown className="ml-1 h-4 w-4 inline" />;
   }
   return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
 };
+
 export const ClientsTable = ({
   filteredAndSortedClients,
   selectedClients,
@@ -34,16 +41,88 @@ export const ClientsTable = ({
   sortConfig
 }: ClientsTableProps) => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [openModalClientId, setOpenModalClientId] = useState<string | null>(null);
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
+  
   const handleRowClick = (clientId: string) => {
     setOpenAccordionId(prev => prev === clientId ? null : clientId);
   };
+  
   const handleProjectUpdate = () => {
     queryClient.invalidateQueries({
       queryKey: ['clients']
     });
   };
+
+  const removeProjectFromClient = async (clientId: string, projectId: string, projectName: string) => {
+    try {
+      const { error: deleteError } = await supabase
+        .from('client_project_assignments')
+        .delete()
+        .eq('client_id', clientId)
+        .eq('project_id', projectId);
+      
+      if (deleteError) throw deleteError;
+      
+      const { data: projectData } = await supabase
+        .from('projects')
+        .select('client_id, client_name')
+        .eq('id', projectId)
+        .single();
+        
+      if (projectData?.client_id === clientId) {
+        const { data: nextClient } = await supabase
+          .from('client_project_assignments')
+          .select(`
+            clients (
+              id,
+              company_name
+            )
+          `)
+          .eq('project_id', projectId)
+          .neq('client_id', clientId)
+          .limit(1)
+          .single();
+          
+        if (nextClient) {
+          await supabase
+            .from('projects')
+            .update({ 
+              client_id: nextClient.clients.id,
+              client_name: nextClient.clients.company_name
+            })
+            .eq('id', projectId);
+        } else {
+          await supabase
+            .from('projects')
+            .update({ 
+              client_id: null,
+              client_name: "No Client"
+            })
+            .eq('id', projectId);
+        }
+      }
+      
+      toast({
+        title: "Project removed",
+        description: `${projectName} is no longer assigned to this client`,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    } catch (error) {
+      console.error("Error removing project from client:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove project from client",
+        variant: "destructive",
+      });
+    }
+  };
+
   return <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -60,7 +139,8 @@ export const ClientsTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAndSortedClients?.map(client => <React.Fragment key={client.id}>
+          {filteredAndSortedClients?.map(client => (
+            <React.Fragment key={client.id}>
               <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
                 <TableCell>
                   <Checkbox checked={selectedClients.includes(client.id)} onCheckedChange={() => toggleClientSelection(client.id)} aria-label={`Select client ${client.company_name}`} />
@@ -73,11 +153,28 @@ export const ClientsTable = ({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-2 items-center">
-                    {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").map((p: any) => <span key={p.id} className="inline-block px-2 py-1 rounded text-xs font-medium" style={{
-                  background: "#E5DEFF",
-                  color: "#6E59A5"
-                }}>{p.name}</span>)}
-                    {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").length === 0 && <span className="text-xs text-muted-foreground">No active projects</span>}
+                    {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").map((project: any) => (
+                      <div key={project.id} className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium" style={{
+                        background: "#E5DEFF",
+                        color: "#6E59A5"
+                      }}>
+                        {project.name}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-4 w-4 p-0 ml-1 hover:bg-transparent" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeProjectFromClient(client.id, project.id, project.name);
+                          }}
+                        >
+                          <X className="h-3 w-3 text-amber-700" />
+                        </Button>
+                      </div>
+                    ))}
+                    {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").length === 0 && 
+                      <span className="text-xs text-muted-foreground">No active projects</span>
+                    }
                     <ProjectSelect clientId={client.id} onUpdate={handleProjectUpdate} />
                   </div>
                 </TableCell>
@@ -93,19 +190,19 @@ export const ClientsTable = ({
                               <div className="grid grid-cols-3 gap-3 mt-1 text-zinc-700 text-[13px]">
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Briefcase className="h-4 w-4 text-vividPurple-700" />
+                                    <Briefcase className="h-4 w-4 text-amber-700" />
                                   </span>
                                   <span className="truncate">{contact.role || <span className="text-muted-foreground">—</span>}</span>
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Mail className="h-4 w-4 text-vividPurple-700" />
+                                    <Mail className="h-4 w-4 text-amber-700" />
                                   </span>
                                   {contact.email ? <span className="underline truncate">{contact.email}</span> : <span className="text-muted-foreground">—</span>}
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Phone className="h-4 w-4 text-vividPurple-700" />
+                                    <Phone className="h-4 w-4 text-amber-700" />
                                   </span>
                                   <span className="truncate">{contact.phone || <span className="text-muted-foreground">—</span>}</span>
                                 </div>
@@ -127,7 +224,8 @@ export const ClientsTable = ({
                     </div>
                   </TableCell>
                 </TableRow>}
-            </React.Fragment>)}
+            </React.Fragment>
+          ))}
         </TableBody>
       </Table>
     </div>;
