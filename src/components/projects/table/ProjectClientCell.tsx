@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Loader2, Users } from "lucide-react";
@@ -79,7 +80,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
     }
   };
 
-  const createClient = async (clientData: {
+  const handleClientFormSubmit = async (clientData: {
     company_name: string;
     company: string;
     website?: string;
@@ -95,59 +96,59 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
     try {
       setIsSubmitting(true);
       
-      // Create the client (company)
-      const { data: clientData, error: clientError } = await supabase
+      // First, create the client
+      const { data: newClient, error: clientError } = await supabase
         .from('clients')
         .insert({
           company_name: clientData.company_name,
           company: clientData.company,
-          website: clientData.website,
-          address: clientData.address,
-          notes: clientData.notes,
-          // Required fields for the clients table
-          email: clientData.contact?.email || "",
-          phone: clientData.contact?.phone || "",
-          role: clientData.contact?.role || ""
+          website: clientData.website || null,
+          address: clientData.address || null,
+          notes: clientData.notes || null,
+          // These fields are still required in the database schema
+          role: clientData.contact.role || "Primary Contact",
+          email: clientData.contact.email || "",
+          phone: clientData.contact.phone || "",
         })
         .select()
         .single();
       
       if (clientError) throw clientError;
       
-      // Create the primary contact
-      if (clientData.contact && clientData.contact.name) {
-        const { error: contactError } = await supabase
-          .from('contacts')
-          .insert({
-            company_id: clientData.id,
-            name: clientData.contact.name,
-            role: clientData.contact.role,
-            email: clientData.contact.email,
-            phone: clientData.contact.phone,
-            is_primary: true
-          });
-        
-        if (contactError) {
-          console.error("Error creating contact:", contactError);
-        }
-      }
+      // Then create the primary contact
+      const { error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          company_id: newClient.id,
+          name: clientData.contact.name,
+          role: clientData.contact.role || null,
+          email: clientData.contact.email || null,
+          phone: clientData.contact.phone || null,
+          is_primary: true
+        });
+      
+      if (contactError) throw contactError;
       
       // Assign the client to the project
-      const { error: assignError } = await supabase
+      const { error: assignmentError } = await supabase
         .from('client_project_assignments')
         .insert({
-          client_id: clientData.id,
+          client_id: newClient.id,
           project_id: projectId
         });
       
-      if (assignError) throw assignError;
+      if (assignmentError) throw assignmentError;
       
       // Set as primary client for the project
-      await setPrimaryClient(clientData.id, clientData.company_name);
+      await setPrimaryClient(newClient.id, newClient.company_name);
       
       setIsModalOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['project-assigned-clients'] });
+      toast({
+        title: "Success",
+        description: `${clientData.company_name} has been created and assigned to this project`,
+      });
       
+      queryClient.invalidateQueries({ queryKey: ['project-assigned-clients'] });
     } catch (error) {
       console.error("Error creating client:", error);
       toast({
@@ -201,19 +202,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
             No clients assigned to this project
           </DropdownMenuItem>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create New Client
-        </DropdownMenuItem>
       </DropdownMenuContent>
-
-      <ClientModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={createClient}
-        isSubmitting={isSubmitting}
-      />
     </DropdownMenu>
   );
 }
