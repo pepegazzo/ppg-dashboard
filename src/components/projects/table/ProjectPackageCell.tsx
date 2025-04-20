@@ -13,17 +13,16 @@ import {
 interface ProjectPackageCellProps {
   packageName: string | null | undefined;
   projectId: string;
-  onUpdatePackage?: () => void;
 }
 
 export function ProjectPackageCell({ 
-  packageName, 
-  projectId,
-  onUpdatePackage 
+  packageName: initialPackageName, 
+  projectId 
 }: ProjectPackageCellProps) {
   const [packages, setPackages] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [currentPackageName, setCurrentPackageName] = useState(initialPackageName);
 
   useEffect(() => {
     fetchPackages();
@@ -76,10 +75,13 @@ export function ProjectPackageCell({
         if (insertError) throw insertError;
       }
       
-      setIsOpen(false);
-      if (onUpdatePackage) {
-        onUpdatePackage();
+      // Get the name of the selected package
+      const selectedPackage = packages.find(pkg => pkg.id === packageId);
+      if (selectedPackage) {
+        setCurrentPackageName(selectedPackage.name);
       }
+      
+      setIsOpen(false);
     } catch (error) {
       console.error('Error updating package:', error);
     } finally {
@@ -95,10 +97,10 @@ export function ProjectPackageCell({
           className="h-auto p-0 hover:bg-transparent"
           disabled={loading}
         >
-          {packageName ? (
+          {currentPackageName ? (
             <Badge variant="outline" className="inline-flex items-center text-xs w-fit">
               <Package className="h-3 w-3 mr-1" />
-              <span className="truncate">{packageName}</span>
+              <span className="truncate">{currentPackageName}</span>
             </Badge>
           ) : (
             <span className="text-muted-foreground text-xs">No package</span>
@@ -112,7 +114,7 @@ export function ProjectPackageCell({
               key={pkg.id}
               variant="ghost"
               size="sm"
-              className={`justify-start ${packageName === pkg.name ? 'bg-accent' : ''}`}
+              className={`justify-start ${currentPackageName === pkg.name ? 'bg-accent' : ''}`}
               onClick={() => handleSelectPackage(pkg.id)}
               disabled={loading}
             >
