@@ -26,7 +26,7 @@ interface Client {
   role: string;
   email: string;
   phone: string;
-  active_projects: Project[];
+  active_projects: Project[] | null;
 }
 
 const Clients = () => {
@@ -42,15 +42,15 @@ const Clients = () => {
           *,
           active_projects:projects(id, name, status)
         `)
-        .returns<(Client & { active_projects: Project[] })[]>();
+        .returns<(Client & { active_projects: Project[] | null })[]>();
 
       if (error) throw error;
 
       return data.map(client => ({
         ...client,
-        active_projects: client.active_projects.filter(project => 
+        active_projects: client.active_projects ? client.active_projects.filter(project => 
           project.status === 'Active' || project.status === 'Onboarding'
-        )
+        ) : []
       }));
     }
   });
@@ -203,20 +203,21 @@ const Clients = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-2">
-                        {client.active_projects.map(project => (
-                          <Link 
-                            key={project.id} 
-                            to={`/projects?project=${project.id}`}
-                            className="group"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="group-hover:bg-secondary/70">
-                                {project.name}
-                              </Badge>
-                            </div>
-                          </Link>
-                        ))}
-                        {client.active_projects.length === 0 && (
+                        {client.active_projects && client.active_projects.length > 0 ? (
+                          client.active_projects.map(project => (
+                            <Link 
+                              key={project.id} 
+                              to={`/projects?project=${project.id}`}
+                              className="group"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="group-hover:bg-secondary/70">
+                                  {project.name}
+                                </Badge>
+                              </div>
+                            </Link>
+                          ))
+                        ) : (
                           <span className="text-sm text-muted-foreground">No active projects</span>
                         )}
                       </div>
