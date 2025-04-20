@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowUpDown, CheckCircle, Clock, AlertCircle, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
@@ -34,9 +34,7 @@ interface InvoiceTableProps {
 }
 
 export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
   const [invoiceFilter, setInvoiceFilter] = useState("");
@@ -52,6 +50,12 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
     field: 'issue_date',
     direction: 'desc'
   });
+
+  useEffect(() => {
+    if (initialProjectFilter) {
+      setProjectFilter(initialProjectFilter);
+    }
+  }, [initialProjectFilter]);
 
   const resetFilters = () => {
     setInvoiceFilter("");
