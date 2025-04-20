@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { PlusCircle, Loader2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { EmptyState } from "@/components/clients/EmptyState";
 import { ClientFilter } from "@/components/clients/ClientFilter";
@@ -11,7 +11,7 @@ import { ClientsTable } from "@/components/clients/ClientsTable";
 import { SelectedClientsActions } from "@/components/clients/SelectedClientsActions";
 import ClientModal from "@/components/clients/ClientModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Client } from "@/types/clients";
+import { Client, Project } from "@/types/clients";
 
 const Clients = () => {
   const {
