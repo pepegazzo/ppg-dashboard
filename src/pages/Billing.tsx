@@ -50,11 +50,20 @@ const Billing = () => {
               <CreateInvoiceForm onSuccess={handleInvoiceCreated} />
               <Button 
                 variant="outline" 
-                size="icon" 
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? (
+                  <>
+                    <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCcw className="mr-2 h-4 w-4" />
+                    Refresh
+                  </>
+                )}
               </Button>
             </div>
           </div>
