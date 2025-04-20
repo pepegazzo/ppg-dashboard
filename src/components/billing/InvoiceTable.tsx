@@ -34,7 +34,7 @@ interface Invoice {
   };
 }
 
-type SortableField = keyof Invoice | 'project.name' | 'project.client_name';
+type SortableField = keyof Invoice | 'project.name' | 'project.client_name' | 'description';
 
 export function InvoiceTable() {
   const { toast } = useToast();
@@ -90,7 +90,6 @@ export function InvoiceTable() {
       
       let filteredData = [...(data as Invoice[])];
       
-      // Apply client-side filters
       if (invoiceFilter) {
         filteredData = filteredData.filter(invoice => 
           invoice.invoice_number.toLowerCase().includes(invoiceFilter.toLowerCase())
@@ -109,7 +108,6 @@ export function InvoiceTable() {
         );
       }
       
-      // Apply sorting for project-related fields
       if (sortBy.field === 'project.name') {
         filteredData.sort((a, b) => {
           const aValue = a.project?.name || '';
@@ -289,6 +287,9 @@ export function InvoiceTable() {
               <TableHead onClick={() => toggleSort('project.client_name')} className="cursor-pointer">
                 Client {renderSortIndicator('project.client_name')}
               </TableHead>
+              <TableHead onClick={() => toggleSort('description')} className="cursor-pointer">
+                Description {renderSortIndicator('description')}
+              </TableHead>
               <TableHead onClick={() => toggleSort('amount')} className="cursor-pointer text-right">
                 Amount {renderSortIndicator('amount')}
               </TableHead>
@@ -329,6 +330,9 @@ export function InvoiceTable() {
                   <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                   <TableCell className="text-sm">{invoice.project.name}</TableCell>
                   <TableCell className="text-sm">{invoice.project.client_name}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {invoice.description || '-'}
+                  </TableCell>
                   <TableCell className="text-right font-medium">
                     <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
                       S/ {invoice.amount.toFixed(2)}
@@ -387,7 +391,9 @@ export function InvoiceTable() {
                       </PopoverContent>
                     </Popover>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{format(new Date(invoice.issue_date), 'MMM d, yyyy')}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {format(new Date(invoice.issue_date), 'MMM d, yyyy')}
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {invoice.due_date 
                       ? format(new Date(invoice.due_date), 'MMM d, yyyy')
