@@ -354,7 +354,7 @@ const Clients = () => {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
                       <TableHead className="w-[50px]">
                         <Checkbox 
                           checked={clients?.length > 0 && selectedClients.length === clients?.length}
@@ -362,15 +362,15 @@ const Clients = () => {
                           aria-label="Select all clients"
                         />
                       </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Company & Role</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Active Projects</TableHead>
+                      <TableHead className="font-medium">Name</TableHead>
+                      <TableHead className="font-medium">Company & Role</TableHead>
+                      <TableHead className="font-medium">Contact</TableHead>
+                      <TableHead className="font-medium">Active Projects</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {clients?.map((client) => (
-                      <TableRow key={client.id}>
+                      <TableRow key={client.id} className="hover:bg-muted/30 transition-colors">
                         <TableCell>
                           <Checkbox 
                             checked={selectedClients.includes(client.id)}
