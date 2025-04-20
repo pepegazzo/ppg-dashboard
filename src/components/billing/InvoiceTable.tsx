@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -212,23 +213,23 @@ export function InvoiceTable() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className={`justify-start ${invoice.status === 'paid' ? 'bg-green-50' : ''}`}
-                          onClick={() => updateInvoiceStatus(invoice.id, 'paid')}
-                          disabled={updatingInvoiceId === invoice.id}
-                        >
-                          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
-                            <CheckCircle className="h-3 w-3" /> Paid
-                          </Badge>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
                           className={`justify-start ${invoice.status === 'pending' ? 'bg-yellow-50' : ''}`}
                           onClick={() => updateInvoiceStatus(invoice.id, 'pending')}
                           disabled={updatingInvoiceId === invoice.id}
                         >
                           <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1">
                             <Clock className="h-3 w-3" /> Pending
+                          </Badge>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`justify-start ${invoice.status === 'paid' ? 'bg-green-50' : ''}`}
+                          onClick={() => updateInvoiceStatus(invoice.id, 'paid')}
+                          disabled={updatingInvoiceId === invoice.id}
+                        >
+                          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" /> Paid
                           </Badge>
                         </Button>
                         <Button 
