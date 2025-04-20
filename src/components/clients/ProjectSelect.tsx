@@ -83,10 +83,6 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
     }
   };
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800';
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -104,14 +100,14 @@ export function ProjectSelect({ clientId, activeProject, onUpdate }: ProjectSele
             <PopoverTrigger asChild>
               <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
                 {isUpdating ? (
-                  <Badge className="flex items-center gap-1">
+                  <Badge variant="default" className="flex items-center gap-1">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Updating...
                   </Badge>
                 ) : localProject ? (
-                  <Badge className={getStatusColor(true)}>{localProject.name}</Badge>
+                  <Badge variant="secondary">{localProject.name}</Badge>
                 ) : (
-                  <Badge className={getStatusColor(false)}>No project</Badge>
+                  <Badge variant="secondary">No project</Badge>
                 )}
               </Button>
             </PopoverTrigger>
