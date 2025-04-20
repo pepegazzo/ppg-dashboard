@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -98,11 +98,11 @@ const Clients = () => {
   };
 
   const {
-    data: clients,
+    data: rawClients,
     isLoading,
     error
   } = useQuery({
-    queryKey: ['clients', nameFilter, companyFilter, projectFilter, sortConfig],
+    queryKey: ['clients', nameFilter, companyFilter, projectFilter],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('clients')
@@ -114,43 +114,38 @@ const Clients = () => {
 
       if (error) throw error;
 
-      let filteredData = data.map(client => ({
+      return data.map(client => ({
         ...client,
         active_projects: client.active_projects || []
       }));
-
-      if (nameFilter) {
-        filteredData = filteredData.filter(client => 
-          client.name.toLowerCase().includes(nameFilter.toLowerCase())
-        );
-      }
-      if (companyFilter) {
-        filteredData = filteredData.filter(client => 
-          client.company.toLowerCase().includes(companyFilter.toLowerCase())
-        );
-      }
-      if (projectFilter !== 'all') {
-        filteredData = filteredData.filter(client => 
-          client.active_projects?.some(project => project.id === projectFilter)
-        );
-      }
-
-      filteredData.sort((a, b) => {
-        if (sortConfig.key === 'active_projects') {
-          const aLength = a.active_projects?.length || 0;
-          const bLength = b.active_projects?.length || 0;
-          const comparison = aLength - bLength;
-          return sortConfig.direction === 'asc' ? comparison : -comparison;
-        }
-        const aValue = String(a[sortConfig.key]);
-        const bValue = String(b[sortConfig.key]);
-        const comparison = aValue.localeCompare(bValue);
-        return sortConfig.direction === 'asc' ? comparison : -comparison;
-      });
-
-      return filteredData;
     }
   });
+
+  const filteredAndSortedClients = useMemo(() => {
+    if (!rawClients) return [];
+
+    let filteredData = rawClients.filter(client => {
+      const nameMatch = client.name.toLowerCase().includes(nameFilter.toLowerCase());
+      const companyMatch = client.company.toLowerCase().includes(companyFilter.toLowerCase());
+      const projectMatch = projectFilter === 'all' || 
+        client.active_projects?.some(project => project.id === projectFilter);
+      
+      return nameMatch && companyMatch && projectMatch;
+    });
+
+    return filteredData.sort((a, b) => {
+      if (sortConfig.key === 'active_projects') {
+        const aLength = a.active_projects?.length || 0;
+        const bLength = b.active_projects?.length || 0;
+        const comparison = aLength - bLength;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      }
+      const aValue = String(a[sortConfig.key]);
+      const bValue = String(b[sortConfig.key]);
+      const comparison = aValue.localeCompare(bValue);
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+  }, [rawClients, nameFilter, companyFilter, projectFilter, sortConfig]);
 
   const updateClient = async (clientId: string, updates: Partial<Client>) => {
     try {
@@ -339,7 +334,7 @@ const Clients = () => {
           </div>
         </div>
 
-        {clients && clients.length === 0 ? <EmptyState setIsCreating={() => setIsModalOpen(true)} handleRefreshClients={() => queryClient.invalidateQueries({
+        {filteredAndSortedClients && filteredAndSortedClients.length === 0 ? <EmptyState setIsCreating={() => setIsModalOpen(true)} handleRefreshClients={() => queryClient.invalidateQueries({
         queryKey: ['clients']
       })} testCreateClient={async () => {
         await createClient({
@@ -406,7 +401,7 @@ const Clients = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {clients?.map(client => <TableRow key={client.id} className="border-b">
+                    {filteredAndSortedClients?.map(client => <TableRow key={client.id} className="border-b">
                         <TableCell>
                           <Checkbox checked={selectedClients.includes(client.id)} onCheckedChange={() => toggleClientSelection(client.id)} aria-label={`Select client ${client.name}`} />
                         </TableCell>
