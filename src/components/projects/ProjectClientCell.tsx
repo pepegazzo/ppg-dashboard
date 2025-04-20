@@ -30,7 +30,17 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
   const { data: availableClients } = useQuery({
     queryKey: ['project-available-clients', projectId],
     queryFn: async () => {
-      // Get all clients that don't have a project assigned
+      // First, get all projects that already have clients assigned
+      const { data: projectsWithClients } = await supabase
+        .from('projects')
+        .select('client_id')
+        .not('client_id', 'is', null)
+        .not('id', 'eq', projectId);
+      
+      // Extract client IDs that are already assigned to other projects
+      const assignedClientIds = projectsWithClients?.map(p => p.client_id) || [];
+      
+      // Get all clients that are not already assigned to other projects
       const { data, error } = await supabase
         .from('clients')
         .select(`
@@ -38,8 +48,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
           name,
           company
         `)
-        .is('id', null)
-        .in('id', supabase.from('projects').select('client_id').not('id', 'eq', projectId));
+        .not('id', 'in', assignedClientIds);
       
       if (error) throw error;
       return data || [];
