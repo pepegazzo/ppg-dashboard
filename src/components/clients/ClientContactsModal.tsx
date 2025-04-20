@@ -78,7 +78,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 <Label className="text-sm mb-2 block">Contacts</Label>
                 <div className="space-y-2">
                   {currentContacts.map(contact => (
-                    <div key={contact.id} className="bg-amber-50/50 border border-amber-100 rounded-md px-3 py-2 flex flex-col gap-0.5">
+                    <div key={contact.id} className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 flex flex-col gap-0.5">
                       <span className="font-medium text-amber-900">{contact.name}</span>
                       {contact.role && <span className="text-xs text-amber-800">{contact.role}</span>}
                       {contact.email && <span className="text-xs text-amber-700">{contact.email}</span>}

@@ -127,7 +127,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
           <Plus className="h-3 w-3 mr-1" /> Add Project
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-2 rounded shadow-lg min-w-[180px]" align="start">
+      <PopoverContent className="w-auto p-2 rounded shadow-lg min-w-[180px] border-amber-200" align="start">
         <div className="flex flex-col gap-1">
           {isLoadingAvailable ? (
             <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
@@ -140,7 +140,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
                 key={project.id} 
                 variant="ghost" 
                 size="sm"
-                className="justify-start rounded hover:bg-amber-50 text-sm"
+                className="justify-start rounded hover:bg-amber-50 hover:text-amber-800 text-sm"
                 onClick={() => assignProjectToClient(project.id, project.name)}
                 disabled={isUpdating}
               >

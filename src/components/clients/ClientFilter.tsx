@@ -10,15 +10,6 @@ import {
   SelectValue,
   SelectSeparator
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
 
 interface Project {
   id: string;
@@ -68,14 +59,14 @@ export function ClientFilter({
       </div>
       <div className="w-[200px]">
         <Select value={projectFilter} onValueChange={setProjectFilter}>
-          <SelectTrigger>
+          <SelectTrigger className="border-amber-200 text-amber-900 hover:bg-amber-50">
             <SelectValue placeholder="Project" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="border-amber-200">
             <SelectItem value="all">All Projects</SelectItem>
             {projects && projects.length > 0 && (
               <>
-                <SelectSeparator />
+                <SelectSeparator className="bg-amber-100" />
                 {projects.map(project => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
@@ -86,7 +77,7 @@ export function ClientFilter({
           </SelectContent>
         </Select>
       </div>
-      <Button variant="outline" size="icon" onClick={resetFilters} className="shrink-0">
+      <Button variant="outline" size="icon" onClick={resetFilters} className="shrink-0 border-amber-200 text-amber-800 hover:bg-amber-50">
         ✕
       </Button>
     </div>

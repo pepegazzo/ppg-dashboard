@@ -187,7 +187,7 @@ export const ClientsTable = ({
                   <TableCell colSpan={2}>
                     <div className="py-3">
                       <div className="font-semibold mb-1">Contacts</div>
-                      {client.contacts && client.contacts.length > 0 ? <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-muted/30">
+                      {client.contacts && client.contacts.length > 0 ? <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-amber-50/30">
                           {client.contacts.map((contact: Contact) => <div key={contact.id} className="p-3 flex flex-col gap-2">
                               <span className="font-medium">{contact.name}</span>
                               <div className="grid grid-cols-3 gap-3 mt-1 text-zinc-700 text-[13px]">
