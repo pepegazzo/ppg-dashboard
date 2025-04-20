@@ -8,7 +8,8 @@ import { Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/clients";
-import { Badge } from "@/components/ui/badge"; // Added import for Badge
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ClientContactsModalProps {
   clientId: string;
@@ -22,19 +23,22 @@ type ContactForm = {
   role?: string;
   email?: string;
   phone?: string;
-  is_primary?: boolean;
 };
 
 export default function ClientContactsModal({ clientId, currentContacts, onClose, onChanged }: ClientContactsModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPrimaryChanging, setIsPrimaryChanging] = useState(false);
   const { toast } = useToast();
-  const [form, setForm] = useState<ContactForm>({ name: "", role: "", email: "", phone: "", is_primary: false });
+  const [form, setForm] = useState<ContactForm>({ name: "", role: "", email: "", phone: "" });
+  const [primaryContactId, setPrimaryContactId] = useState<string | null>(
+    currentContacts.find(contact => contact.is_primary)?.id || null
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm(f => ({
       ...f,
-      [name]: type === "checkbox" ? checked : value
+      [name]: value
     }));
   };
 
@@ -43,19 +47,32 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
     setIsSubmitting(true);
     try {
       if (!form.name) throw new Error("Name is required");
-      await supabase.from("contacts").insert({
+      
+      // Check if this is the first contact (make it primary by default)
+      const makePrimary = currentContacts.length === 0;
+      
+      // Add the new contact
+      const { data, error } = await supabase.from("contacts").insert({
         company_id: clientId,
         name: form.name,
         role: form.role || null,
         email: form.email || null,
         phone: form.phone || null,
-        is_primary: form.is_primary ?? false,
-      });
+        is_primary: makePrimary
+      }).select();
+      
+      if (error) throw error;
+      
+      // If this was made primary, update state
+      if (makePrimary && data && data[0]) {
+        setPrimaryContactId(data[0].id);
+      }
+      
       toast({
         title: "Contact added",
         description: `${form.name} was added to this company.`
       });
-      setForm({ name: "", role: "", email: "", phone: "", is_primary: false });
+      setForm({ name: "", role: "", email: "", phone: "" });
       onChanged();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -64,7 +81,35 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
     }
   };
 
-  // Optionally: add editing/removal of contacts in the future
+  const handlePrimaryChange = async (contactId: string) => {
+    if (contactId === primaryContactId) return;
+    
+    setIsPrimaryChanging(true);
+    try {
+      // First, remove primary flag from all contacts
+      await supabase
+        .from("contacts")
+        .update({ is_primary: false })
+        .eq("company_id", clientId);
+      
+      // Then set the selected contact as primary
+      await supabase
+        .from("contacts")
+        .update({ is_primary: true })
+        .eq("id", contactId);
+      
+      setPrimaryContactId(contactId);
+      toast({
+        title: "Primary contact updated",
+        description: "The primary contact for this company has been updated."
+      });
+      onChanged();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsPrimaryChanging(false);
+    }
+  };
 
   return (
     <Dialog open onOpenChange={open => !open && onClose()}>
@@ -77,17 +122,36 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
             {currentContacts.length === 0 && (
               <span className="text-muted-foreground mb-3 text-xs">No contacts for this company.</span>
             )}
-            {currentContacts.map(contact => (
-              <div key={contact.id} className="bg-muted/20 rounded px-3 py-2 mb-2 flex flex-col gap-0.5">
-                <span className="font-medium">
-                  {contact.name} {contact.is_primary && <Badge className="ml-2" variant="secondary">Primary</Badge>}
-                </span>
-                {contact.role && <span className="text-xs">{contact.role}</span>}
-                {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
-                {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
-                {/* Contact removal or edit UI can be added later */}
+            {currentContacts.length > 0 && (
+              <div className="mb-4">
+                <Label className="text-sm mb-2 block">Primary Contact</Label>
+                <RadioGroup
+                  value={primaryContactId || undefined}
+                  onValueChange={handlePrimaryChange}
+                  className="space-y-1"
+                  disabled={isPrimaryChanging}
+                >
+                  {currentContacts.map(contact => (
+                    <div key={contact.id} className={`bg-muted/20 rounded px-3 py-2 mb-2 flex items-start gap-2 ${contact.id === primaryContactId ? 'border border-primary' : ''}`}>
+                      <RadioGroupItem value={contact.id} id={`radio-${contact.id}`} className="mt-1" />
+                      <div className="flex flex-col gap-0.5 flex-1">
+                        <label htmlFor={`radio-${contact.id}`} className="font-medium cursor-pointer">
+                          {contact.name} {contact.is_primary && <Badge className="ml-2" variant="secondary">Primary</Badge>}
+                        </label>
+                        {contact.role && <span className="text-xs">{contact.role}</span>}
+                        {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
+                        {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </RadioGroup>
+                {isPrimaryChanging && (
+                  <div className="flex items-center text-xs text-muted-foreground mt-1">
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Updating primary contact...
+                  </div>
+                )}
               </div>
-            ))}
+            )}
           </div>
         </div>
         <form onSubmit={handleAdd} className="space-y-2 border-t pt-3 mt-2">
@@ -111,12 +175,6 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
               <Label htmlFor="contact_phone">Phone</Label>
               <Input id="contact_phone" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
             </div>
-            <div>
-              <label className="inline-flex items-center">
-                <input type="checkbox" name="is_primary" checked={form.is_primary} onChange={handleChange} className="mr-2" />
-                Primary Contact
-              </label>
-            </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Close</Button>
@@ -130,4 +188,3 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
     </Dialog>
   );
 }
-
