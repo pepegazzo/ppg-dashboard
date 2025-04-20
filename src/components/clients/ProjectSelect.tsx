@@ -1,18 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@/types/clients";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
 
 interface ProjectSelectProps {
   clientId: string;
@@ -212,83 +207,73 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {assignedProjects && assignedProjects.length > 0 ? (
-          assignedProjects.map((project: any) => (
-            <Badge 
-              key={project.id} 
-              variant="secondary"
-              className="flex items-center gap-1 py-1 pr-1"
-            >
-              {project.name}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 rounded-full ml-1 hover:bg-red-100"
-                onClick={() => removeProjectFromClient(project.id, project.name)}
-              >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Remove</span>
-              </Button>
-            </Badge>
-          ))
-        ) : (
-          <Badge variant="outline" className="bg-slate-50">No projects</Badge>
-        )}
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="rounded-full h-6 w-6"
-                    disabled={isUpdating || (availableProjects && availableProjects.length === 0)}
+      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-auto p-0 font-normal hover:bg-transparent"
+            disabled={isUpdating}
+          >
+            <div className="flex flex-wrap gap-2">
+              {assignedProjects && assignedProjects.length > 0 ? (
+                assignedProjects.map((project: any) => (
+                  <Badge 
+                    key={project.id} 
+                    variant="secondary"
+                    className="flex items-center gap-1 py-1 pr-1"
                   >
-                    {isUpdating ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Plus className="h-3 w-3" />
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-2" align="start">
-                  <div className="flex flex-col gap-1 min-w-[150px]">
-                    {isLoadingAvailable ? (
-                      <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Loading...
-                      </div>
-                    ) : availableProjects && availableProjects.length > 0 ? (
-                      availableProjects.map((project) => (
-                        <Button 
-                          key={project.id} 
-                          variant="ghost" 
-                          size="sm" 
-                          className="justify-start" 
-                          onClick={() => assignProjectToClient(project.id, project.name)}
-                          disabled={isUpdating}
-                        >
-                          {project.name}
-                        </Button>
-                      ))
-                    ) : (
-                      <div className="text-sm text-muted-foreground p-2">
-                        No available projects
-                      </div>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Assign project</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+                    {project.name}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 rounded-full ml-1 hover:bg-red-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeProjectFromClient(project.id, project.name);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove</span>
+                    </Button>
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-muted-foreground">
+                  Click to assign projects
+                </span>
+              )}
+            </div>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-2" align="start">
+          <div className="flex flex-col gap-1 min-w-[150px]">
+            {isLoadingAvailable ? (
+              <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading...
+              </div>
+            ) : availableProjects && availableProjects.length > 0 ? (
+              availableProjects.map((project) => (
+                <Button 
+                  key={project.id} 
+                  variant="ghost" 
+                  size="sm" 
+                  className="justify-start" 
+                  onClick={() => assignProjectToClient(project.id, project.name)}
+                  disabled={isUpdating}
+                >
+                  {project.name}
+                </Button>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground p-2">
+                No available projects
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
