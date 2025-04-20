@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useToast } from "@/hooks/use-toast";
 import { BillingFilter } from "./BillingFilter";
 import { DeleteInvoiceDialog } from "./DeleteInvoiceDialog";
+
 interface Invoice {
   id: string;
   invoice_number: string;
@@ -25,15 +26,21 @@ interface Invoice {
     client_name: string;
   };
 }
+
 type SortableField = keyof Invoice | 'project.name' | 'project.client_name' | 'description';
-export function InvoiceTable() {
+
+interface InvoiceTableProps {
+  initialProjectFilter?: string | null;
+}
+
+export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
   const {
     toast
   } = useToast();
   const queryClient = useQueryClient();
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
   const [invoiceFilter, setInvoiceFilter] = useState("");
-  const [projectFilter, setProjectFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState(initialProjectFilter || "");
   const [clientFilter, setClientFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
@@ -45,12 +52,14 @@ export function InvoiceTable() {
     field: 'issue_date',
     direction: 'desc'
   });
+
   const resetFilters = () => {
     setInvoiceFilter("");
     setProjectFilter("");
     setClientFilter("");
     setStatusFilter("all");
   };
+
   const {
     data: invoices,
     isLoading,
@@ -109,6 +118,7 @@ export function InvoiceTable() {
       return filteredData;
     }
   });
+
   const toggleSort = (field: SortableField) => {
     setSortBy(prevSort => {
       if (prevSort.field === field) {
@@ -123,6 +133,7 @@ export function InvoiceTable() {
       };
     });
   };
+
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'paid':
@@ -135,12 +146,14 @@ export function InvoiceTable() {
         return <Badge variant="outline" className="w-fit">{status}</Badge>;
     }
   };
+
   const renderSortIndicator = (field: SortableField) => {
     if (sortBy.field === field) {
       return sortBy.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4 inline" /> : <ChevronDown className="ml-1 h-4 w-4 inline" />;
     }
     return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
   };
+
   const updateInvoiceStatus = async (invoiceId: string, newStatus: string) => {
     try {
       setUpdatingInvoiceId(invoiceId);
@@ -183,9 +196,11 @@ export function InvoiceTable() {
       setUpdatingInvoiceId(null);
     }
   };
+
   const toggleInvoiceSelection = (invoiceId: string) => {
     setSelectedInvoices(prev => prev.includes(invoiceId) ? prev.filter(id => id !== invoiceId) : [...prev, invoiceId]);
   };
+
   const toggleSelectAll = () => {
     if (invoices) {
       if (selectedInvoices.length === invoices.length) {
@@ -195,6 +210,7 @@ export function InvoiceTable() {
       }
     }
   };
+
   const handleDeleteSuccess = () => {
     queryClient.invalidateQueries({
       queryKey: ['invoices']
@@ -203,11 +219,13 @@ export function InvoiceTable() {
       queryKey: ['billing-stats']
     });
   };
+
   if (error) {
     return <div className="bg-white border border-red-200 rounded-md p-4 text-center shadow-sm">
         <p className="text-destructive">Error loading invoices: {(error as Error).message}</p>
       </div>;
   }
+
   return <div className="space-y-4">
       {selectedInvoices.length > 0 && <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
           <span className="text-sm">

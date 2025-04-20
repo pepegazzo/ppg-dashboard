@@ -1,17 +1,22 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { BillingStats } from "@/components/billing/BillingStats";
 import { InvoiceTable } from "@/components/billing/InvoiceTable";
 import { CreateInvoiceForm } from "@/components/billing/CreateInvoiceForm";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw } from "lucide-react";
 
 const Billing = () => {
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Get project filter from URL
+  const projectFromUrl = searchParams.get('project');
   
   const handleInvoiceCreated = () => {
     queryClient.invalidateQueries({ queryKey: ['invoices'] });
@@ -64,7 +69,7 @@ const Billing = () => {
           
           <div>
             <h2 className="text-xl font-semibold mb-4">Invoices</h2>
-            <InvoiceTable />
+            <InvoiceTable initialProjectFilter={projectFromUrl} />
           </div>
         </div>
       </div>
