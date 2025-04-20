@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { Project } from "../types";
-import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
@@ -14,8 +12,7 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
-import { ProjectClientCell } from "./ProjectClientCell";
-import { Link } from "react-router-dom";
+import { ProjectClientCell } from "../../projects/ProjectClientCell";
 
 interface ProjectTableRowProps {
   project: Project;

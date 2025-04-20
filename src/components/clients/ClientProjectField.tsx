@@ -32,13 +32,16 @@ export default function ClientProjectField({
   const { data: availableProjects } = useQuery({
     queryKey: ['available-projects', clientId],
     queryFn: async () => {
-      const { data: activeProjectIds } = await supabase
-        .from('client_active_projects')
-        .select('project_id')
-        .eq('client_id', clientId);
-
-      const excludedIds = activeProjectIds?.map(p => p.project_id) || [];
+      // Get the current project for this client if any
+      const { data: clientProject } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('client_id', clientId)
+        .single();
       
+      const excludedIds = clientProject ? [clientProject.id] : [];
+      
+      // Get all projects that aren't already assigned to this client
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
@@ -54,12 +57,14 @@ export default function ClientProjectField({
     try {
       setIsUpdating(true);
       
+      // Update the project to use this client as its client
       const { error } = await supabase
-        .from('client_active_projects')
-        .insert({ 
+        .from('projects')
+        .update({ 
           client_id: clientId,
-          project_id: projectId
-        });
+          client_name: clientName
+        })
+        .eq('id', projectId);
       
       if (error) throw error;
       

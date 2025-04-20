@@ -26,24 +26,23 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch all clients that have this project as active
+  // Fetch all clients that could be assigned to this project
   const { data: availableClients } = useQuery({
     queryKey: ['project-available-clients', projectId],
     queryFn: async () => {
+      // Get all clients that don't have a project assigned
       const { data, error } = await supabase
-        .from('client_active_projects')
+        .from('clients')
         .select(`
-          client_id,
-          clients (
-            id,
-            name,
-            company
-          )
+          id,
+          name,
+          company
         `)
-        .eq('project_id', projectId);
+        .is('id', null)
+        .in('id', supabase.from('projects').select('client_id').not('id', 'eq', projectId));
       
       if (error) throw error;
-      return data?.map(row => row.clients) || [];
+      return data || [];
     }
   });
 
@@ -97,16 +96,6 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
         .single();
       
       if (clientError) throw clientError;
-      
-      // Add the project as active for this client
-      const { error: activeProjectError } = await supabase
-        .from('client_active_projects')
-        .insert({ 
-          client_id: newClient.id,
-          project_id: projectId
-        });
-      
-      if (activeProjectError) throw activeProjectError;
       
       // Set as the project's main client
       const { error: projectError } = await supabase
