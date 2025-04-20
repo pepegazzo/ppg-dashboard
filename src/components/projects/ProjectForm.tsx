@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,10 +35,25 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     try {
       setIsSubmitting(true);
       
+      // If a client was selected, get their name
+      let clientName = "";
+      if (values.client_id) {
+        const { data: client } = await supabase
+          .from('clients')
+          .select('name')
+          .eq('id', values.client_id)
+          .single();
+        
+        if (client) {
+          clientName = client.name;
+        }
+      }
+      
       // Create properly typed data object for Supabase
       const projectPayload = {
         name: values.name,
-        client_name: values.client_name,
+        client_id: values.client_id || null,
+        client_name: clientName || "No Client",
         status: values.status,
         priority: values.priority,
         start_date: values.start_date || null,

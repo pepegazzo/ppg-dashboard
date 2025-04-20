@@ -1,4 +1,3 @@
-
 import { Control } from "react-hook-form";
 import { ProjectFormValues } from "./types";
 import { ProjectTextField } from "./ProjectTextField";
@@ -7,6 +6,7 @@ import { ProjectPriorityField } from "./ProjectPriorityField";
 import { ProjectDateField } from "./ProjectDateField";
 import { ProjectPackageField } from "./ProjectPackageField";
 import { ProjectRevenueField } from "./ProjectRevenueField";
+import { ProjectClientField } from "./ProjectClientField";
 
 interface ProjectFormFieldsProps {
   control: Control<ProjectFormValues>;
@@ -22,12 +22,7 @@ export function ProjectFormFields({ control }: ProjectFormFieldsProps) {
         placeholder="Enter project name" 
       />
       
-      <ProjectTextField 
-        control={control} 
-        name="client_name" 
-        label="Client Name" 
-        placeholder="Enter client name" 
-      />
+      <ProjectClientField control={control} />
       
       <ProjectStatusField control={control} />
       
