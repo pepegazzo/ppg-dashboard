@@ -32,10 +32,12 @@ interface Invoice {
   };
 }
 
+type SortableField = keyof Invoice | 'project.name' | 'project.client_name';
+
 export function InvoiceTable() {
   const { toast } = useToast();
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<{ field: keyof Invoice | 'project.name' | 'project.client_name'; direction: 'asc' | 'desc' }>({ 
+  const [sortBy, setSortBy] = useState<{ field: SortableField; direction: 'asc' | 'desc' }>({ 
     field: 'issue_date', 
     direction: 'desc'
   });
@@ -43,17 +45,7 @@ export function InvoiceTable() {
   const { data: invoices, isLoading, error } = useQuery({
     queryKey: ['invoices', sortBy],
     queryFn: async () => {
-      let orderField: string;
-      
-      if (sortBy.field === 'project.name') {
-        orderField = 'project.name';
-      } else if (sortBy.field === 'project.client_name') {
-        orderField = 'project.client_name';
-      } else {
-        orderField = sortBy.field;
-      }
-      
-      const { data, error } = await supabase
+      let query = supabase
         .from('invoices')
         .select(`
           *,
@@ -61,15 +53,50 @@ export function InvoiceTable() {
             name,
             client_name
           )
-        `)
-        .order(orderField, { ascending: sortBy.direction === 'asc' });
+        `);
+      
+      // Handle sorting differently based on field type
+      if (sortBy.field === 'project.name') {
+        // For project fields, we'll sort after fetching
+        query = query.order('id'); // Just use a default order in the query
+      } else if (sortBy.field === 'project.client_name') {
+        // For project fields, we'll sort after fetching
+        query = query.order('id'); // Just use a default order in the query
+      } else {
+        // For direct invoice fields, we can use Supabase's order
+        query = query.order(sortBy.field, { ascending: sortBy.direction === 'asc' });
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
-      return data as Invoice[];
+      
+      let sortedData = [...(data as Invoice[])];
+      
+      // Handle sorting for nested fields after data is fetched
+      if (sortBy.field === 'project.name') {
+        sortedData.sort((a, b) => {
+          const aValue = a.project?.name || '';
+          const bValue = b.project?.name || '';
+          return sortBy.direction === 'asc' 
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        });
+      } else if (sortBy.field === 'project.client_name') {
+        sortedData.sort((a, b) => {
+          const aValue = a.project?.client_name || '';
+          const bValue = b.project?.client_name || '';
+          return sortBy.direction === 'asc' 
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        });
+      }
+      
+      return sortedData;
     }
   });
 
-  const toggleSort = (field: keyof Invoice | 'project.name' | 'project.client_name') => {
+  const toggleSort = (field: SortableField) => {
     setSortBy(prevSort => {
       if (prevSort.field === field) {
         return { field, direction: prevSort.direction === 'asc' ? 'desc' : 'asc' };
@@ -91,7 +118,7 @@ export function InvoiceTable() {
     }
   };
 
-  const renderSortIndicator = (field: keyof Invoice | 'project.name' | 'project.client_name') => {
+  const renderSortIndicator = (field: SortableField) => {
     if (sortBy.field === field) {
       return sortBy.direction === 'asc' ? 
         <ChevronUp className="ml-1 h-4 w-4 inline" /> : 
