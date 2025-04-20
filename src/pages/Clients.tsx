@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, RefreshCw } from "lucide-react";
+import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InlineEdit from "@/components/clients/InlineEdit";
 import ClientModal from "@/components/clients/ClientModal";
@@ -288,7 +288,6 @@ const Clients = () => {
                 Add Client
               </Button>
               <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-                <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
             </div>

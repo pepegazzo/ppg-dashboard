@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -54,7 +53,6 @@ const Billing = () => {
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
             </div>
