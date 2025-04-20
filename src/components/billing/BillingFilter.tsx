@@ -1,74 +1,81 @@
 
-import { Check, Filter, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface BillingFilterProps {
-  selectedStatus: string | null;
-  onStatusChange: (status: string | null) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
+  invoiceFilter: string;
+  setInvoiceFilter: (value: string) => void;
+  projectFilter: string;
+  setProjectFilter: (value: string) => void;
+  clientFilter: string;
+  setClientFilter: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  resetFilters: () => void;
 }
 
-export function BillingFilter({ 
-  selectedStatus, 
-  onStatusChange,
-  searchQuery,
-  onSearchChange,
+export function BillingFilter({
+  invoiceFilter,
+  setInvoiceFilter,
+  projectFilter,
+  setProjectFilter,
+  clientFilter,
+  setClientFilter,
+  statusFilter,
+  setStatusFilter,
+  resetFilters,
 }: BillingFilterProps) {
-  const statuses = ["paid", "pending", "overdue"];
-
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-4">
       <div className="flex-1">
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search invoices..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Filter by invoice number..."
+            value={invoiceFilter}
+            onChange={(e) => setInvoiceFilter(e.target.value)}
             className="pl-8"
           />
         </div>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-10">
-            <Filter className="mr-2 h-4 w-4" />
-            {selectedStatus ? (
-              <>
-                Status: <span className="ml-1 capitalize">{selectedStatus}</span>
-              </>
-            ) : (
-              "Filter"
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[200px]">
-          <DropdownMenuItem onClick={() => onStatusChange(null)}>
-            <Check className={`mr-2 h-4 w-4 ${!selectedStatus ? 'opacity-100' : 'opacity-0'}`} />
-            All Statuses
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {statuses.map((status) => (
-            <DropdownMenuItem key={status} onClick={() => onStatusChange(status)}>
-              <Check
-                className={`mr-2 h-4 w-4 ${
-                  selectedStatus === status ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-              <span className="capitalize">{status}</span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex-1">
+        <Input
+          placeholder="Filter by project name..."
+          value={projectFilter}
+          onChange={(e) => setProjectFilter(e.target.value)}
+        />
+      </div>
+      <div className="flex-1">
+        <Input
+          placeholder="Filter by client name..."
+          value={clientFilter}
+          onChange={(e) => setClientFilter(e.target.value)}
+        />
+      </div>
+      <div className="w-[180px]">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Paid">Paid</SelectItem>
+            <SelectItem value="Overdue">Overdue</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button variant="outline" size="icon" onClick={resetFilters} className="shrink-0">
+        ✕
+      </Button>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,8 +40,10 @@ export function InvoiceTable() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [invoiceFilter, setInvoiceFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState("");
+  const [clientFilter, setClientFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sortBy, setSortBy] = useState<{ field: SortableField; direction: 'asc' | 'desc' }>({ 
@@ -50,11 +51,16 @@ export function InvoiceTable() {
     direction: 'desc'
   });
 
+  const resetFilters = () => {
+    setInvoiceFilter("");
+    setProjectFilter("");
+    setClientFilter("");
+    setStatusFilter("all");
+  };
+
   const { data: invoices, isLoading, error } = useQuery({
-    queryKey: ['invoices', sortBy, selectedStatus, searchQuery],
+    queryKey: ['invoices', sortBy, statusFilter, invoiceFilter, projectFilter, clientFilter],
     queryFn: async () => {
-      console.log("Search query:", searchQuery); // Debug log
-      
       let query = supabase
         .from('invoices')
         .select(`
@@ -65,17 +71,10 @@ export function InvoiceTable() {
           )
         `);
       
-      if (selectedStatus) {
-        query = query.eq('status', selectedStatus);
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
       }
 
-      if (searchQuery && searchQuery.trim() !== '') {
-        query = query.or(
-          `invoice_number.ilike.%${searchQuery}%,` +
-          `description.ilike.%${searchQuery}%`
-        );
-      }
-      
       if (sortBy.field === 'project.name' || sortBy.field === 'project.client_name') {
         query = query.order('id');
       } else {
@@ -89,22 +88,28 @@ export function InvoiceTable() {
         throw error;
       }
       
-      console.log("Raw data returned:", data); // Debug log
-      
       let filteredData = [...(data as Invoice[])];
       
-      if (searchQuery && searchQuery.trim() !== '') {
-        const lowerSearchQuery = searchQuery.toLowerCase();
+      // Apply client-side filters
+      if (invoiceFilter) {
         filteredData = filteredData.filter(invoice => 
-          invoice.project?.name?.toLowerCase().includes(lowerSearchQuery) ||
-          invoice.project?.client_name?.toLowerCase().includes(lowerSearchQuery) ||
-          invoice.invoice_number.toLowerCase().includes(lowerSearchQuery) ||
-          (invoice.description && invoice.description.toLowerCase().includes(lowerSearchQuery))
+          invoice.invoice_number.toLowerCase().includes(invoiceFilter.toLowerCase())
+        );
+      }
+
+      if (projectFilter) {
+        filteredData = filteredData.filter(invoice => 
+          invoice.project?.name?.toLowerCase().includes(projectFilter.toLowerCase())
+        );
+      }
+
+      if (clientFilter) {
+        filteredData = filteredData.filter(invoice => 
+          invoice.project?.client_name?.toLowerCase().includes(clientFilter.toLowerCase())
         );
       }
       
-      console.log("Filtered data:", filteredData.length); // Debug log
-      
+      // Apply sorting for project-related fields
       if (sortBy.field === 'project.name') {
         filteredData.sort((a, b) => {
           const aValue = a.project?.name || '';
@@ -176,7 +181,7 @@ export function InvoiceTable() {
         return;
       }
 
-      queryClient.setQueryData(['invoices', sortBy, selectedStatus, searchQuery], (oldData: Invoice[] | undefined) => {
+      queryClient.setQueryData(['invoices', sortBy, statusFilter, invoiceFilter, projectFilter, clientFilter], (oldData: Invoice[] | undefined) => {
         if (!oldData) return oldData;
         
         return oldData.map(invoice => 
@@ -253,10 +258,15 @@ export function InvoiceTable() {
       )}
 
       <BillingFilter 
-        selectedStatus={selectedStatus} 
-        onStatusChange={setSelectedStatus}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        invoiceFilter={invoiceFilter}
+        setInvoiceFilter={setInvoiceFilter}
+        projectFilter={projectFilter}
+        setProjectFilter={setProjectFilter}
+        clientFilter={clientFilter}
+        setClientFilter={setClientFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        resetFilters={resetFilters}
       />
       
       <div className="rounded-md border">
