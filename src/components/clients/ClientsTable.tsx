@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronDown, ChevronUp, ArrowUpDown, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, User, Briefcase } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import ClientContactsModal from "./ClientContactsModal";
 import { Project, Client, Contact } from "@/types/clients";
@@ -69,9 +69,8 @@ export const ClientsTable = ({
             >
               Company / Brand {renderSortIndicator('company_name', sortConfig)}
             </TableHead>
-            {/* Remove Website column */}
             <TableHead>
-              Projects
+              Active Projects
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -95,9 +94,24 @@ export const ClientsTable = ({
                     {openAccordionId === client.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </TableCell>
-                {/* Projects column */}
+                {/* Active Projects column */}
                 <TableCell>
-                  <ProjectSelect clientId={client.id} onUpdate={handleProjectUpdate} />
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {/* Show only projects not completed/cancelled */}
+                    {client.active_projects
+                      ?.filter(p => p.status !== "Completed" && p.status !== "Cancelled")
+                      .map((p: any) => (
+                        <span
+                          key={p.id}
+                          className="inline-block px-2 py-1 bg-purple-100 text-vividPurple-700 rounded text-xs font-medium"
+                          style={{ background: "#E5DEFF", color: "#6E59A5" }}
+                        >{p.name}</span>
+                      ))}
+                    {(client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").length === 0) && (
+                      <span className="text-xs text-muted-foreground">No active projects</span>
+                    )}
+                    <ProjectSelect clientId={client.id} onUpdate={handleProjectUpdate} />
+                  </div>
                 </TableCell>
               </TableRow>
               {/* Accordion: expand contacts on row open */}
@@ -111,11 +125,28 @@ export const ClientsTable = ({
                         <div className="divide-y divide-muted-foreground/10 rounded border border-muted/30 bg-muted/30">
                           {client.contacts.map((contact: Contact) => (
                             <div key={contact.id} className="p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                              <span className="font-medium">{contact.name}</span>
-                              <div className="flex flex-col md:flex-row md:gap-3">
-                                {contact.role && <span className="text-xs">{contact.role}</span>}
-                                {contact.email && <span className="text-xs text-muted-foreground">{contact.email}</span>}
-                                {contact.phone && <span className="text-xs text-muted-foreground">{contact.phone}</span>}
+                              <span className="font-medium flex items-center gap-2">
+                                <User className="h-4 w-4 text-purple-400" />{contact.name}
+                              </span>
+                              <div className="flex flex-col md:flex-row md:gap-4 gap-1 text-zinc-700 text-[13px]">
+                                {contact.role && (
+                                  <span className="flex items-center gap-1 text-[13px]">
+                                    <Briefcase className="h-4 w-4 text-[#7E69AB]" />
+                                    <span className="">{contact.role}</span>
+                                  </span>
+                                )}
+                                {contact.email && (
+                                  <span className="flex items-center gap-1 text-[13px]">
+                                    <Mail className="h-4 w-4 text-[#8B5CF6]" />
+                                    <span className="underline">{contact.email}</span>
+                                  </span>
+                                )}
+                                {contact.phone && (
+                                  <span className="flex items-center gap-1 text-[13px]">
+                                    <Phone className="h-4 w-4 text-[#0FA0CE]" />
+                                    <span>{contact.phone}</span>
+                                  </span>
+                                )}
                               </div>
                             </div>
                           ))}
