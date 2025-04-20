@@ -39,13 +39,14 @@ export function InvoiceTable() {
   const queryClient = useQueryClient();
   const [updatingInvoiceId, setUpdatingInvoiceId] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<{ field: SortableField; direction: 'asc' | 'desc' }>({ 
     field: 'issue_date', 
     direction: 'desc'
   });
 
   const { data: invoices, isLoading, error } = useQuery({
-    queryKey: ['invoices', sortBy, selectedStatus],
+    queryKey: ['invoices', sortBy, selectedStatus, searchQuery],
     queryFn: async () => {
       let query = supabase
         .from('invoices')
@@ -59,6 +60,10 @@ export function InvoiceTable() {
       
       if (selectedStatus) {
         query = query.eq('status', selectedStatus);
+      }
+
+      if (searchQuery) {
+        query = query.or(`invoice_number.ilike.%${searchQuery}%,project.name.ilike.%${searchQuery}%,project.client_name.ilike.%${searchQuery}%`);
       }
       
       if (sortBy.field === 'project.name' || sortBy.field === 'project.client_name') {
@@ -144,7 +149,7 @@ export function InvoiceTable() {
         return;
       }
 
-      queryClient.setQueryData(['invoices', sortBy, selectedStatus], (oldData: Invoice[] | undefined) => {
+      queryClient.setQueryData(['invoices', sortBy, selectedStatus, searchQuery], (oldData: Invoice[] | undefined) => {
         if (!oldData) return oldData;
         
         return oldData.map(invoice => 
@@ -180,9 +185,12 @@ export function InvoiceTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <BillingFilter selectedStatus={selectedStatus} onStatusChange={setSelectedStatus} />
-      </div>
+      <BillingFilter 
+        selectedStatus={selectedStatus} 
+        onStatusChange={setSelectedStatus}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
