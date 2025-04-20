@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,28 +23,22 @@ const Clients = () => {
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      // Temporarily return mock data until we set up the clients table
-      const mockClients: Client[] = [
-        {
-          id: '1',
-          name: 'John Doe',
-          company: 'Tech Corp',
-          role: 'CTO',
-          email: 'john@techcorp.com',
-          phone: '+1 234 567 890',
-          active_projects: 3
-        },
-        {
-          id: '2',
-          name: 'Jane Smith',
-          company: 'Design Studio',
-          role: 'Creative Director',
-          email: 'jane@designstudio.com',
-          phone: '+1 234 567 891',
-          active_projects: 2
-        }
-      ];
-      return mockClients;
+      // Get clients with a count of their active projects
+      const { data, error } = await supabase
+        .from('clients')
+        .select(`
+          *,
+          active_projects:projects(count)
+        `)
+        .returns<(Client & { active_projects: { count: number }[] })[]>();
+
+      if (error) throw error;
+
+      // Transform the data to match our Client interface
+      return data.map(client => ({
+        ...client,
+        active_projects: client.active_projects[0]?.count || 0
+      }));
     }
   });
 

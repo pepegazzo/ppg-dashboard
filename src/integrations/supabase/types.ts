@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      clients: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
@@ -224,6 +257,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_id: string | null
           client_name: string
           created_at: string
           due_date: string | null
@@ -238,6 +272,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_id?: string | null
           client_name: string
           created_at?: string
           due_date?: string | null
@@ -252,6 +287,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_id?: string | null
           client_name?: string
           created_at?: string
           due_date?: string | null
@@ -265,7 +301,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
