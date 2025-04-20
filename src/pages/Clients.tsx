@@ -1,9 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Mail, Phone, PlusCircle, Loader2, Trash2, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -381,19 +389,19 @@ const Clients = () => {
                 </div>
               )}
               
-              <Table>
+              <Table className="border rounded-lg">
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="w-[50px]">
+                    <TableHead className="w-[50px] border-r">
                       <Checkbox 
                         checked={clients?.length > 0 && selectedClients.length === clients?.length}
                         onCheckedChange={handleSelectAll}
                         aria-label="Select all clients"
                       />
                     </TableHead>
-                    <TableHead className="w-[220px]">Name</TableHead>
-                    <TableHead className="w-[180px]">Company & Role</TableHead>
-                    <TableHead className="w-[120px]">Contact</TableHead>
+                    <TableHead className="w-[220px] border-r">Name</TableHead>
+                    <TableHead className="w-[180px] border-r">Company & Role</TableHead>
+                    <TableHead className="w-[120px] border-r">Contact</TableHead>
                     <TableHead className="w-[130px]">Active Projects</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -401,9 +409,9 @@ const Clients = () => {
                   {clients?.map((client) => (
                     <TableRow 
                       key={client.id} 
-                      className="border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted"
+                      className="border-b"
                     >
-                      <TableCell className="p-4 align-middle">
+                      <TableCell className="border-r p-4 align-middle">
                         <Checkbox 
                           checked={selectedClients.includes(client.id)}
                           onCheckedChange={() => toggleClientSelection(client.id)}
