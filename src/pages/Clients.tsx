@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,14 +114,11 @@ const Clients = () => {
       }
 
       if (projectFilter !== 'all') {
-        filteredData = filteredData.filter(client => {
-          if (projectFilter === 'none') {
-            return !client.active_projects || client.active_projects.length === 0;
-          }
-          return client.active_projects?.some(project => 
+        filteredData = filteredData.filter(client => 
+          client.active_projects?.some(project => 
             project.id === projectFilter
-          );
-        });
+          )
+        );
       }
 
       return filteredData;

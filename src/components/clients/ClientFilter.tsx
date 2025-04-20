@@ -73,7 +73,6 @@ export function ClientFilter({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Projects</SelectItem>
-            <SelectItem value="none">No Projects</SelectItem>
             {projects && projects.length > 0 && (
               <>
                 <SelectSeparator />
