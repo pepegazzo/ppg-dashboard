@@ -15,16 +15,15 @@ interface ProjectFormFieldsProps {
 
 export function ProjectFormFields({ control }: ProjectFormFieldsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
+    <div className="space-y-6">
+      {/* Row 1 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProjectTextField 
           control={control} 
           name="name" 
           label="Project Name" 
           placeholder="Enter project name" 
         />
-      </div>
-      <div>
         <ProjectTextField
           control={control}
           name="slug"
@@ -33,28 +32,26 @@ export function ProjectFormFields({ control }: ProjectFormFieldsProps) {
         />
       </div>
 
-      <div>
+      {/* Row 2 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProjectClientField control={control} />
-      </div>
-      <div>
         <ProjectStatusField control={control} />
       </div>
 
-      <div>
+      {/* Row 3 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProjectPriorityField control={control} />
-      </div>
-      <div>
         <ProjectDateField control={control} name="start_date" label="Start Date" />
       </div>
 
-      <div>
+      {/* Row 4 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProjectDateField control={control} name="due_date" label="Due Date" />
-      </div>
-      <div>
         <ProjectPackageField control={control} />
       </div>
       
-      <div className="md:col-span-2">
+      {/* Revenue field that spans full width */}
+      <div>
         <ProjectRevenueField control={control} />
       </div>
     </div>

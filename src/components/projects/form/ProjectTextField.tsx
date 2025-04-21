@@ -17,10 +17,15 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="h-full flex flex-col">
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input placeholder={placeholder} {...field} autoComplete="off" />
+            <Input 
+              placeholder={placeholder} 
+              {...field} 
+              className="h-10" 
+              autoComplete="off" 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
