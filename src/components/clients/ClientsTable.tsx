@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase, X } from "lucide-react";
@@ -27,7 +26,7 @@ interface ClientsTableProps {
 
 const renderSortIndicator = (key: keyof Client | 'company' | 'email' | 'active_projects', sortConfig: ClientsTableProps['sortConfig']) => {
   if (sortConfig.key === key) {
-    return sortConfig.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4 inline text-purple-500" /> : <ChevronDown className="ml-1 h-4 w-4 inline text-purple-500" />;
+    return sortConfig.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4 inline" /> : <ChevronDown className="ml-1 h-4 w-4 inline" />;
   }
   return <ArrowUpDown className="ml-1 h-4 w-4 inline opacity-40" />;
 };
@@ -125,10 +124,10 @@ export const ClientsTable = ({
   };
 
   return (
-    <div className="rounded-md border border-purple-200">
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <TableRow className="bg-purple-50/50 hover:bg-purple-50/50">
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
             <TableHead className="w-[50px]">
               <Checkbox 
                 checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
@@ -147,7 +146,7 @@ export const ClientsTable = ({
         <TableBody>
           {filteredAndSortedClients?.map(client => (
             <React.Fragment key={client.id}>
-              <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-purple-50/20' : ''}`} onClick={() => handleRowClick(client.id)}>
+              <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
                 <TableCell>
                   <Checkbox 
                     checked={selectedClients.includes(client.id)} 
@@ -157,7 +156,7 @@ export const ClientsTable = ({
                 </TableCell>
                 <TableCell className="font-medium flex items-center gap-2">
                   {client.company_name}
-                  <span className="ml-2 text-purple-500">
+                  <span className="ml-2 text-amber-500">
                     {openAccordionId === client.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </TableCell>
@@ -167,12 +166,12 @@ export const ClientsTable = ({
                       <Badge
                         key={project.id}
                         variant="outline"
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-800 border-purple-200"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-800 border-amber-200"
                       >
                         {project.name}
                         <button
                           type="button"
-                          className="ml-1 p-0.5 rounded-full hover:bg-purple-100 transition-colors"
+                          className="ml-1 p-0.5 rounded-full hover:bg-amber-100 transition-colors"
                           aria-label={`Remove ${project.name}`}
                           tabIndex={0}
                           onClick={e => {
@@ -180,7 +179,7 @@ export const ClientsTable = ({
                             removeProjectFromClient(client.id, project.id, project.name);
                           }}
                         >
-                          <X className="w-3 h-3 text-purple-500" />
+                          <X className="w-3 h-3 text-amber-500" />
                         </button>
                       </Badge>
                     ))}
@@ -192,45 +191,45 @@ export const ClientsTable = ({
                 </TableCell>
               </TableRow>
               {openAccordionId === client.id && (
-                <TableRow className="bg-purple-50/10">
+                <TableRow className="bg-muted/10">
                   <TableCell />
                   <TableCell colSpan={2}>
                     <div className="py-3">
-                      <div className="font-semibold mb-1 text-purple-900">Contacts</div>
+                      <div className="font-semibold mb-1 text-amber-900">Contacts</div>
                       {client.contacts && client.contacts.length > 0 ? (
-                        <div className="divide-y divide-purple-100 rounded border border-purple-200 bg-purple-50/30">
+                        <div className="divide-y divide-amber-100 rounded border border-amber-200 bg-amber-50/30">
                           {client.contacts.map((contact: Contact) => (
                             <div key={contact.id} className="p-3 flex flex-col gap-2">
-                              <span className="font-medium text-purple-900">{contact.name}</span>
-                              <div className="grid grid-cols-3 gap-3 mt-1 text-purple-800 text-[13px]">
+                              <span className="font-medium text-amber-900">{contact.name}</span>
+                              <div className="grid grid-cols-3 gap-3 mt-1 text-amber-800 text-[13px]">
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Briefcase className="h-4 w-4 text-purple-500" />
+                                    <Briefcase className="h-4 w-4 text-amber-500" />
                                   </span>
-                                  <span className="truncate">{contact.role || <span className="text-purple-400">—</span>}</span>
+                                  <span className="truncate">{contact.role || <span className="text-amber-400">—</span>}</span>
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Mail className="h-4 w-4 text-purple-500" />
+                                    <Mail className="h-4 w-4 text-amber-500" />
                                   </span>
                                   {contact.email ? (
-                                    <span className="underline truncate text-purple-700">{contact.email}</span>
+                                    <span className="underline truncate text-amber-700">{contact.email}</span>
                                   ) : (
-                                    <span className="text-purple-400">—</span>
+                                    <span className="text-amber-400">—</span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-1 min-w-0">
                                   <span>
-                                    <Phone className="h-4 w-4 text-purple-500" />
+                                    <Phone className="h-4 w-4 text-amber-500" />
                                   </span>
-                                  <span className="truncate">{contact.phone || <span className="text-purple-400">—</span>}</span>
+                                  <span className="truncate">{contact.phone || <span className="text-amber-400">—</span>}</span>
                                 </div>
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-purple-400 text-xs">No contacts</span>
+                        <span className="text-amber-400 text-xs">No contacts</span>
                       )}
                       <Button 
                         onClick={e => {
@@ -240,7 +239,7 @@ export const ClientsTable = ({
                         type="button" 
                         variant="outline"
                         size="sm"
-                        className="mt-3 text-xs text-purple-800 hover:bg-purple-50 border-purple-200"
+                        className="mt-3 text-xs text-amber-800 hover:bg-amber-50 border-amber-200"
                       >
                         <Plus className="h-3 w-3 mr-1" /> Manage Contacts
                       </Button>
