@@ -10,8 +10,6 @@ import { ProjectListLoading } from "./ProjectListLoading";
 import { ProjectListError } from "./ProjectListError";
 import { ProjectListEmpty } from "./ProjectListEmpty";
 import { ProjectListNoMatch } from "./ProjectListNoMatch";
-import { Card, CardContent } from "@/components/ui/card";
-import ProjectForm from "../ProjectForm";
 
 interface ProjectListContainerProps {
   projects: Project[];
@@ -42,8 +40,6 @@ export function ProjectListContainer({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
 
   const handleSort = (field: SortableProjectField) => {
     if (field === sortField) {
@@ -89,20 +85,6 @@ export function ProjectListContainer({
     }
   };
 
-  const handleEditProject = (projectId: string) => {
-    const projectToEdit = projects.find(p => p.id === projectId);
-    if (projectToEdit) {
-      setProjectToEdit(projectToEdit);
-      setIsEditing(true);
-    }
-  };
-
-  const handleFormSubmitted = () => {
-    setIsEditing(false);
-    setProjectToEdit(null);
-    fetchProjects();
-  };
-
   if (loading) return <ProjectListLoading />;
   if (error) return <ProjectListError error={error} fetchProjects={fetchProjects} />;
   if (projects.length === 0)
@@ -127,23 +109,6 @@ export function ProjectListContainer({
         resetFilters={resetFilters}
       />
     );
-
-  if (isEditing && projectToEdit) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <ProjectForm
-            project={projectToEdit}
-            onCancel={() => {
-              setIsEditing(false);
-              setProjectToEdit(null);
-            }}
-            onSubmitted={handleFormSubmitted}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <div>
@@ -180,7 +145,6 @@ export function ProjectListContainer({
         handleSelectAllProjects={handleSelectAllProjects}
         sortField={sortField}
         sortDirection={sortDirection}
-        onEditProject={handleEditProject}
       />
 
       <DeleteConfirmDialog

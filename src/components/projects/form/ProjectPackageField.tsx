@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
-import { Wrench, Palette, Video, Globe, Heart, Package } from "lucide-react";
+import { Wrench, Palette, Video, Globe, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
@@ -11,14 +11,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 interface PackageType {
   id: string;
@@ -28,7 +20,6 @@ interface PackageType {
 
 interface ProjectPackageFieldProps {
   control: Control<ProjectFormValues>;
-  existingPackageId?: string;
 }
 
 export const getServiceIcon = (packageName: string) => {
@@ -44,20 +35,19 @@ export const getServiceIcon = (packageName: string) => {
     case 'website':
       return <Globe className="h-4 w-4 mr-2 opacity-70" />;
     default:
-      return <Package className="h-4 w-4 mr-2 opacity-70" />;
+      return <Wrench className="h-4 w-4 mr-2 opacity-70" />;
   }
 };
 
-export function ProjectPackageField({ control, existingPackageId }: ProjectPackageFieldProps) {
+export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
   
   const { field } = useController({
     name: "package",
     control,
-    defaultValue: existingPackageId || "",
+    defaultValue: "",
   });
 
   useEffect(() => {
@@ -85,7 +75,6 @@ export function ProjectPackageField({ control, existingPackageId }: ProjectPacka
 
   const selectPackage = (packageId: string) => {
     field.onChange(packageId);
-    setOpen(false);
   };
 
   const getSelectedPackageName = () => {
@@ -98,18 +87,16 @@ export function ProjectPackageField({ control, existingPackageId }: ProjectPacka
     <div className="space-y-2">
       <Label>Service</Label>
       
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
             className="w-full justify-start h-auto min-h-10 py-2"
-            role="combobox"
-            aria-expanded={open}
           >
             {field.value ? (
               getServiceIcon(getSelectedPackageName())
             ) : (
-              <Package className="h-4 w-4 mr-2 opacity-70" />
+              <Wrench className="h-4 w-4 mr-2 opacity-70" />
             )}
             <span className="font-normal">
               {field.value 
@@ -121,38 +108,40 @@ export function ProjectPackageField({ control, existingPackageId }: ProjectPacka
         </PopoverTrigger>
         
         <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search services..." />
-            <CommandEmpty>No service found.</CommandEmpty>
-            <CommandGroup>
-              {loading ? (
-                <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
-              ) : error ? (
-                <div className="p-2 text-sm text-red-500">Error: {error}</div>
-              ) : packages.length === 0 ? (
-                <div className="p-2 text-sm text-muted-foreground">No services available</div>
-              ) : (
-                <CommandList className="max-h-[300px] overflow-auto">
-                  {packages.map((pkg) => (
-                    <CommandItem
-                      key={pkg.id}
-                      value={pkg.name}
-                      onSelect={() => selectPackage(pkg.id)}
-                      className="flex items-center cursor-pointer py-2"
-                    >
+          <div className="p-2">
+            <div className="font-medium text-sm mb-2">Available Services</div>
+            {loading ? (
+              <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
+            ) : error ? (
+              <div className="p-2 text-sm text-red-500">Error: {error}</div>
+            ) : packages.length === 0 ? (
+              <div className="p-2 text-sm text-muted-foreground">No services available</div>
+            ) : (
+              <div className="max-h-[300px] overflow-auto">
+                {packages.map((pkg) => (
+                  <Button
+                    key={pkg.id}
+                    variant="ghost"
+                    className="w-full justify-start mb-1 h-auto py-2"
+                    onClick={() => selectPackage(pkg.id)}
+                  >
+                    {field.value === pkg.id && (
+                      <span className="absolute left-2">•</span>
+                    )}
+                    <div className="flex items-center w-full">
                       {getServiceIcon(pkg.name)}
-                      <div className="flex flex-col">
-                        <span className="font-medium">{pkg.name}</span>
+                      <div className="flex flex-col items-start">
+                        <span>{pkg.name}</span>
                         {pkg.description && (
                           <span className="text-xs text-muted-foreground">{pkg.description}</span>
                         )}
                       </div>
-                    </CommandItem>
-                  ))}
-                </CommandList>
-              )}
-            </CommandGroup>
-          </Command>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
         </PopoverContent>
       </Popover>
     </div>

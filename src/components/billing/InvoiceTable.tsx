@@ -12,7 +12,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useToast } from "@/hooks/use-toast";
 import { BillingFilter } from "./BillingFilter";
 import { DeleteInvoiceDialog } from "./DeleteInvoiceDialog";
-import { updateProjectRevenue } from "@/utils/projectRevenue";
 
 interface Invoice {
   id: string;
@@ -162,31 +161,12 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
   const updateInvoiceStatus = async (invoiceId: string, newStatus: string) => {
     try {
       setUpdatingInvoiceId(invoiceId);
-      
-      const { data: invoice, error: fetchError } = await supabase
-        .from('invoices')
-        .select('project_id')
-        .eq('id', invoiceId)
-        .single();
-        
-      if (fetchError) {
-        console.error('Error fetching invoice details:', fetchError);
-        toast({
-          title: "Error updating status",
-          description: fetchError.message || "Please try again later.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('invoices')
-        .update({
-          status: newStatus
-        })
-        .eq('id', invoiceId)
-        .select();
-        
+      const {
+        data,
+        error
+      } = await supabase.from('invoices').update({
+        status: newStatus
+      }).eq('id', invoiceId).select();
       if (error) {
         toast({
           title: "Error updating status",
@@ -195,11 +175,6 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
         });
         return;
       }
-      
-      if (invoice && invoice.project_id) {
-        await updateProjectRevenue(invoice.project_id);
-      }
-      
       queryClient.setQueryData(['invoices', sortBy, statusFilter, invoiceFilter, projectFilter, clientFilter], (oldData: Invoice[] | undefined) => {
         if (!oldData) return oldData;
         return oldData.map(invoice => invoice.id === invoiceId ? {
@@ -207,11 +182,9 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
           status: newStatus
         } : invoice);
       });
-      
       queryClient.invalidateQueries({
         queryKey: ['billing-stats']
       });
-      
       toast({
         title: "Status updated",
         description: `Invoice status changed to ${newStatus}`
