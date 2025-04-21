@@ -11,16 +11,11 @@ interface DashboardLayoutProps {
 const MainContent = ({ children }: { children: ReactNode }) => {
   const { state } = useSidebar();
 
-  // Remove margins and padding on main content so no gap between sidebar and content.
   return (
     <SidebarInset
-      className={`bg-zinc-50 text-foreground transition-[margin,padding] duration-200 ${
-        state === "collapsed"
-          ? "md:ml-0"
-          : "md:ml-0"
-      }`}
+      className="bg-zinc-50 text-foreground transition-[margin,padding] duration-200"
     >
-      <div className="w-full py-8 px-0"> {/* Remove horizontal padding */}
+      <div className="w-full py-8 px-4">
         {children}
       </div>
     </SidebarInset>

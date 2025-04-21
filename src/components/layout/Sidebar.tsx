@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
@@ -74,7 +73,7 @@ const Sidebar = () => {
 
   return (
     <ShadcnSidebar
-      className="bg-sidebar border-sidebar-border" 
+      className="bg-sidebar border-sidebar-border !border-r-0" 
       variant="sidebar"
       collapsible="icon"
       style={{ 
