@@ -3,7 +3,7 @@ import { useState } from "react";
 import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, Key, Link, Copy } from "lucide-react";
+import { Eye, Key, Link, Copy, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -82,6 +82,35 @@ export function ProjectActionsCell({
     }
   };
 
+  const handleRegeneratePassword = async () => {
+    setLoading(true);
+    const newPass = generateSimplePassword();
+
+    const { error, data } = await supabase
+      .from("projects")
+      .update({ portal_password: newPass })
+      .eq("id", projectId)
+      .select("portal_password")
+      .single();
+
+    if (error) {
+      toast({
+        title: "Failed to regenerate password",
+        description: error.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+    
+    setCurrentPassword(data.portal_password);
+    toast({
+      title: "Password regenerated",
+      description: "A new password was generated and saved for this project.",
+    });
+    setLoading(false);
+  };
+
   return (
     <TableCell className="flex items-center gap-2 p-0">
       <Button
@@ -134,6 +163,18 @@ export function ProjectActionsCell({
               disabled={loading || !currentPassword}
             >
               <Copy className="w-5 h-5" />
+            </Button>
+          </div>
+          <div className="flex space-x-2 mb-4">
+            <Button
+              variant="outline"
+              onClick={handleRegeneratePassword}
+              disabled={loading}
+              className="w-full"
+              type="button"
+            >
+              Regenerate Password
+              <RefreshCw className="ml-2 w-4 h-4" />
             </Button>
           </div>
           <DialogFooter>
