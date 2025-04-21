@@ -70,7 +70,7 @@ const Sidebar = () => {
 
   return (
     <aside 
-      className={`h-screen bg-zinc-900 fixed ${sidebarWidth} transition-all duration-300 ease-in-out border-r border-zinc-800/30 flex flex-col`}
+      className={`h-screen bg-zinc-900 fixed left-0 top-0 ${sidebarWidth} transition-all duration-300 ease-in-out border-r border-zinc-800/30 flex flex-col z-40`}
     >
       {/* Header */}
       <div className="h-16 flex items-center px-4 justify-between border-b border-zinc-800/30">
