@@ -1,4 +1,3 @@
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableProjectField, SortDirection } from "../types";
@@ -27,7 +26,7 @@ export function ProjectTableHeader({
         <TableHead className="w-[50px]">
           <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
         </TableHead>
-        <TableHead onClick={() => onSort('name')} className="cursor-pointer w-[220px]">
+        <TableHead onClick={() => onSort('name')} className="cursor-pointer w-[200px]">
           Project {renderSortIndicator('name')}
         </TableHead>
         <TableHead onClick={() => onSort('client_name')} className="cursor-pointer w-[180px]">
