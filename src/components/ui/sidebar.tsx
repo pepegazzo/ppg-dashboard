@@ -62,12 +62,19 @@ export const SidebarInset = ({
   );
 };
 
-// Export other components that are being imported from other files
+// Export sidebar components with extended props
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: string;
+  collapsible?: string;
+}
+
 export const Sidebar = ({
   className,
   children,
+  variant,
+  collapsible,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+}: SidebarProps) => {
   return (
     <div
       className={cn("h-screen fixed top-0 left-0", className)}
