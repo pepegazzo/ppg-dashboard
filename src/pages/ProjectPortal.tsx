@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft, Shield, User, Key } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Project } from "@/components/projects/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { Input } from "@/components/ui/input";
 
 const ProjectPortal = () => {
   const { projectSlug } = useParams<{ projectSlug: string }>();
@@ -17,10 +18,20 @@ const ProjectPortal = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [authMethod, setAuthMethod] = useState<"client" | "admin">("client");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchProject();
-  }, [projectSlug]);
+    if (user) {
+      setIsAuthenticated(true);
+      fetchProject();
+    } else {
+      fetchProject();
+    }
+  }, [projectSlug, user]);
 
   const fetchProject = async () => {
     if (!projectSlug) return;
@@ -55,11 +66,35 @@ const ProjectPortal = () => {
     navigate("/projects");
   };
 
-  const handleAuthenticate = () => {
+  const handleClientAuthenticate = () => {
     if (project && project.portal_password === password) {
       setIsAuthenticated(true);
     } else {
       setError("Incorrect password. Please try again.");
+    }
+  };
+
+  const handleAdminAuthenticate = async () => {
+    try {
+      setIsAdminLoading(true);
+      setError(null);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password: adminPassword,
+      });
+
+      if (error) {
+        setError(`Admin login failed: ${error.message}`);
+        setIsAdminLoading(false);
+        return;
+      }
+
+      setIsAuthenticated(true);
+      setIsAdminLoading(false);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred during login.");
+      setIsAdminLoading(false);
     }
   };
 
@@ -96,37 +131,85 @@ const ProjectPortal = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Shield className="mx-auto mb-2 h-8 w-8 text-primary" />
-            <CardTitle className="text-xl">Client Portal Authentication</CardTitle>
+            <CardTitle className="text-xl">Project Portal Access</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <p className="text-center text-muted-foreground text-sm mb-4">
-                  Please enter the password to access the {project.name} portal.
-                </p>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter project password"
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  onKeyDown={(e) => e.key === "Enter" && handleAuthenticate()}
-                />
-                {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
-              </div>
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={handleBackToAdmin}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button onClick={handleAuthenticate}>Access Portal</Button>
-              </div>
-            </div>
+            <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "client" | "admin")} className="mt-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="client" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Client Access
+                </TabsTrigger>
+                <TabsTrigger value="admin" className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  Admin Access
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="client" className="space-y-4 mt-4">
+                <div>
+                  <p className="text-center text-muted-foreground text-sm mb-4">
+                    Please enter the password to access the {project.name} portal
+                  </p>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter project password"
+                    className="w-full"
+                    onKeyDown={(e) => e.key === "Enter" && handleClientAuthenticate()}
+                  />
+                  {error && authMethod === "client" && <p className="text-sm text-red-600 mt-2">{error}</p>}
+                </div>
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={handleBackToAdmin}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={handleClientAuthenticate}>Access Portal</Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="admin" className="space-y-4 mt-4">
+                <div className="space-y-3">
+                  <p className="text-center text-muted-foreground text-sm mb-4">
+                    Sign in as an administrator to access {project.name} with full permissions
+                  </p>
+                  <Input
+                    type="email"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    placeholder="Admin Email"
+                    className="w-full"
+                  />
+                  <Input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Admin Password"
+                    className="w-full"
+                    onKeyDown={(e) => e.key === "Enter" && handleAdminAuthenticate()}
+                  />
+                  {error && authMethod === "admin" && <p className="text-sm text-red-600 mt-2">{error}</p>}
+                </div>
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={handleBackToAdmin}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={handleAdminAuthenticate} disabled={isAdminLoading}>
+                    {isAdminLoading ? "Signing in..." : "Sign In as Admin"}
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  const isAdminMode = !!user;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -138,6 +221,11 @@ const ProjectPortal = () => {
               Back to Admin
             </Button>
             <h1 className="text-xl font-bold">{project.name} - Client Portal</h1>
+            {isAdminMode && (
+              <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                Admin Mode
+              </span>
+            )}
           </div>
           <div className="text-sm text-muted-foreground">
             Client: {project.client_name || "No client assigned"}
