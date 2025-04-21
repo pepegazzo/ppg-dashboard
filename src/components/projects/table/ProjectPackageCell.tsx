@@ -1,24 +1,30 @@
 
+import { useState } from "react";
 import { TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Package } from "lucide-react";
+import { ServicePopover } from "./ServicePopover";
 
+/**
+ * ProjectPackageCell with interactive popover for in-table package/service selection.
+ */
 interface ProjectPackageCellProps {
   packageName?: string | null;
   projectId: string;
 }
 
-export function ProjectPackageCell({ packageName }: ProjectPackageCellProps) {
+/**
+ * The cell now contains an interactive popover that allows updating the package/service.
+ */
+export function ProjectPackageCell({ packageName, projectId }: ProjectPackageCellProps) {
+  // We want to update UI immediately on change
+  const [currentPackage, setCurrentPackage] = useState(packageName || null);
+
   return (
-    <TableCell>
-      {packageName ? (
-        <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
-          <Package className="h-3 w-3 shrink-0" />
-          <span className="truncate">{packageName}</span>
-        </Badge>
-      ) : (
-        <span className="text-muted-foreground text-xs">No package</span>
-      )}
+    <TableCell className="relative group min-w-[120px] cursor-pointer">
+      <ServicePopover
+        projectId={projectId}
+        currentPackageName={currentPackage || ""}
+        onPackageChange={(pkg) => setCurrentPackage(pkg?.name ?? null)}
+      />
     </TableCell>
   );
 }
