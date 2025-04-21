@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "../types";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,11 +90,10 @@ export function TableRow({
   const isUpdating = updatingProjectId === localProject.id;
 
   return <UITableRow className="hover:bg-muted/30 transition-colors">
-      <TableCell>
+      <TableCell className="px-2 py-0 w-[28px]">
         <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
       </TableCell>
-      
-      <TableCell className="font-medium">
+      <TableCell className="font-medium px-[10px]">
         <ProjectNameCell 
           name={localProject.name} 
           fieldName="name" 
@@ -106,12 +104,10 @@ export function TableRow({
           onUpdate={updateProjectField}
         />
       </TableCell>
-      
       <ProjectClientCell 
         clientName={localProject.client_name} 
         projectId={localProject.id} 
       />
-
       <ProjectContactCell
         projectId={localProject.id}
         clientId={localProject.client_id}
@@ -120,28 +116,22 @@ export function TableRow({
         updatingProjectId={updatingProjectId}
         fetchProjects={fetchProjects}
       />
-
       <ProjectStatusCell 
         project={localProject} 
         updatingProjectId={updatingProjectId} 
         setUpdatingProjectId={setUpdatingProjectId}
         onUpdate={updateProjectField}
       />
-      
       <ProjectProgressCell progress={localProject.progress || 0} />
-      
       <ProjectPriorityCell priority={localProject.priority} />
-      
       <ProjectPackageCell 
         project={localProject}
         updatingProjectId={updatingProjectId}
         setUpdatingProjectId={setUpdatingProjectId}
         onUpdate={updateProjectField}
       />
-      
       <ProjectRevenueCell revenue={localProject.revenue} />
-      
-      <TableCell className="text-sm text-muted-foreground justify-items-center">
+      <TableCell className="text-sm text-muted-foreground justify-items-center px-[10px]">
         <ProjectDateCell 
           date={localProject.start_date} 
           fieldName="start_date" 
@@ -151,8 +141,7 @@ export function TableRow({
           setUpdatingProjectId={setUpdatingProjectId}
         />
       </TableCell>
-      
-      <TableCell className="text-sm text-muted-foreground">
+      <TableCell className="text-sm text-muted-foreground px-[10px]">
         <ProjectDateCell 
           date={localProject.due_date} 
           fieldName="due_date" 
@@ -162,8 +151,7 @@ export function TableRow({
           setUpdatingProjectId={setUpdatingProjectId}
         />
       </TableCell>
-      
-      <TableCell className="text-center">
+      <TableCell className="text-center px-[10px]">
         <ProjectActionsCell 
           projectId={localProject.id} 
           setShowDeleteModal={setShowDeleteModal}
