@@ -34,14 +34,14 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
           <FormControl>
             <Select 
               onValueChange={field.onChange} 
-              value={field.value || ''} 
+              value={field.value || 'null'} 
               disabled={isLoading}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a client (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Client</SelectItem>
+                <SelectItem value="null">No Client</SelectItem>
                 {clients?.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
                     {client.company_name}
