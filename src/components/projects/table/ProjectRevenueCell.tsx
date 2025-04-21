@@ -12,9 +12,14 @@ export function ProjectRevenueCell({ revenue }: ProjectRevenueCellProps) {
     return `S/ ${amount.toFixed(2)}`;
   };
 
+  const getRevenueColor = () => {
+    if (!revenue || revenue === 0) return "bg-gray-50 text-gray-700 border-gray-200";
+    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  };
+
   return (
     <TableCell>
-      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
+      <Badge variant="outline" className={`${getRevenueColor()} w-fit`}>
         {formatRevenue(revenue)}
       </Badge>
     </TableCell>

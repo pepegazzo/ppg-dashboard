@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +13,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { updateProjectRevenue } from "@/utils/projectRevenue";
 
 interface DeleteInvoiceDialogProps {
   showDeleteModal: boolean;
@@ -31,6 +32,30 @@ export function DeleteInvoiceDialog({
 }: DeleteInvoiceDialogProps) {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [affectedProjects, setAffectedProjects] = useState<string[]>([]);
+  
+  // Get affected project IDs when selected invoices change
+  useEffect(() => {
+    if (selectedInvoices.length === 0) {
+      setAffectedProjects([]);
+      return;
+    }
+    
+    const fetchAffectedProjects = async () => {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('project_id')
+        .in('id', selectedInvoices);
+        
+      if (!error && data) {
+        // Extract unique project IDs
+        const projectIds = [...new Set(data.map(invoice => invoice.project_id))];
+        setAffectedProjects(projectIds);
+      }
+    };
+    
+    fetchAffectedProjects();
+  }, [selectedInvoices]);
 
   const deleteSelectedInvoices = async () => {
     if (selectedInvoices.length === 0) return;
@@ -51,6 +76,11 @@ export function DeleteInvoiceDialog({
           variant: "destructive",
         });
         return;
+      }
+      
+      // Update revenue for all affected projects
+      for (const projectId of affectedProjects) {
+        await updateProjectRevenue(projectId);
       }
       
       toast({
