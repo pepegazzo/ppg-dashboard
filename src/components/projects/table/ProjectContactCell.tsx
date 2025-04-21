@@ -116,7 +116,7 @@ export function ProjectContactCell({
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs hover:bg-muted px-2"
+            className="text-xs hover:bg-muted"
             disabled={isSubmitting}
           >
             {isSubmitting && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
