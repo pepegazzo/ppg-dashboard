@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Eye, Key, Link as LinkIcon, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Helper to generate an 8-character alphanumeric password
 function generateSimplePassword() {
@@ -33,6 +32,7 @@ export function ProjectPasswordDialog({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Generate and save a password if it doesn't exist when the dialog opens
   useEffect(() => {
@@ -161,6 +161,11 @@ export function ProjectPasswordDialog({
     setSaving(false);
   };
 
+  const handlePortalAccess = () => {
+    setOpen(false);
+    navigate(`/projects/${projectSlug}/portal`);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent onPointerDownOutside={() => {}}>
@@ -236,27 +241,16 @@ export function ProjectPasswordDialog({
         </div>
         <DialogFooter>
           {projectSlug ? (
-            <Link
-              to={`/projects/${projectSlug}/portal`}
+            <Button
+              variant="default"
               className="w-full"
-              style={{ textDecoration: "none" }}
-              tabIndex={-1}
-              target="_blank" // Open in new tab
-              rel="noopener"
+              disabled={loading || saving}
+              type="button"
+              onClick={handlePortalAccess}
             >
-              <Button
-                variant="default"
-                className="w-full"
-                disabled={loading || saving}
-                type="button"
-                asChild
-              >
-                <span>
-                  Visit Project Portal
-                  <LinkIcon className="ml-2 w-4 h-4" />
-                </span>
-              </Button>
-            </Link>
+              Visit Project Portal
+              <LinkIcon className="ml-2 w-4 h-4" />
+            </Button>
           ) : (
             <Button variant="default" className="w-full" disabled>
               Visit Project Portal
