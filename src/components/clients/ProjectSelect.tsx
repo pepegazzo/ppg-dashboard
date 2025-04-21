@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -165,3 +166,4 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     </Popover>
   );
 }
+
