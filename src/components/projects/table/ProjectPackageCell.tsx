@@ -48,14 +48,32 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
 
   useEffect(() => {
     let mounted = true;
-    supabase
-      .from("package_types")
-      .select("*")
-      .order("name")
-      .then(({ data }) => {
-        if (mounted && data) setPackages(data);
-      })
-      .finally(() => mounted && setLoading(false));
+    
+    const fetchPackages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("package_types")
+          .select("*")
+          .order("name");
+          
+        if (mounted && data) {
+          setPackages(data);
+        }
+        
+        if (error) {
+          console.error("Error fetching package types:", error);
+        }
+      } catch (err) {
+        console.error("Unexpected error fetching package types:", err);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchPackages();
+    
     return () => { mounted = false; }
   }, []);
 
