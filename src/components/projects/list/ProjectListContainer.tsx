@@ -95,20 +95,6 @@ export function ProjectListContainer({
         testCreateProject={testCreateProject}
       />
     );
-  if (filteredAndSortedProjects.length === 0)
-    return (
-      <ProjectListNoMatch
-        nameFilter={nameFilter}
-        setNameFilter={setNameFilter}
-        clientFilter={clientFilter}
-        setClientFilter={setClientFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        priorityFilter={priorityFilter}
-        setPriorityFilter={setPriorityFilter}
-        resetFilters={resetFilters}
-      />
-    );
 
   return (
     <div>
@@ -132,20 +118,34 @@ export function ProjectListContainer({
         />
       )}
 
-      <ProjectTable
-        projects={filteredAndSortedProjects}
-        selectedProjects={selectedProjects}
-        toggleProjectSelection={toggleProjectSelection}
-        setSelectedProjects={setSelectedProjects}
-        updatingProjectId={updatingProjectId}
-        setUpdatingProjectId={setUpdatingProjectId}
-        setShowDeleteModal={setShowDeleteModal}
-        fetchProjects={fetchProjects}
-        handleSort={handleSort}
-        handleSelectAllProjects={handleSelectAllProjects}
-        sortField={sortField}
-        sortDirection={sortDirection}
-      />
+      {filteredAndSortedProjects.length > 0 ? (
+        <ProjectTable
+          projects={filteredAndSortedProjects}
+          selectedProjects={selectedProjects}
+          toggleProjectSelection={toggleProjectSelection}
+          setSelectedProjects={setSelectedProjects}
+          updatingProjectId={updatingProjectId}
+          setUpdatingProjectId={setUpdatingProjectId}
+          setShowDeleteModal={setShowDeleteModal}
+          fetchProjects={fetchProjects}
+          handleSort={handleSort}
+          handleSelectAllProjects={handleSelectAllProjects}
+          sortField={sortField}
+          sortDirection={sortDirection}
+        />
+      ) : (
+        <ProjectListNoMatch
+          nameFilter={nameFilter}
+          setNameFilter={setNameFilter}
+          clientFilter={clientFilter}
+          setClientFilter={setClientFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          priorityFilter={priorityFilter}
+          setPriorityFilter={setPriorityFilter}
+          resetFilters={resetFilters}
+        />
+      )}
 
       <DeleteConfirmDialog
         showDeleteModal={showDeleteModal}
