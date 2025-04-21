@@ -41,17 +41,47 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
     try {
       setIsSubmitting(true);
 
+      // 1. Update the projects table
       const updateData: { client_id: string | null; client_name: string | null } = {
         client_id: clientId || null,
         client_name: clientName || null
       };
 
-      const { error } = await supabase
+      const { error: projectUpdateError } = await supabase
         .from('projects')
         .update(updateData)
         .eq('id', projectId);
 
-      if (error) throw error;
+      if (projectUpdateError) throw projectUpdateError;
+
+      // 2. Update the client_project_assignments table
+      if (clientId) {
+        // First remove any existing assignments for this project
+        const { error: deleteError } = await supabase
+          .from('client_project_assignments')
+          .delete()
+          .eq('project_id', projectId);
+        
+        if (deleteError) throw deleteError;
+          
+        // Then add the new assignment
+        const { error: insertError } = await supabase
+          .from('client_project_assignments')
+          .insert({
+            client_id: clientId,
+            project_id: projectId
+          });
+          
+        if (insertError) throw insertError;
+      } else {
+        // If clearing the client, just delete any assignments
+        const { error: deleteError } = await supabase
+          .from('client_project_assignments')
+          .delete()
+          .eq('project_id', projectId);
+          
+        if (deleteError) throw deleteError;
+      }
 
       toast({
         title: "Project updated",
@@ -60,7 +90,12 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
           : "No client assigned to this project.",
       });
 
+      // Invalidate both projects and client-related queries
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['all-clients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
     } catch (error) {
       console.error("Error updating client:", error);
       toast({

@@ -75,6 +75,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     try {
       setIsUpdating(true);
 
+      // Get client company name for project update
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('company_name')
@@ -84,6 +85,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       if (clientError) throw clientError;
       const clientName = clientData?.company_name || 'Unknown';
 
+      // 1. Insert into client_project_assignments
       const { error: assignError } = await supabase
         .from('client_project_assignments')
         .insert({ 
@@ -93,23 +95,16 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
       if (assignError) throw assignError;
 
-      const { data: projectData } = await supabase
+      // 2. Always update the projects table with this client as primary
+      const { error: updateError } = await supabase
         .from('projects')
-        .select('client_id')
-        .eq('id', projectId)
-        .single();
+        .update({ 
+          client_id: clientId,
+          client_name: clientName
+        })
+        .eq('id', projectId);
 
-      if (!projectData?.client_id) {
-        const { error: updateError } = await supabase
-          .from('projects')
-          .update({ 
-            client_id: clientId,
-            client_name: clientName
-          })
-          .eq('id', projectId);
-
-        if (updateError) throw updateError;
-      }
+      if (updateError) throw updateError;
 
       setIsPopoverOpen(false);
 
@@ -118,6 +113,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         description: `${projectName} has been assigned to this client`,
       });
 
+      // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
