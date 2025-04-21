@@ -1,7 +1,6 @@
-
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import Sidebar from "./Sidebar";
 import { cn } from "@/lib/utils";
 
@@ -10,16 +9,19 @@ interface DashboardLayoutProps {
 }
 
 const MainContent = ({ children }: { children: ReactNode }) => {
+  const { state } = useSidebar();
+
   return (
-    <div
+    <SidebarInset
       className={cn(
-        "flex-1 bg-zinc-50 text-foreground min-h-screen"
+        "flex-grow bg-zinc-50 text-foreground transition-all duration-200",
+        state === "collapsed" ? "ml-[3rem]" : "ml-[14rem]"
       )}
     >
       <div className="w-full py-8 px-4">
         {children}
       </div>
-    </div>
+    </SidebarInset>
   );
 };
 
@@ -37,4 +39,3 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 };
 
 export default DashboardLayout;
-
