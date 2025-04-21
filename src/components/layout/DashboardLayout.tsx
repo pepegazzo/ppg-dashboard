@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
@@ -16,8 +17,8 @@ const MainContent = ({ children }: { children: ReactNode }) => {
     <SidebarInset
       className={`bg-zinc-50 text-foreground transition-[margin,padding] duration-200 ${
         state === "collapsed"
-          ? "md:ml-[3rem] ml-0"
-          : "md:ml-[14rem] ml-0"
+          ? "md:ml-0" // Remove the margin when collapsed
+          : "md:ml-0" // Remove the margin when expanded too
       }`}
     >
       <div className="w-full py-8 px-[16px]">
