@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project, PackageType, SortDirection, SortableProjectField } from "../types";
 import { useFilteredSortedProjects } from "./useFilteredSortedProjects";
@@ -10,6 +9,7 @@ import { ProjectListLoading } from "./ProjectListLoading";
 import { ProjectListError } from "./ProjectListError";
 import { ProjectListEmpty } from "./ProjectListEmpty";
 import { ProjectListNoMatch } from "./ProjectListNoMatch";
+import { BulkProjectActions } from "./BulkProjectActions";
 
 interface ProjectListContainerProps {
   projects: Project[];
@@ -125,10 +125,11 @@ export function ProjectListContainer({
       />
 
       {selectedProjects.length > 0 && (
-        <SelectedProjectsActions
-          count={selectedProjects.length}
-          isDeleting={isDeleting}
-          onDelete={() => setShowDeleteModal(true)}
+        <BulkProjectActions
+          selectedProjectIds={selectedProjects}
+          packageTypes={packageTypes}
+          onBulkUpdated={fetchProjects}
+          clearSelection={() => setSelectedProjects([])}
         />
       )}
 
