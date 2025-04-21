@@ -11,10 +11,10 @@ interface ProjectActionsCellProps {
 
 export function ProjectActionsCell({ projectId }: ProjectActionsCellProps) {
   return (
-    <TableCell className="p-[10px] text-center">
-      <Button variant="outline" size="sm" className="flex items-center justify-center gap-1 text-xs">
-        Portal
-        <ExternalLink className="ml-1 h-3 w-3" />
+    <TableCell>
+      <Button variant="ghost" size="sm" className="text-sm hover:bg-muted px-0 flex items-center gap-1">
+        Portal 
+        <ExternalLink className="h-3 w-3" />
       </Button>
     </TableCell>
   );

@@ -1,4 +1,3 @@
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableProjectField, SortDirection } from "../types";
@@ -58,7 +57,7 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[70px] px-[10px] text-left">
         End {renderSortIndicator('due_date')}
       </TableHead>
-      <TableHead className="w-[60px] px-[10px] text-center">Portal</TableHead>
+      <TableHead className="w-[60px] px-[10px] text-left">Portal</TableHead>
     </TableRow>
   </TableHeader>;
 }
