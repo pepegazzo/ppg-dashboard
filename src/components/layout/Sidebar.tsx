@@ -77,7 +77,10 @@ const Sidebar = () => {
       className="bg-sidebar border-sidebar-border" 
       variant="sidebar"
       collapsible="icon"
-      style={{ width: '14rem' }} // Reduced width from default 16rem for a bit more real estate
+      style={{ 
+        "--sidebar-width": "14rem", 
+        "--sidebar-width-icon": "3rem" 
+      } as React.CSSProperties}
     >
       <SidebarRail />
       <SidebarHeader className="h-16 flex items-center px-4 justify-between border-b border-zinc-800/30">
@@ -195,4 +198,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
