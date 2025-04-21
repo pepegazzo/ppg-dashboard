@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/clients";
@@ -26,6 +27,7 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [form, setForm] = useState<ContactForm>({ name: "", role: "", email: "", phone: "" });
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,6 +63,23 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
     }
   };
 
+  const handleDelete = async (contactId: string, contactName: string) => {
+    setDeletingId(contactId);
+    try {
+      const { error } = await supabase.from("contacts").delete().eq("id", contactId);
+      if (error) throw error;
+      toast({
+        title: "Contact removed",
+        description: `${contactName} has been deleted.`,
+      });
+      onChanged();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <Dialog open onOpenChange={open => !open && onClose()}>
       <DialogContent className="max-w-[500px]">
@@ -79,13 +98,29 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 <Label className="text-sm block">Current Contacts</Label>
                 <div className="space-y-2">
                   {currentContacts.map(contact => (
-                    <div key={contact.id} className="border rounded-md p-4 bg-muted/5">
-                      <span className="font-medium text-foreground">{contact.name}</span>
-                      <div className="grid gap-1 mt-2 text-sm">
-                        {contact.role && <div className="text-muted-foreground">Role: {contact.role}</div>}
-                        {contact.email && <div className="text-muted-foreground">Email: {contact.email}</div>}
-                        {contact.phone && <div className="text-muted-foreground">Phone: {contact.phone}</div>}
+                    <div key={contact.id} className="border rounded-md p-4 bg-muted/5 flex items-start justify-between gap-4 relative">
+                      <div>
+                        <span className="font-medium text-foreground">{contact.name}</span>
+                        <div className="grid gap-1 mt-2 text-sm">
+                          {contact.role && <div className="text-muted-foreground">Role: {contact.role}</div>}
+                          {contact.email && <div className="text-muted-foreground">Email: {contact.email}</div>}
+                          {contact.phone && <div className="text-muted-foreground">Phone: {contact.phone}</div>}
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        aria-label="Delete contact"
+                        className="text-destructive hover:bg-destructive/10 rounded-full p-1 transition-colors flex items-center disabled:opacity-50"
+                        disabled={deletingId === contact.id}
+                        onClick={() => handleDelete(contact.id, contact.name)}
+                        tabIndex={0}
+                      >
+                        {deletingId === contact.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -154,3 +189,4 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
     </Dialog>
   );
 }
+
