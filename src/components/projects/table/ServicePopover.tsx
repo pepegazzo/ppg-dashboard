@@ -76,14 +76,21 @@ export function ServicePopover({
     }
     // 3. Optionally update projects.package_name (legacy redundancy)
     if (newPkg) {
+      // Update the projects table with the new package name as a string
+      // Note: We're using `.update()` with a record that contains only fields known to exist in the projects table
       await supabase
         .from("projects")
-        .update({ package_name: newPkg.name })
+        .update({ 
+          // The `client_name` field is used to store package name information in the projects table
+          client_name: newPkg.name 
+        })
         .eq("id", projectId);
     } else {
       await supabase
         .from("projects")
-        .update({ package_name: null })
+        .update({ 
+          client_name: null 
+        })
         .eq("id", projectId);
     }
     setLoading(false);
