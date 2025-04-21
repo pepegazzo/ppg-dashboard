@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
@@ -58,15 +57,13 @@ const Sidebar = () => {
   const location = useLocation();
   const { user, signOut, isOwner } = useAuth();
 
-  // Sidebar is always expanded, no collapsed state or toggle button
-
   return (
     <aside 
       className="h-screen bg-zinc-900 fixed left-0 top-0 w-[14rem] border-r border-zinc-800/30 flex flex-col z-40"
     >
       {/* Header */}
       <div className="h-16 flex items-center px-4 border-b border-zinc-800/30">
-        <div className="text-amber-500 font-semibold text-xl tracking-tight">
+        <div className="text-amber-500 font-semibold text-lg tracking-tight">
           Creative
         </div>
       </div>
@@ -82,11 +79,11 @@ const Sidebar = () => {
                 <Link 
                   to={item.path}
                   className={`
-                    relative flex items-center gap-3 px-3 py-2 text-zinc-400 rounded-md transition-all duration-200 ease-in-out
+                    relative flex items-center gap-3 px-3 py-2 text-zinc-400 rounded-md transition-all duration-200 ease-in-out text-sm
                     ${isActive ? 'bg-amber-500/10 text-amber-500' : 'hover:bg-zinc-800/50 hover:text-zinc-200'}
                   `}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-4 h-4" />
                   <span className="font-medium whitespace-nowrap">
                     {item.title}
                   </span>
@@ -106,13 +103,13 @@ const Sidebar = () => {
           <div className="flex flex-col items-center space-y-3">
             <div className="flex items-center w-full gap-3">
               <div className="
-                w-9 h-9 rounded-full bg-amber-500/20 
+                w-8 h-8 rounded-full bg-amber-500/20 
                 flex items-center justify-center text-amber-500
               ">
-                <User className="w-5 h-5" />
+                <User className="w-4 h-4" />
               </div>
               <div className="overflow-hidden text-center w-full">
-                <h4 className="text-sm font-medium text-zinc-200 truncate">{user.email}</h4>
+                <h4 className="text-xs font-medium text-zinc-200 truncate">{user.email}</h4>
                 <p className="text-xs text-zinc-500">
                   {isOwner ? "Owner" : "User"}
                 </p>
@@ -122,9 +119,9 @@ const Sidebar = () => {
             <Button 
               onClick={() => signOut()} 
               variant="ghost" 
-              className="w-full justify-center text-zinc-400 hover:text-zinc-100 px-4"
+              className="w-full justify-center text-zinc-400 hover:text-zinc-100 px-4 text-xs h-8"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               <span className="ml-2">Sign Out</span>
             </Button>
           </div>
@@ -133,9 +130,9 @@ const Sidebar = () => {
             <Link to="/login">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start text-zinc-400 hover:text-zinc-100"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 text-xs h-8"
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="w-3.5 h-3.5 mr-2" />
                 Sign In
               </Button>
             </Link>
@@ -143,9 +140,9 @@ const Sidebar = () => {
             <Link to="/register">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start text-zinc-400 hover:text-zinc-100"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 text-xs h-8"
               >
-                <UserPlus className="w-4 h-4 mr-2" />
+                <UserPlus className="w-3.5 h-3.5 mr-2" />
                 Register
               </Button>
             </Link>
@@ -157,4 +154,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-

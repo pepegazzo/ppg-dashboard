@@ -52,13 +52,30 @@
     @apply border-border;
   }
 
+  html {
+    @apply scroll-smooth;
+    font-size: 15px;
+  }
+
   body {
     @apply bg-background text-foreground antialiased overflow-x-hidden;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
   }
 
-  html {
-    @apply scroll-smooth;
+  h1 {
+    @apply text-2xl font-semibold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg font-medium;
+  }
+
+  h4 {
+    @apply text-base font-medium;
   }
 }
 
@@ -84,7 +101,7 @@
   }
   
   .menu-item-icon {
-    @apply w-5 h-5;
+    @apply w-4 h-4;
   }
 
   .bg-sidebar {
@@ -100,10 +117,10 @@
   }
   
   .app-table-cell {
-    @apply p-4 align-middle;
+    @apply p-3 align-middle;
   }
   
   .app-table-head {
-    @apply h-10 px-4 text-left align-middle font-medium text-muted-foreground;
+    @apply h-9 px-3 text-left align-middle font-medium text-muted-foreground text-xs;
   }
 }
