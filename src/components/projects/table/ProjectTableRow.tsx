@@ -1,3 +1,4 @@
+
 export function TableRow({
   project,
   selectedProjects,
@@ -74,3 +75,113 @@ export function TableRow({
   };
 
   const isUpdating = updatingProjectId === localProject.id;
+  
+  // Add the missing implementation for the TableRow component
+  return (
+    <TableBodyRow>
+      <TableCell className="p-0 w-12">
+        <Checkbox
+          checked={selectedProjects.includes(localProject.id)}
+          onCheckedChange={() => toggleProjectSelection(localProject.id)}
+          aria-label="Select project"
+          className="ml-4"
+        />
+      </TableCell>
+      <ProjectNameCell
+        project={localProject}
+        isUpdating={isUpdating}
+        updateProjectField={updateProjectField}
+      />
+      <ProjectClientCell
+        clientName={localProject.client_name}
+        clientId={localProject.client_id}
+      />
+      <ProjectStatusCell
+        status={localProject.status}
+        projectId={localProject.id}
+        isUpdating={isUpdating}
+        updateProjectField={updateProjectField}
+      />
+      <ProjectPriorityCell
+        priority={localProject.priority}
+        projectId={localProject.id}
+        isUpdating={isUpdating}
+        updateProjectField={updateProjectField}
+      />
+      <ProjectDateCell
+        label="Start"
+        date={localProject.start_date}
+        projectId={localProject.id}
+        field="start_date"
+        isUpdating={isUpdating}
+        updateProjectField={updateProjectField}
+      />
+      <ProjectDateCell
+        label="Due"
+        date={localProject.due_date}
+        projectId={localProject.id}
+        field="due_date"
+        isUpdating={isUpdating}
+        updateProjectField={updateProjectField}
+      />
+      <ProjectPackageCell
+        packageName={localProject.package_name}
+        packageId={localProject.package_id}
+      />
+      <ProjectRevenueCell
+        revenue={localProject.revenue}
+        projectId={localProject.id}
+        isUpdating={isUpdating}
+        updateProjectField={updateProjectField}
+      />
+      <ProjectProgressCell progress={localProject.progress} />
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDeleteClick}
+          >
+            Delete
+          </Button>
+          <ProjectActionsCell
+            projectId={localProject.id}
+            setShowDeleteModal={setShowDeleteModal}
+            setSelectedProjects={setSelectedProjects}
+          />
+        </div>
+      </TableCell>
+    </TableBodyRow>
+  );
+}
+
+// Import all required components and types at the top of the file
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TableBodyRow } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Project } from "@/components/projects/types";
+import { supabase } from "@/integrations/supabase/client";
+import { ProjectNameCell } from "./ProjectNameCell";
+import { ProjectClientCell } from "./ProjectClientCell";
+import { ProjectStatusCell } from "./ProjectStatusCell";
+import { ProjectPriorityCell } from "./ProjectPriorityCell";
+import { ProjectDateCell } from "./ProjectDateCell";
+import { ProjectPackageCell } from "./ProjectPackageCell";
+import { ProjectRevenueCell } from "./ProjectRevenueCell";
+import { ProjectProgressCell } from "./ProjectProgressCell";
+import { ProjectActionsCell } from "./ProjectActionsCell";
+
+// Define the props interface
+interface ProjectTableRowProps {
+  project: Project;
+  selectedProjects: string[];
+  toggleProjectSelection: (projectId: string) => void;
+  setSelectedProjects: (projectIds: string[]) => void;
+  updatingProjectId: string | null;
+  setUpdatingProjectId: (projectId: string | null) => void;
+  setShowDeleteModal: (show: boolean) => void;
+  fetchProjects: () => void;
+}
