@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "../types";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,7 @@ import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
 import { ProjectClientCell } from "./ProjectClientCell";
+import { ProjectContactCell } from "./ProjectContactCell";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -111,11 +111,15 @@ export function TableRow({
         projectId={localProject.id} 
       />
 
-      {/* Contact cell: currently displays "-" as no contact field */}
-      <TableCell className="text-sm text-muted-foreground">
-        -
-      </TableCell>
-      
+      <ProjectContactCell
+        projectId={localProject.id}
+        clientId={localProject.client_id}
+        contactId={localProject.contact_id}
+        setUpdatingProjectId={setUpdatingProjectId}
+        updatingProjectId={updatingProjectId}
+        fetchProjects={fetchProjects}
+      />
+
       <ProjectStatusCell 
         project={localProject} 
         updatingProjectId={updatingProjectId} 
