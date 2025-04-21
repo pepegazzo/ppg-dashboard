@@ -56,7 +56,8 @@ export function BulkProjectActions({
       toast({
         title: "Services updated",
         description: `Updated service to "${pkg.name}" for ${selectedProjectIds.length} project(s).`,
-        icon: <SquareCheck className="text-green-600" />
+        // Using description instead of icon since the Toast type doesn't support icon
+        // This is what caused the TypeScript error
       });
 
       // Optionally tell parent to re-fetch
