@@ -14,9 +14,8 @@ const MainContent = ({ children }: { children: ReactNode }) => {
   return (
     <SidebarInset
       className={cn(
-        "bg-zinc-50 text-foreground transition-[margin,padding] duration-200",
-        // Remove any fixed padding/margin when sidebar is collapsed
-        state === "collapsed" && "!p-0 !m-0"
+        "flex-grow bg-zinc-50 text-foreground transition-all duration-200",
+        state === "collapsed" ? "ml-[3rem]" : "ml-[14rem]"
       )}
     >
       <div className="w-full py-8 px-4">
