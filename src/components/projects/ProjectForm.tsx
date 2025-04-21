@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +7,7 @@ import { Form } from "@/components/ui/form";
 import { formSchema, ProjectFormValues } from "./form/types";
 import { ProjectFormFields } from "./form/ProjectFormFields";
 import { ProjectFormActions } from "./form/ProjectFormActions";
+import { updateProjectRevenue } from "@/utils/projectRevenue";
 
 interface ProjectFormProps {
   onCancel: () => void;
@@ -130,6 +130,9 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
             variant: "destructive",
           });
         } else {
+          // Ensure project revenue is in sync with invoices
+          await updateProjectRevenue(newProject.id);
+          
           toast({
             title: "Success",
             description: "Project and pending invoice created successfully.",

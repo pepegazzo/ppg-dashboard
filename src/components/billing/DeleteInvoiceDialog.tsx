@@ -13,6 +13,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { updateProjectRevenue } from "@/utils/projectRevenue";
 
 interface DeleteInvoiceDialogProps {
   showDeleteModal: boolean;
@@ -38,6 +39,26 @@ export function DeleteInvoiceDialog({
     try {
       setIsDeleting(true);
       
+      // First, get the project IDs of the selected invoices before deletion
+      const { data: invoices, error: fetchError } = await supabase
+        .from('invoices')
+        .select('project_id')
+        .in('id', selectedInvoices);
+      
+      if (fetchError) {
+        console.error('Error fetching invoice details:', fetchError);
+        toast({
+          title: "Error fetching invoice details",
+          description: fetchError.message || "Please try again later.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Get unique project IDs to update later
+      const projectIds = [...new Set(invoices.map(invoice => invoice.project_id))];
+      
+      // Delete the invoices
       const { error } = await supabase
         .from('invoices')
         .delete()
@@ -51,6 +72,11 @@ export function DeleteInvoiceDialog({
           variant: "destructive",
         });
         return;
+      }
+      
+      // Update each affected project's revenue
+      for (const projectId of projectIds) {
+        await updateProjectRevenue(projectId);
       }
       
       toast({
