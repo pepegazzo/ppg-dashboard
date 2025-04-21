@@ -11,17 +11,16 @@ interface DashboardLayoutProps {
 const MainContent = ({ children }: { children: ReactNode }) => {
   const { state } = useSidebar();
 
-  // When collapsed, reduce left margin/padding; when expanded, keep it as normal.
-  // On smaller screens the sidebar overlays so we don't need margin.
+  // Remove margins and padding on main content so no gap between sidebar and content.
   return (
     <SidebarInset
       className={`bg-zinc-50 text-foreground transition-[margin,padding] duration-200 ${
         state === "collapsed"
-          ? "md:ml-0" // Remove the margin when collapsed
-          : "md:ml-0" // Remove the margin when expanded too
+          ? "md:ml-0"
+          : "md:ml-0"
       }`}
     >
-      <div className="w-full py-8 px-[16px]">
+      <div className="w-full py-8 px-0"> {/* Remove horizontal padding */}
         {children}
       </div>
     </SidebarInset>
