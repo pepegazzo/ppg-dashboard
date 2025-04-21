@@ -97,7 +97,8 @@ export function ProjectPasswordDialog({
   const handleCopyPortalLink = () => {
     if (projectSlug) {
       const baseUrl = window.location.origin;
-      const portalUrl = `${baseUrl}/projects/${projectSlug}/portal`;
+      // Use the new direct URL format
+      const portalUrl = `${baseUrl}/${projectSlug}`;
       navigator.clipboard.writeText(portalUrl);
       toast({
         title: "Portal link copied",
@@ -176,7 +177,8 @@ export function ProjectPasswordDialog({
 
   const handlePortalAccess = () => {
     setOpen(false);
-    navigate(`/projects/${projectSlug}/portal`);
+    // Navigate to the new direct URL format
+    navigate(`/${projectSlug}`);
   };
 
   return (
@@ -289,4 +291,3 @@ export function ProjectPasswordDialog({
     </Dialog>
   );
 }
-
