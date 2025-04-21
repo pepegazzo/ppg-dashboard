@@ -9,10 +9,12 @@ interface ProjectProgressCellProps {
 export function ProjectProgressCell({ progress }: ProjectProgressCellProps) {
   return (
     <TableCell className="p-2">
-      <Progress value={progress} className="h-3" />
-      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-        {progress}%
-      </span>
+      <div className="w-[95px] flex items-center gap-1">
+        <Progress value={progress} className="h-3 flex-grow" />
+        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+          {progress}%
+        </span>
+      </div>
     </TableCell>
   );
 }
