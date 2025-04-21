@@ -5,6 +5,7 @@ export const formSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   client_id: z.string().optional(),
   client_name: z.string().optional(),
+  contact_id: z.string().optional(), // <-- Ensure contact_id is included!
   status: z.enum(["Onboarding", "Active", "Completed", "Cancelled"]),
   priority: z.enum(["Low", "Medium", "High"]),
   start_date: z.date().optional(),

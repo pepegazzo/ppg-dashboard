@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Project } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +12,7 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
-import { ProjectClientCell } from "./ProjectClientCell";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -38,6 +37,62 @@ export function TableRow({
 }: ProjectTableRowProps) {
   const { toast } = useToast();
   const [localProject, setLocalProject] = useState<Project>(project);
+  const [clientContacts, setClientContacts] = useState<{id: string, name: string}[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+
+  useEffect(() => {
+    if (localProject.client_name) {
+      setLoadingContacts(true);
+      supabase
+        .from("contacts")
+        .select("id, name")
+        .eq("company_id", localProject.client_id)
+        .then(({ data }) => {
+          setClientContacts(data ?? []);
+          setLoadingContacts(false);
+        });
+    }
+  }, [localProject.client_name, localProject.client_id]);
+
+  const updateContact = async (contactId: string) => {
+    try {
+      setUpdatingProjectId(localProject.id);
+      const { data, error } = await supabase
+        .from('projects')
+        .update({ contact_id: contactId })
+        .eq('id', localProject.id)
+        .select();
+      if (error) {
+        toast({
+          title: "Error updating contact person",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      let contactNameDisplay = "";
+      if (contactId) {
+        const { data: cdata } = await supabase
+          .from("contacts")
+          .select("name")
+          .eq("id", contactId)
+          .maybeSingle();
+        contactNameDisplay = cdata?.name ?? "";
+      }
+      setLocalProject(prev => ({
+        ...prev,
+        contact_id: contactId,
+        contact_name: contactNameDisplay
+      }));
+      toast({
+        title: "Contact updated",
+        description: "Project's contact person has been changed."
+      });
+      if (fetchProjects) fetchProjects();
+    } finally {
+      setUpdatingProjectId(null);
+    }
+  };
 
   const updateProjectField = async (projectId: string, field: string, value: string) => {
     try {
@@ -45,10 +100,7 @@ export function TableRow({
       const updateData: Record<string, any> = {
         [field]: value
       };
-      const {
-        data,
-        error
-      } = await supabase.from('projects').update(updateData).eq('id', projectId).select();
+      const { data, error } = await supabase.from('projects').update(updateData).eq('id', projectId).select();
       if (error) {
         console.error(`Error updating project ${field}:`, error);
         toast({
@@ -89,7 +141,8 @@ export function TableRow({
 
   const isUpdating = updatingProjectId === localProject.id;
 
-  return <UITableRow className="hover:bg-muted/30 transition-colors">
+  return (
+    <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
         <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
       </TableCell>
@@ -110,6 +163,31 @@ export function TableRow({
         clientName={localProject.client_name} 
         projectId={localProject.id} 
       />
+      
+      <TableCell className="text-sm min-w-[180px]">
+        <Select 
+          value={localProject.contact_id ?? ""}
+          onValueChange={updateContact}
+          disabled={loadingContacts || !clientContacts.length || isUpdating}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue 
+              placeholder={loadingContacts ? "Loading..." : clientContacts.length === 0 ? "No contacts" : "Select contact"} 
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {clientContacts.length === 0 ? (
+              <SelectItem value="" disabled>No contacts</SelectItem>
+            ) : (
+              clientContacts.map(contact => (
+                <SelectItem key={contact.id} value={contact.id}>
+                  {contact.name}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </TableCell>
       
       <ProjectStatusCell 
         project={localProject} 
@@ -160,6 +238,6 @@ export function TableRow({
           setSelectedProjects={setSelectedProjects}
         />
       </TableCell>
-    </UITableRow>;
+    </UITableRow>
+  );
 }
-

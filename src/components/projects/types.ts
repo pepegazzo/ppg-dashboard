@@ -11,6 +11,8 @@ export type Project = {
   due_date: string | null;
   slug: string | null;
   created_at: string;
+  contact_id?: string | null;        // <-- add contact_id for new column!
+  contact_name?: string | null;      // For easier access in table (when joining)
   package_name?: string | null;
   package_id?: string | null;
   revenue?: number | null;
@@ -25,4 +27,4 @@ export type PackageType = {
 
 export type SortDirection = 'asc' | 'desc';
 
-export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';
+export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress' | 'contact_name';
