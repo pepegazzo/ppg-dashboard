@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -18,8 +19,6 @@ interface Project {
 interface ClientFilterProps {
   nameFilter: string;
   setNameFilter: (value: string) => void;
-  companyFilter: string;
-  setCompanyFilter: (value: string) => void;
   projectFilter: string;
   setProjectFilter: (value: string) => void;
   projects: Project[];
@@ -29,8 +28,6 @@ interface ClientFilterProps {
 export function ClientFilter({
   nameFilter,
   setNameFilter,
-  companyFilter,
-  setCompanyFilter,
   projectFilter,
   setProjectFilter,
   projects,
@@ -48,13 +45,6 @@ export function ClientFilter({
             className="pl-8"
           />
         </div>
-      </div>
-      <div className="flex-1">
-        <Input
-          placeholder="Filter by company..."
-          value={companyFilter}
-          onChange={(e) => setCompanyFilter(e.target.value)}
-        />
       </div>
       <div className="w-[200px]">
         <Select value={projectFilter} onValueChange={setProjectFilter}>

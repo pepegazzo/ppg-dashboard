@@ -32,8 +32,6 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
     isRefreshing,
     nameFilter,
     setNameFilter,
-    companyFilter,
-    setCompanyFilter,
     projectFilter,
     setProjectFilter,
     allProjects,
@@ -164,8 +162,6 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
           <ClientFilter 
             nameFilter={nameFilter}
             setNameFilter={setNameFilter}
-            companyFilter={companyFilter}
-            setCompanyFilter={setCompanyFilter}
             projectFilter={projectFilter}
             setProjectFilter={setProjectFilter}
             projects={allProjects}

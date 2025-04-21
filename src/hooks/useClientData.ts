@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +8,6 @@ export function useClientData() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [nameFilter, setNameFilter] = useState("");
-  const [companyFilter, setCompanyFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -48,7 +46,7 @@ export function useClientData() {
     isLoading,
     error
   } = useQuery({
-    queryKey: ['clients', nameFilter, companyFilter, projectFilter],
+    queryKey: ['clients', nameFilter, projectFilter],
     queryFn: async () => {
       // Get company data
       const { data: companiesData, error: clientsError } = await supabase
@@ -103,11 +101,10 @@ export function useClientData() {
 
     let filteredData = rawClients.filter(client => {
       const nameMatch = (client.company_name ?? "").toLowerCase().includes(nameFilter.toLowerCase());
-      const companyMatch = (client.company ?? "").toLowerCase().includes(companyFilter.toLowerCase());
       const projectMatch = projectFilter === 'all' || 
         client.active_projects?.some(project => project.id === projectFilter);
 
-      return nameMatch && companyMatch && projectMatch;
+      return nameMatch && projectMatch;
     });
 
     return filteredData.sort((a, b) => {
@@ -123,19 +120,18 @@ export function useClientData() {
       const comparison = aValue.localeCompare(bValue);
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
-  }, [rawClients, nameFilter, companyFilter, projectFilter, sortConfig]);
+  }, [rawClients, nameFilter, projectFilter, sortConfig]);
+
+  const resetFilters = () => {
+    setNameFilter("");
+    setProjectFilter("all");
+  };
 
   const handleSort = (key: keyof Client | 'company' | 'email' | 'active_projects') => {
     setSortConfig(current => ({
       key,
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
     }));
-  };
-
-  const resetFilters = () => {
-    setNameFilter("");
-    setCompanyFilter("");
-    setProjectFilter("all");
   };
 
   const handleRefresh = async () => {
@@ -211,8 +207,6 @@ export function useClientData() {
     isRefreshing,
     nameFilter,
     setNameFilter,
-    companyFilter,
-    setCompanyFilter,
     projectFilter,
     setProjectFilter,
     allProjects,
