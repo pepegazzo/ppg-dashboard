@@ -56,7 +56,7 @@ export function ProjectContactField({ control }: ProjectContactFieldProps) {
               </SelectTrigger>
               <SelectContent>
                 {contacts.length === 0 ? (
-                  <SelectItem value="no-contacts" disabled>No contacts</SelectItem>
+                  <SelectItem value="" disabled>No contacts</SelectItem>
                 ) : (
                   contacts.map(contact => (
                     <SelectItem key={contact.id} value={contact.id}>

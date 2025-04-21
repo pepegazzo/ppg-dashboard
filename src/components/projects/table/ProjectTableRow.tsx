@@ -177,7 +177,7 @@ export function TableRow({
           </SelectTrigger>
           <SelectContent>
             {clientContacts.length === 0 ? (
-              <SelectItem value="no-contacts" disabled>No contacts</SelectItem>
+              <SelectItem value="" disabled>No contacts</SelectItem>
             ) : (
               clientContacts.map(contact => (
                 <SelectItem key={contact.id} value={contact.id}>
