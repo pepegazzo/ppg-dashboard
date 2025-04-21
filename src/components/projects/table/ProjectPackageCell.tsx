@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
   PopoverContent
 } from "@/components/ui/popover";
-import { Loader2, Package as PackageIcon, Wrench, Palette, Video, Globe, Heart } from "lucide-react";
+import { Loader2, Package as PackageIcon, Wrench, Palette, Video, Globe, Heart, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -37,6 +37,8 @@ const getServiceIcon = (packageName: string) => {
       return <Video className="h-3 w-3 opacity-80 mr-1" />;
     case 'website':
       return <Globe className="h-3 w-3 opacity-80 mr-1" />;
+    case 'none':
+      return <Box className="h-3 w-3 opacity-80 mr-1" />;
     default:
       return <PackageIcon className="h-3 w-3 opacity-80 mr-1" />;
   }
@@ -184,6 +186,10 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
     }
   };
 
+  const isSelected = (id: string | null) => {
+    return project.package_id === id;
+  };
+
   return (
     <TableCell>
       <Popover open={showPopover} onOpenChange={setShowPopover}>
@@ -212,11 +218,14 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
         <PopoverContent className="w-auto p-2">
           <div className="flex flex-col gap-1">
             <Button variant="ghost" size="sm"
-              className={ !project.package_id ? "" : ""}
+              className={`justify-start ${!project.package_id ? "border border-amber-400 rounded-md" : ""}`}
               onClick={() => updateService(null, null)}
               disabled={isUpdating || updatingProjectId === project.id}
             >
-              <Badge variant="secondary">{getServiceIcon("none")}Unassigned</Badge>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                {getServiceIcon("none")}
+                Unassigned
+              </Badge>
             </Button>
             {loading && (
               <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
@@ -228,7 +237,7 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
                 key={pkg.id}
                 variant="ghost"
                 size="sm"
-                className={`justify-start text-left`}
+                className={`justify-start text-left ${isSelected(pkg.id) ? "border border-amber-400 rounded-md" : ""}`}
                 onClick={() => updateService(pkg.id, pkg.name)}
                 disabled={isUpdating || updatingProjectId === project.id}
               >
