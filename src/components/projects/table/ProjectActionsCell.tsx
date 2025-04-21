@@ -30,7 +30,9 @@ export function ProjectActionsCell({
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState<string>(projectPassword || "");
+  const [editedPassword, setEditedPassword] = useState<string>(projectPassword || "");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const handlePortalClick = async () => {
@@ -58,11 +60,14 @@ export function ProjectActionsCell({
         return;
       }
       setCurrentPassword(data.portal_password);
+      setEditedPassword(data.portal_password);
       toast({
         title: "Portal password created",
         description: "A password was generated and saved for this project.",
       });
       setLoading(false);
+    } else {
+      setEditedPassword(currentPassword);
     }
   };
 
@@ -73,8 +78,8 @@ export function ProjectActionsCell({
   };
 
   const handleCopyPassword = () => {
-    if (currentPassword) {
-      navigator.clipboard.writeText(currentPassword);
+    if (editedPassword) {
+      navigator.clipboard.writeText(editedPassword);
       toast({
         title: "Password copied",
         description: "The portal password was copied to clipboard.",
@@ -104,11 +109,50 @@ export function ProjectActionsCell({
     }
     
     setCurrentPassword(data.portal_password);
+    setEditedPassword(data.portal_password);
     toast({
       title: "Password regenerated",
       description: "A new password was generated and saved for this project.",
     });
     setLoading(false);
+  };
+
+  const handlePasswordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedPassword(e.target.value);
+  };
+
+  const handleSavePassword = async () => {
+    if (!editedPassword) {
+      toast({
+        title: "Password cannot be empty",
+        description: "Please enter a password.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setSaving(true);
+    const { error, data } = await supabase
+      .from("projects")
+      .update({ portal_password: editedPassword })
+      .eq("id", projectId)
+      .select("portal_password")
+      .single();
+    if (error) {
+      toast({
+        title: "Failed to save password",
+        description: error.message,
+        variant: "destructive"
+      });
+      setSaving(false);
+      return;
+    }
+    setCurrentPassword(data.portal_password);
+    setEditedPassword(data.portal_password);
+    toast({
+      title: "Password saved",
+      description: "The portal password has been updated.",
+    });
+    setSaving(false);
   };
 
   return (
@@ -131,18 +175,21 @@ export function ProjectActionsCell({
               Project Password
             </DialogTitle>
             <DialogDescription>
-              Use this password to access the client portal for this project.
+              Use this password to access the client portal for this project.<br />
+              <span className="text-xs text-muted-foreground">You can type a custom password or generate one.</span>
             </DialogDescription>
           </DialogHeader>
           <div className="mb-4 mt-2 flex items-center gap-2">
             <input
               type={showPassword ? "text" : "password"}
-              readOnly
-              value={currentPassword}
+              value={editedPassword ?? ""}
+              onChange={handlePasswordInputChange}
               className="w-full font-mono px-3 py-1.5 border rounded bg-muted text-base"
               placeholder={loading ? "Generating password..." : "No password"}
               aria-label="Project Password"
-              disabled={loading}
+              disabled={loading || saving}
+              autoFocus
+              maxLength={32}
             />
             <Button
               variant="ghost"
@@ -150,7 +197,7 @@ export function ProjectActionsCell({
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
               type="button"
-              disabled={loading}
+              disabled={loading || saving}
             >
               <Eye className="w-5 h-5" />
             </Button>
@@ -160,7 +207,7 @@ export function ProjectActionsCell({
               onClick={handleCopyPassword}
               aria-label="Copy password"
               type="button"
-              disabled={loading || !currentPassword}
+              disabled={loading || saving || !editedPassword}
             >
               <Copy className="w-5 h-5" />
             </Button>
@@ -169,19 +216,33 @@ export function ProjectActionsCell({
             <Button
               variant="outline"
               onClick={handleRegeneratePassword}
-              disabled={loading}
+              disabled={loading || saving}
               className="w-full"
               type="button"
             >
               Regenerate Password
               <RefreshCw className="ml-2 w-4 h-4" />
             </Button>
+            <Button
+              variant="default"
+              onClick={handleSavePassword}
+              disabled={
+                saving ||
+                loading ||
+                editedPassword === currentPassword ||
+                !editedPassword
+              }
+              className="w-full"
+              type="button"
+            >
+              {saving ? "Saving..." : "Save Password"}
+            </Button>
           </div>
           <DialogFooter>
             <Button
               variant="default"
               onClick={handleVisitPortal}
-              disabled={!projectSlug || loading}
+              disabled={!projectSlug || loading || saving}
               className="w-full"
               type="button"
             >
