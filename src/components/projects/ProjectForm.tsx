@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +50,20 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     return formatted;
   };
 
+  // Generate a slug from the project name
+  const generateSlugFromName = (name: string): string => {
+    return formatSlug(name);
+  };
+
+  // Watch for name changes to auto-generate slug if empty
+  form.watch("name");
+  
+  // Set up effect to auto-generate slug when name changes if slug is empty
+  if (form.getValues("name") && !form.getValues("slug")) {
+    const generatedSlug = generateSlugFromName(form.getValues("name"));
+    form.setValue("slug", generatedSlug);
+  }
+
   const onSubmit = async (values: ProjectFormValues) => {
     try {
       setIsSubmitting(true);
@@ -71,18 +84,22 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
 
       // Check if the slug already exists in the database
       if (!values.slug || values.slug.trim() === '') {
-        toast({
-          title: "Missing Slug",
-          description: "Please provide a portal slug for this project.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
+        // Generate slug from name if empty
+        values.slug = generateSlugFromName(values.name);
+        if (!values.slug) {
+          toast({
+            title: "Missing Slug",
+            description: "Please provide a portal slug for this project.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       // Ensure proper slug format
       const formattedSlug = formatSlug(values.slug.trim());
-      console.log("Formatted slug:", formattedSlug);
+      console.log("ABOUT TO SAVE PROJECT WITH SLUG:", formattedSlug);
       
       // Check if the slug already exists
       const { data: existingProject, error: slugCheckError } = await supabase
@@ -136,7 +153,8 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
 
       if (projectError) throw projectError;
 
-      console.log("Created project with data:", newProject);
+      console.log("PROJECT SAVED WITH DATA:", newProject);
+      console.log("SAVED PROJECT SLUG:", newProject.slug);
 
       if (values.package) {
         const packageData = {
