@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,6 @@ export function ProjectContactCell({
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch all contacts for the client
   const { data: clientContacts, isLoading } = useQuery({
     queryKey: ['client-contacts', clientId],
     queryFn: async () => {
@@ -51,7 +49,6 @@ export function ProjectContactCell({
     enabled: !!clientId
   });
 
-  // Current contact info
   const currentContact = clientContacts?.find((c: any) => c.id === localContactId);
 
   const updateProjectContact = async (newContactId: string | null) => {
@@ -75,7 +72,6 @@ export function ProjectContactCell({
           : "No contact assigned to this project."
       });
 
-      // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-contacts'] });
       if (fetchProjects) fetchProjects();
@@ -116,7 +112,7 @@ export function ProjectContactCell({
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs hover:bg-muted"
+            className="text-xs hover:bg-muted px-0"
             disabled={isSubmitting}
           >
             {isSubmitting && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
@@ -154,4 +150,3 @@ export function ProjectContactCell({
     </TableCell>
   );
 }
-
