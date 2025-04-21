@@ -1,8 +1,7 @@
 
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TableRow as TableBodyRow } from "@/components/ui/table";
-import { TableCell } from "@/components/ui/table";
+import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Project } from "@/components/projects/types";
@@ -108,7 +107,7 @@ export function TableRow({
   
   // Add the missing implementation for the TableRow component
   return (
-    <TableBodyRow>
+    <TableRow>
       <TableCell className="p-0 w-12">
         <Checkbox
           checked={selectedProjects.includes(localProject.id)}
@@ -118,51 +117,51 @@ export function TableRow({
         />
       </TableCell>
       <ProjectNameCell
-        project={localProject}
-        isUpdating={isUpdating}
-        updateProjectField={updateProjectField}
+        name={localProject.name} 
+        projectId={localProject.id}
+        fieldName="name"
+        value={localProject.name}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
       />
       <ProjectClientCell
         clientName={localProject.client_name}
-        clientId={localProject.client_id}
+        projectId={localProject.id}
       />
       <ProjectStatusCell
-        status={localProject.status}
-        projectId={localProject.id}
-        isUpdating={isUpdating}
-        updateProjectField={updateProjectField}
+        project={localProject}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
       />
       <ProjectPriorityCell
         priority={localProject.priority}
-        projectId={localProject.id}
-        isUpdating={isUpdating}
-        updateProjectField={updateProjectField}
       />
       <ProjectDateCell
-        label="Start"
         date={localProject.start_date}
+        fieldName="start_date"
         projectId={localProject.id}
-        field="start_date"
-        isUpdating={isUpdating}
-        updateProjectField={updateProjectField}
+        onUpdate={updateProjectField}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
       />
       <ProjectDateCell
-        label="Due"
         date={localProject.due_date}
+        fieldName="due_date"
         projectId={localProject.id}
-        field="due_date"
-        isUpdating={isUpdating}
-        updateProjectField={updateProjectField}
+        onUpdate={updateProjectField}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
       />
       <ProjectPackageCell
-        packageName={localProject.package_name}
-        packageId={localProject.package_id}
+        project={localProject}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
       />
       <ProjectRevenueCell
         revenue={localProject.revenue}
-        projectId={localProject.id}
-        isUpdating={isUpdating}
-        updateProjectField={updateProjectField}
       />
       <ProjectProgressCell progress={localProject.progress} />
       <TableCell>
@@ -181,6 +180,6 @@ export function TableRow({
           />
         </div>
       </TableCell>
-    </TableBodyRow>
+    </TableRow>
   );
 }
