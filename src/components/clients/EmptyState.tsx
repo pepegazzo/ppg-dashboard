@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Info, PlusCircle } from "lucide-react";
 
@@ -16,8 +15,8 @@ export function EmptyState({
   return (
     <div className="border border-dashed border-zinc-300 rounded-lg p-8 text-center">
       <div className="flex flex-col items-center justify-center space-y-4">
-        <div className="bg-zinc-100 p-3 rounded-full">
-          <Info className="h-8 w-8 text-zinc-500" />
+        <div className="bg-amber-100 p-3 rounded-full">
+          <Info className="h-8 w-8 text-amber-500" />
         </div>
         <h3 className="text-lg font-medium text-zinc-900">No clients found</h3>
         <p className="text-zinc-500 max-w-md">
