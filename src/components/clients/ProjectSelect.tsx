@@ -20,6 +20,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [assignedProjectIds, setAssignedProjectIds] = useState<string[]>([]);
 
+  // Fetch assigned projects (to not double-assign)
   const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
     queryKey: ['client-assigned-projects', clientId],
     queryFn: async () => {
@@ -34,6 +35,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     }
   });
 
+  // Available projects not assigned to this client
   const { data: availableProjects, isLoading: isLoadingAvailable, refetch: refetchAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId, assignedProjectIds],
     queryFn: async () => {
@@ -126,10 +128,10 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <Button 
           variant="default"
           size="sm"
-          className="h-7 px-3 text-xs bg-amber-400 text-black hover:bg-amber-500 hover:text-black focus:ring-amber-400"
+          className="h-7 px-3 text-xs bg-amber-300 text-amber-900 hover:bg-amber-400 hover:text-amber-950 focus:ring-amber-400"
           disabled={isUpdating}
         >
           <Plus className="h-3 w-3 mr-1" />
@@ -138,16 +140,16 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-2 rounded shadow-lg min-w-[180px]" align="start">
         <div className="flex flex-col gap-1">
-          {(isLoadingAssigned || isLoadingAvailable) ? (
+          {isLoadingAssigned || isLoadingAvailable ? (
             <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading...
             </div>
           ) : availableProjects && availableProjects.length > 0 ? (
             availableProjects.map((project) => (
-              <Button
-                key={project.id}
-                variant="ghost"
+              <Button 
+                key={project.id} 
+                variant="ghost" 
                 size="sm"
                 className="justify-start rounded hover:bg-muted text-sm"
                 onClick={() => assignProjectToClient(project.id, project.name)}
@@ -166,4 +168,3 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     </Popover>
   );
 }
-
