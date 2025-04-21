@@ -50,17 +50,13 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     return formatted;
   };
 
-  // Generate a slug from the project name
-  const generateSlugFromName = (name: string): string => {
-    return formatSlug(name);
-  };
-
   // Watch for name changes to auto-generate slug if empty
   form.watch("name");
+  form.watch("slug");
   
   // Set up effect to auto-generate slug when name changes if slug is empty
   if (form.getValues("name") && !form.getValues("slug")) {
-    const generatedSlug = generateSlugFromName(form.getValues("name"));
+    const generatedSlug = formatSlug(form.getValues("name"));
     form.setValue("slug", generatedSlug);
   }
 
@@ -82,30 +78,19 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
 
-      // Check if the slug already exists in the database
-      if (!values.slug || values.slug.trim() === '') {
-        // Generate slug from name if empty
-        values.slug = generateSlugFromName(values.name);
-        if (!values.slug) {
-          toast({
-            title: "Missing Slug",
-            description: "Please provide a portal slug for this project.",
-            variant: "destructive",
-          });
-          setIsSubmitting(false);
-          return;
-        }
+      // Validate and format the slug
+      let finalSlug = values.slug;
+      if (!finalSlug || finalSlug.trim() === '') {
+        finalSlug = formatSlug(values.name);
+      } else {
+        finalSlug = formatSlug(finalSlug);
       }
 
-      // Ensure proper slug format
-      const formattedSlug = formatSlug(values.slug.trim());
-      console.log("ABOUT TO SAVE PROJECT WITH SLUG:", formattedSlug);
-      
       // Check if the slug already exists
       const { data: existingProject, error: slugCheckError } = await supabase
         .from('projects')
         .select('id')
-        .eq('slug', formattedSlug)
+        .eq('slug', finalSlug)
         .maybeSingle();
 
       if (slugCheckError) {
@@ -140,10 +125,10 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         due_date: formattedDueDate,
         revenue: values.revenue || null,
         portal_password: null,
-        slug: formattedSlug, // Use the formatted slug
+        slug: finalSlug,
       };
 
-      console.log("Creating project with slug:", formattedSlug);
+      console.log("Creating project with slug:", finalSlug);
 
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
