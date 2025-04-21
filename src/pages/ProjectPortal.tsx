@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ interface ProjectPortalProps {
   isLegacyRoute?: boolean;
 }
 
-const ProjectPortal = ({ isLegacyRoute }: ProjectPortalProps = {}) => {
+const ProjectPortal = ({ isLegacyRoute = false }: ProjectPortalProps) => {
   const params = useParams<{ projectSlug?: string }>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -32,9 +31,12 @@ const ProjectPortal = ({ isLegacyRoute }: ProjectPortalProps = {}) => {
 
   let projectSlug = params.projectSlug;
 
+  // Make sure we're not trying to use a reserved path as a slug
   if (!projectSlug || RESERVED_PATHS.includes(projectSlug.toLowerCase())) {
     projectSlug = undefined;
   }
+
+  console.log("Project Portal - Using slug:", projectSlug);
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,6 +78,7 @@ const ProjectPortal = ({ isLegacyRoute }: ProjectPortalProps = {}) => {
       setIsLoading(true);
       setError(null);
 
+      console.log("Fetching project with slug:", projectSlug);
       const { data, error } = await supabase
         .from("projects")
         .select("*")
@@ -89,6 +92,7 @@ const ProjectPortal = ({ isLegacyRoute }: ProjectPortalProps = {}) => {
         return;
       }
 
+      console.log("Found project:", data);
       setProject(data as Project);
       setIsLoading(false);
     } catch (err) {
