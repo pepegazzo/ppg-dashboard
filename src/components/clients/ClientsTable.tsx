@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase, X } from "lucide-react";
@@ -130,17 +129,23 @@ export const ClientsTable = ({
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
             <TableHead className="w-[50px]">
-              <Checkbox 
-                checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
-                onCheckedChange={handleSelectAll} 
-                aria-label="Select all clients" 
-              />
+              <div className="flex items-center">
+                <Checkbox 
+                  checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
+                  onCheckedChange={handleSelectAll} 
+                  aria-label="Select all clients" 
+                />
+              </div>
             </TableHead>
             <TableHead className="w-[220px] cursor-pointer" onClick={() => handleSort('company_name')}>
-              Company / Brand {renderSortIndicator('company_name', sortConfig)}
+              <div className="flex items-center">
+                Company / Brand {renderSortIndicator('company_name', sortConfig)}
+              </div>
             </TableHead>
             <TableHead>
-              Active Projects
+              <div className="flex items-center">
+                Active Projects
+              </div>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -149,17 +154,21 @@ export const ClientsTable = ({
             <React.Fragment key={client.id}>
               <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
                 <TableCell>
-                  <Checkbox 
-                    checked={selectedClients.includes(client.id)} 
-                    onCheckedChange={() => toggleClientSelection(client.id)} 
-                    aria-label={`Select client ${client.company_name}`} 
-                  />
+                  <div className="flex items-center">
+                    <Checkbox 
+                      checked={selectedClients.includes(client.id)} 
+                      onCheckedChange={() => toggleClientSelection(client.id)} 
+                      aria-label={`Select client ${client.company_name}`} 
+                    />
+                  </div>
                 </TableCell>
-                <TableCell className="font-medium flex items-center gap-2">
-                  {client.company_name}
-                  <span className="ml-2">
-                    {openAccordionId === client.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-                  </span>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    {client.company_name}
+                    <span className="ml-2">
+                      {openAccordionId === client.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-2 items-center">
@@ -269,4 +278,3 @@ export const ClientsTable = ({
     </div>
   );
 };
-
