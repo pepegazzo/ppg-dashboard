@@ -7,16 +7,12 @@ import { ProjectPasswordDialog } from "./ProjectPasswordDialog";
 
 interface ProjectActionsCellProps {
   projectId: string;
-  projectPassword?: string | null;
-  projectSlug?: string | null;
   setShowDeleteModal: (show: boolean) => void;
   setSelectedProjects: (ids: string[]) => void;
 }
 
 export function ProjectActionsCell({
   projectId,
-  projectPassword,
-  projectSlug,
   setShowDeleteModal,
   setSelectedProjects,
 }: ProjectActionsCellProps) {
@@ -41,8 +37,6 @@ export function ProjectActionsCell({
         open={open}
         setOpen={setOpen}
         projectId={projectId}
-        projectPassword={projectPassword}
-        projectSlug={projectSlug}
       />
     </TableCell>
   );

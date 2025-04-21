@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-// Helper to generate an 8-character alphanumeric password
 function generateSimplePassword() {
   return Math.random().toString(36).slice(-8).toUpperCase();
 }
@@ -22,17 +21,15 @@ interface ProjectPasswordDialogProps {
 
 export function ProjectPasswordDialog({
   projectId,
-  projectPassword,
-  projectSlug,
   open,
   setOpen,
 }: ProjectPasswordDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState<string>(projectPassword || "");
-  const [editedPassword, setEditedPassword] = useState<string>(projectPassword || "");
+  const [password, setPassword] = useState<string>("");
+  const [editedPassword, setEditedPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [currentSlug, setCurrentSlug] = useState<string | null>(null);
+  const [slug, setSlug] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,9 +41,12 @@ export function ProjectPasswordDialog({
   }, [open, projectId]);
 
   const fetchProjectData = async () => {
+    if (!open) return;
+    
+    setLoading(true);
+    
     try {
-      console.log("Fetching project data for ID:", projectId);
-      setLoading(true);
+      console.log("Fetching project with ID:", projectId);
       
       const { data, error } = await supabase
         .from("projects")
@@ -55,10 +55,10 @@ export function ProjectPasswordDialog({
         .single();
 
       if (error) {
-        console.error("Error fetching project data:", error);
+        console.error("Error fetching project:", error);
         toast({
-          title: "Error fetching project data",
-          description: error.message,
+          title: "Error",
+          description: "Failed to load project details",
           variant: "destructive",
         });
         setLoading(false);
@@ -67,74 +67,60 @@ export function ProjectPasswordDialog({
 
       console.log("Fetched project data:", data);
       
-      if (data) {
-        // Set the current slug from the database
-        if (data.slug) {
-          setCurrentSlug(data.slug);
-          console.log("Set current slug to:", data.slug);
-        } else {
-          console.error("No slug found for project:", projectId);
-          toast({
-            title: "Missing Slug",
-            description: "This project doesn't have a portal slug defined.",
-            variant: "destructive",
-          });
-        }
-        
-        // Handle password if needed
-        if (!data.portal_password || data.portal_password.trim() === "") {
-          generateAndSavePassword();
-        } else {
-          setCurrentPassword(data.portal_password);
-          setEditedPassword(data.portal_password);
-          setLoading(false);
-        }
+      // Set the slug state from DB data
+      setSlug(data.slug);
+      
+      // Handle password
+      if (data.portal_password) {
+        setPassword(data.portal_password);
+        setEditedPassword(data.portal_password);
       } else {
-        setLoading(false);
+        // Generate password if not exists
+        generateAndSavePassword();
       }
     } catch (err) {
-      console.error("Unexpected error fetching project:", err);
+      console.error("Error in fetchProjectData:", err);
       toast({
         title: "Error",
-        description: "Failed to load project information",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
 
-  // Generate and save a password if it doesn't exist when the dialog opens
   const generateAndSavePassword = async () => {
     setLoading(true);
-    const newPass = generateSimplePassword();
-
+    const newPassword = generateSimplePassword();
+    
     try {
-      const { error, data } = await supabase
+      const { data, error } = await supabase
         .from("projects")
-        .update({ portal_password: newPass })
+        .update({ portal_password: newPassword })
         .eq("id", projectId)
         .select("portal_password")
         .single();
 
       if (error) {
         toast({
-          title: "Failed to generate password",
-          description: error.message,
+          title: "Error",
+          description: "Failed to generate password",
           variant: "destructive",
         });
       } else {
-        setCurrentPassword(data.portal_password);
+        setPassword(data.portal_password);
         setEditedPassword(data.portal_password);
         toast({
-          title: "Portal password created",
-          description: "A password was generated and saved for this project.",
+          title: "Success",
+          description: "Password generated successfully",
         });
       }
     } catch (err) {
       console.error("Error generating password:", err);
       toast({
         title: "Error",
-        description: "An unexpected error occurred.",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
@@ -143,62 +129,68 @@ export function ProjectPasswordDialog({
   };
 
   const handleCopyPassword = () => {
-    if (editedPassword) {
-      navigator.clipboard.writeText(editedPassword);
-      toast({
-        title: "Password copied",
-        description: "The portal password was copied to clipboard.",
-      });
-    }
+    if (!editedPassword) return;
+    navigator.clipboard.writeText(editedPassword);
+    toast({
+      title: "Copied",
+      description: "Password copied to clipboard",
+    });
   };
 
   const handleCopyPortalLink = () => {
-    if (currentSlug) {
-      console.log("Copying portal link with slug:", currentSlug);
-      const baseUrl = window.location.origin;
-      const portalUrl = `${baseUrl}/${currentSlug}`;
-      navigator.clipboard.writeText(portalUrl);
+    if (!slug) {
       toast({
-        title: "Portal link copied",
-        description: "The link to the project portal was copied to clipboard.",
-      });
-    } else {
-      toast({
-        title: "No slug available",
-        description: "This project doesn't have a valid URL slug defined.",
+        title: "No Slug",
+        description: "This project doesn't have a portal URL configured",
         variant: "destructive",
       });
+      return;
     }
+    
+    const portalUrl = `${window.location.origin}/${slug}`;
+    navigator.clipboard.writeText(portalUrl);
+    toast({
+      title: "Copied",
+      description: "Portal link copied to clipboard",
+    });
   };
 
   const handleRegeneratePassword = async () => {
     setLoading(true);
-    const newPass = generateSimplePassword();
+    const newPassword = generateSimplePassword();
 
-    const { error, data } = await supabase
-      .from("projects")
-      .update({ portal_password: newPass })
-      .eq("id", projectId)
-      .select("portal_password")
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .update({ portal_password: newPassword })
+        .eq("id", projectId)
+        .select("portal_password")
+        .single();
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to regenerate password",
+          variant: "destructive",
+        });
+      } else {
+        setPassword(data.portal_password);
+        setEditedPassword(data.portal_password);
+        toast({
+          title: "Success",
+          description: "Password regenerated successfully",
+        });
+      }
+    } catch (err) {
+      console.error("Error regenerating password:", err);
       toast({
-        title: "Failed to regenerate password",
-        description: error.message,
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
-      return;
     }
-    
-    setCurrentPassword(data.portal_password);
-    setEditedPassword(data.portal_password);
-    toast({
-      title: "Password regenerated",
-      description: "A new password was generated and saved for this project.",
-    });
-    setLoading(false);
   };
 
   const handlePasswordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,51 +200,65 @@ export function ProjectPasswordDialog({
   const handleSavePassword = async () => {
     if (!editedPassword) {
       toast({
-        title: "Password cannot be empty",
-        description: "Please enter a password.",
-        variant: "destructive"
-      });
-      return;
-    }
-    setSaving(true);
-    const { error, data } = await supabase
-      .from("projects")
-      .update({ portal_password: editedPassword })
-      .eq("id", projectId)
-      .select("portal_password")
-      .single();
-    if (error) {
-      toast({
-        title: "Failed to save password",
-        description: error.message,
-        variant: "destructive"
-      });
-      setSaving(false);
-      return;
-    }
-    setCurrentPassword(data.portal_password);
-    setEditedPassword(data.portal_password);
-    toast({
-      title: "Password saved",
-      description: "The portal password has been updated.",
-    });
-    setSaving(false);
-  };
-
-  const handlePortalAccess = () => {
-    if (!currentSlug) {
-      toast({
-        title: "No slug available",
-        description: "This project doesn't have a valid URL slug defined.",
+        title: "Error",
+        description: "Password cannot be empty",
         variant: "destructive",
       });
       return;
     }
     
-    console.log("Navigating to project portal with slug:", currentSlug);
+    setSaving(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .update({ portal_password: editedPassword })
+        .eq("id", projectId)
+        .select("portal_password")
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to save password",
+          variant: "destructive",
+        });
+      } else {
+        setPassword(data.portal_password);
+        toast({
+          title: "Success",
+          description: "Password saved successfully",
+        });
+      }
+    } catch (err) {
+      console.error("Error saving password:", err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePortalAccess = () => {
+    if (!slug) {
+      toast({
+        title: "No Slug",
+        description: "This project doesn't have a portal URL configured",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setOpen(false);
-    // Use the current slug fetched from the database for navigation
-    navigate(`/${currentSlug}`);
+    navigate(`/${slug}`);
+  };
+
+  const getPortalUrl = () => {
+    if (!slug) return "No portal URL configured";
+    return `${window.location.origin}/${slug}`;
   };
 
   return (
@@ -269,13 +275,15 @@ export function ProjectPasswordDialog({
             <span className="text-xs text-muted-foreground">You can type a custom password or generate one.</span>
           </DialogDescription>
         </DialogHeader>
+        
+        {/* Password input field */}
         <div className="mb-4 mt-2 flex items-center gap-2">
           <input
             type={showPassword ? "text" : "password"}
-            value={editedPassword ?? ""}
+            value={editedPassword}
             onChange={handlePasswordInputChange}
             className="w-full font-mono px-3 py-1.5 border rounded bg-muted text-base"
-            placeholder={loading ? "Generating password..." : "No password"}
+            placeholder={loading ? "Loading..." : "No password"}
             aria-label="Project Password"
             disabled={loading || saving}
             autoFocus
@@ -303,14 +311,11 @@ export function ProjectPasswordDialog({
           </Button>
         </div>
         
-        {/* Slug information */}
+        {/* Portal URL display */}
         <div className="mb-4 p-3 bg-muted rounded-md">
           <p className="text-sm font-medium mb-1">Portal URL:</p>
           <p className="text-sm font-mono break-all">
-            {currentSlug 
-              ? `${window.location.origin}/${currentSlug}`
-              : "No portal URL available"
-            }
+            {getPortalUrl()}
           </p>
         </div>
         
@@ -321,13 +326,15 @@ export function ProjectPasswordDialog({
             type="button"
             className="w-full flex items-center gap-2"
             onClick={handleCopyPortalLink}
-            disabled={!currentSlug}
+            disabled={!slug}
             aria-label="Copy portal link"
           >
             <Copy className="w-4 h-4" />
             Copy Portal Link
           </Button>
         </div>
+        
+        {/* Password actions */}
         <div className="flex space-x-2 mb-4">
           <Button
             variant="outline"
@@ -342,36 +349,26 @@ export function ProjectPasswordDialog({
           <Button
             variant="default"
             onClick={handleSavePassword}
-            disabled={
-              saving ||
-              loading ||
-              editedPassword === currentPassword ||
-              !editedPassword
-            }
+            disabled={saving || loading || editedPassword === password || !editedPassword}
             className="w-full"
             type="button"
           >
             {saving ? "Saving..." : "Save Password"}
           </Button>
         </div>
+        
+        {/* Portal access button */}
         <DialogFooter>
-          {currentSlug ? (
-            <Button
-              variant="default"
-              className="w-full"
-              disabled={loading || saving}
-              type="button"
-              onClick={handlePortalAccess}
-            >
-              Visit Project Portal
-              <LinkIcon className="ml-2 w-4 h-4" />
-            </Button>
-          ) : (
-            <Button variant="default" className="w-full" disabled>
-              Visit Project Portal
-              <LinkIcon className="ml-2 w-4 h-4" />
-            </Button>
-          )}
+          <Button
+            variant="default"
+            className="w-full"
+            disabled={loading || saving || !slug}
+            type="button"
+            onClick={handlePortalAccess}
+          >
+            Visit Project Portal
+            <LinkIcon className="ml-2 w-4 h-4" />
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

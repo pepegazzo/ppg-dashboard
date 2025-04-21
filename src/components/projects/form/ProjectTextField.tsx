@@ -12,6 +12,18 @@ interface ProjectTextFieldProps {
 }
 
 export function ProjectTextField({ control, name, label, placeholder }: ProjectTextFieldProps) {
+  const formatSlug = (value: string): string => {
+    // Convert to lowercase
+    let formatted = value.toLowerCase();
+    // Replace spaces and special characters with hyphens
+    formatted = formatted.replace(/[^a-z0-9-]/g, '-');
+    // Replace multiple consecutive hyphens with a single one
+    formatted = formatted.replace(/-+/g, '-');
+    // Remove leading and trailing hyphens
+    formatted = formatted.replace(/^-+|-+$/g, '');
+    return formatted;
+  };
+
   return (
     <FormField
       control={control}
@@ -27,10 +39,10 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
               autoComplete="off" 
               value={field.value} 
               onChange={(e) => {
-                // For slug field, enforce lowercase and only allow letters, numbers, and hyphens
+                // For slug field, enforce proper slug format
                 if (name === "slug") {
-                  const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-                  field.onChange(value);
+                  const formattedValue = formatSlug(e.target.value);
+                  field.onChange(formattedValue);
                 } else {
                   field.onChange(e.target.value);
                 }
