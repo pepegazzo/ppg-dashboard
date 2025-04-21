@@ -12,9 +12,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen w-full bg-zinc-50 text-foreground pl-[14rem] flex">
+      <div className="min-h-screen w-full bg-zinc-50 text-foreground">
         <Sidebar />
-        <SidebarInset className="w-full">
+        <SidebarInset className="w-full pl-[var(--sidebar-width)]">
           <div className="w-full py-8 px-[16px]">
             {children}
           </div>
