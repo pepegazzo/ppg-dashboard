@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +10,25 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 
 const ProjectPortal = () => {
-  const { projectSlug } = useParams<{ projectSlug: string }>();
+  const params = useParams<{ projectSlug?: string }>();
+  const location = useLocation();
+  const RESERVED_PATHS = [
+    "login",
+    "projects",
+    "clients",
+    "billing",
+    "notes",
+    "files",
+    "tasks",
+    "portal",
+  ];
+
+  let projectSlug = params.projectSlug;
+
+  if (!projectSlug || RESERVED_PATHS.includes(projectSlug.toLowerCase())) {
+    projectSlug = undefined;
+  }
+
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +52,12 @@ const ProjectPortal = () => {
   }, [projectSlug, user]);
 
   const fetchProject = async () => {
-    if (!projectSlug) return;
+    if (!projectSlug) {
+      setProject(null);
+      setIsLoading(false);
+      setError("Project not found or invalid URL.");
+      return;
+    }
 
     try {
       setIsLoading(true);

@@ -29,12 +29,15 @@ function App() {
             <Route path="/login" element={<Login />} />
             {/* Removed Register route */}
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            {/* Leave the old portal route for backwards compatibility */}
             <Route path="/projects/:projectSlug/portal" element={<ProjectPortal />} />
             <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
             <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
             <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
             <Route path="/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
             <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+            {/* NEW: Public Client Portal Route at root */}
+            <Route path=":projectSlug" element={<ProjectPortal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -44,4 +47,3 @@ function App() {
 }
 
 export default App;
-
