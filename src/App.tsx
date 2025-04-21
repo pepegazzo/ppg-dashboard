@@ -36,8 +36,8 @@ function App() {
             <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
             <Route path="/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
             <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-            {/* NEW: Public Client Portal Route at root */}
-            <Route path=":projectSlug" element={<ProjectPortal />} />
+            {/* Public Client Portal Route at root - IMPORTANT: This must be after all other defined routes */}
+            <Route path="/:projectSlug" element={<ProjectPortal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

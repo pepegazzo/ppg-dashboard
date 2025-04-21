@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,13 @@ const ProjectPortal = () => {
   const [adminPassword, setAdminPassword] = useState("");
   const [isAdminLoading, setIsAdminLoading] = useState(false);
   const { user } = useAuth();
+
+  // Check if we're on the old URL format (/projects/slug/portal) and redirect to new format (/slug)
+  useEffect(() => {
+    if (location.pathname.includes('/projects/') && location.pathname.includes('/portal') && projectSlug) {
+      navigate(`/${projectSlug}`, { replace: true });
+    }
+  }, [location.pathname, projectSlug, navigate]);
 
   useEffect(() => {
     if (user) {
