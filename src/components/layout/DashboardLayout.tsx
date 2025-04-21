@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -15,7 +14,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
         <Sidebar />
-        <SidebarInset className="bg-zinc-50 text-foreground">
+        <SidebarInset 
+          className="bg-zinc-50 text-foreground ml-[14rem]" // 👈 Aquí está la magia
+        >
           <div className="w-full py-8 px-[16px]">
             {children}
           </div>
