@@ -67,21 +67,25 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
         <DialogHeader>
           <DialogTitle>Manage Contacts</DialogTitle>
         </DialogHeader>
-        <div className="mb-2">
+        <div className="mb-4">
           <div className="flex flex-col">
             {currentContacts.length === 0 && (
-              <span className="text-muted-foreground mb-3 text-xs">No contacts for this company.</span>
+              <div className="text-muted-foreground text-sm border rounded-md p-4 bg-muted/5">
+                No contacts added yet for this company
+              </div>
             )}
             {currentContacts.length > 0 && (
-              <div className="mb-4">
-                <Label className="text-sm mb-2 block">Contacts</Label>
+              <div className="space-y-4">
+                <Label className="text-sm block">Current Contacts</Label>
                 <div className="space-y-2">
                   {currentContacts.map(contact => (
-                    <div key={contact.id} className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 flex flex-col gap-0.5">
-                      <span className="font-medium text-amber-900">{contact.name}</span>
-                      {contact.role && <span className="text-xs text-amber-800">{contact.role}</span>}
-                      {contact.email && <span className="text-xs text-amber-700">{contact.email}</span>}
-                      {contact.phone && <span className="text-xs text-amber-700">{contact.phone}</span>}
+                    <div key={contact.id} className="border rounded-md p-4 bg-muted/5">
+                      <span className="font-medium text-foreground">{contact.name}</span>
+                      <div className="grid gap-1 mt-2 text-sm">
+                        {contact.role && <div className="text-muted-foreground">Role: {contact.role}</div>}
+                        {contact.email && <div className="text-muted-foreground">Email: {contact.email}</div>}
+                        {contact.phone && <div className="text-muted-foreground">Phone: {contact.phone}</div>}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -89,12 +93,11 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
             )}
           </div>
         </div>
-        <form onSubmit={handleAdd} className="space-y-2 border-t pt-3 mt-2">
-          <div className="font-semibold text-sm mb-2 flex items-center gap-1">
-            <Plus className="h-4 w-4 text-amber-500" /> Add Contact
-          </div>
-          <div className="space-y-2">
-            <div>
+        
+        <form onSubmit={handleAdd} className="space-y-4 border-t pt-4">
+          <div className="font-medium text-md mb-2">Add New Contact</div>
+          <div className="space-y-3">
+            <div className="space-y-2">
               <Label htmlFor="contact_name">Name*</Label>
               <Input 
                 id="contact_name" 
@@ -103,21 +106,19 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 onChange={handleChange} 
                 required 
                 placeholder="Contact Name"
-                className="border-amber-200 focus-visible:ring-amber-500"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="contact_role">Role</Label>
               <Input 
                 id="contact_role" 
                 name="role" 
                 value={form.role} 
                 onChange={handleChange} 
-                placeholder="Role"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                placeholder="Position or role"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="contact_email">Email</Label>
               <Input 
                 id="contact_email" 
@@ -125,26 +126,26 @@ export default function ClientContactsModal({ clientId, currentContacts, onClose
                 type="email" 
                 value={form.email} 
                 onChange={handleChange} 
-                placeholder="Email"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                placeholder="Email address"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="contact_phone">Phone</Label>
               <Input 
                 id="contact_phone" 
                 name="phone" 
                 value={form.phone} 
                 onChange={handleChange} 
-                placeholder="Phone"
-                className="border-amber-200 focus-visible:ring-amber-500"
+                placeholder="Phone number"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" className="border-amber-200 text-amber-800 hover:bg-amber-50" onClick={onClose}>Close</Button>
-            <Button type="submit" className="bg-amber-500 text-white hover:bg-amber-600" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-3 w-3 mr-2 animate-spin" />}
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Contact
             </Button>
           </DialogFooter>
