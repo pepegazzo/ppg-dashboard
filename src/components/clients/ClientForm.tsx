@@ -9,10 +9,6 @@ import { Loader2 } from "lucide-react";
 interface ClientFormProps {
   onSubmit: (clientData: {
     company_name: string;
-    company: string;
-    website?: string;
-    address?: string;
-    notes?: string;
     contact: {
       name: string;
       role?: string;
@@ -26,10 +22,6 @@ interface ClientFormProps {
 
 export default function ClientForm({ onSubmit, isSubmitting, onCancel }: ClientFormProps) {
   const [company_name, setCompanyName] = useState("");
-  const [company, setCompany] = useState("");
-  const [website, setWebsite] = useState("");
-  const [address, setAddress] = useState("");
-  const [notes, setNotes] = useState("");
   // Primary contact
   const [contactName, setContactName] = useState("");
   const [contactRole, setContactRole] = useState("");
@@ -40,10 +32,6 @@ export default function ClientForm({ onSubmit, isSubmitting, onCancel }: ClientF
     e.preventDefault();
     await onSubmit({
       company_name,
-      company,
-      website,
-      address,
-      notes,
       contact: {
         name: contactName,
         role: contactRole,
@@ -63,42 +51,6 @@ export default function ClientForm({ onSubmit, isSubmitting, onCancel }: ClientF
           onChange={(e) => setCompanyName(e.target.value)}
           placeholder="Enter company/brand name"
           required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="company">Legal Name / Entity (if different)</Label>
-        <Input
-          id="company"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          placeholder="e.g. Acme Corporation LLC"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="website">Website</Label>
-        <Input
-          id="website"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          placeholder="https://company.com"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Address"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="notes">Internal Notes</Label>
-        <Input
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Notes about this company"
         />
       </div>
 

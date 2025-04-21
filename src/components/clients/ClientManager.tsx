@@ -45,10 +45,6 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
 
   const createClient = async (clientData: {
     company_name: string;
-    company: string;
-    website?: string;
-    address?: string;
-    notes?: string;
     contact: {
       name: string;
       role?: string;
@@ -58,14 +54,13 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
   }) => {
     try {
       setIsSubmitting(true);
-      // For clients table, need to include required fields from database schema
+      // Only company_name is required, generic fallback for removed fields
       const { data, error } = await supabase.from('clients').insert({
         company_name: clientData.company_name,
-        company: clientData.company ?? "",
-        website: clientData.website,
-        address: clientData.address,
-        notes: clientData.notes,
-        // Required fields for the clients table
+        company: clientData.company_name, // Fallback
+        website: null,
+        address: null,
+        notes: null,
         email: clientData.contact?.email || "",
         phone: clientData.contact?.phone || "",
         role: clientData.contact?.role || ""
@@ -155,10 +150,6 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
           testCreateClient={async () => {
             await createClient({
               company_name: "Test Company",
-              company: "Test Company",
-              website: "www.testcompany.com",
-              address: "123 Test St",
-              notes: "Test notes",
               contact: {
                 name: "Test Contact",
                 role: "Test Role",
