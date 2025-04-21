@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -36,15 +37,17 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     queryKey: ['client-available-projects', clientId, assignedProjects],
     queryFn: async () => {
       let excludeIds = assignedProjects ?? [];
+      
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
-        .not('id', 'in', excludeIds.length === 0 ? ["000"] : excludeIds)
+        .not('id', 'in', excludeIds.length > 0 ? excludeIds : ["000"]) // Use placeholder ID when empty
         .order('name');
+        
       if (error) throw error;
       return data ?? [];
     },
-    enabled: isPopoverOpen
+    enabled: !!assignedProjects // Only run when assignedProjects is loaded
   });
 
   const assignProjectToClient = async (projectId: string, projectName: string) => {
