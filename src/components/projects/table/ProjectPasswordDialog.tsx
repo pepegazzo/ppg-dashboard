@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Eye, Key, Copy, Link as LinkIcon, RefreshCw } from "lucide-react";
@@ -35,21 +34,21 @@ export function ProjectPasswordDialog({
   }, [open, projectId]);
 
   const fetchProjectData = async () => {
-    if (!open || !projectId) return;
+    if (!open) return;
     
     setLoading(true);
     
     try {
-      console.log("[ProjectPasswordDialog] Fetching project with ID:", projectId);
+      console.log("Fetching project with ID:", projectId);
       
       const { data, error } = await supabase
         .from("projects")
         .select("slug, portal_password")
         .eq("id", projectId)
-        .maybeSingle();
+        .single();
 
       if (error) {
-        console.error("[ProjectPasswordDialog] Error fetching project:", error);
+        console.error("Error fetching project:", error);
         toast({
           title: "Error",
           description: "Failed to load project details",
@@ -59,14 +58,14 @@ export function ProjectPasswordDialog({
         return;
       }
 
-      console.log("[ProjectPasswordDialog] Fetched project data:", data);
+      console.log("Fetched project data:", data);
       
       // Set the slug state from DB data
-      if (data?.slug) {
-        console.log("[ProjectPasswordDialog] Setting slug state to:", data.slug);
+      if (data.slug) {
+        console.log("Setting slug state to:", data.slug);
         setSlug(data.slug);
       } else {
-        console.error("[ProjectPasswordDialog] No slug found for project");
+        console.error("No slug found for project");
         toast({
           title: "Error",
           description: "This project doesn't have a portal URL configured",
@@ -75,7 +74,7 @@ export function ProjectPasswordDialog({
       }
       
       // Handle password
-      if (data?.portal_password) {
+      if (data.portal_password) {
         setPassword(data.portal_password);
         setEditedPassword(data.portal_password);
       } else {
@@ -83,7 +82,7 @@ export function ProjectPasswordDialog({
         generateAndSavePassword();
       }
     } catch (err) {
-      console.error("[ProjectPasswordDialog] Error in fetchProjectData:", err);
+      console.error("Error in fetchProjectData:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -121,7 +120,7 @@ export function ProjectPasswordDialog({
         });
       }
     } catch (err) {
-      console.error("[ProjectPasswordDialog] Error generating password:", err);
+      console.error("Error generating password:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -151,8 +150,8 @@ export function ProjectPasswordDialog({
       return;
     }
     
-    const portalUrl = getPortalUrl();
-    console.log("[ProjectPasswordDialog] Copying portal URL:", portalUrl);
+    const portalUrl = `${window.location.origin}/${slug}`;
+    console.log("Copying portal URL:", portalUrl);
     navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Copied",
@@ -187,7 +186,7 @@ export function ProjectPasswordDialog({
         });
       }
     } catch (err) {
-      console.error("[ProjectPasswordDialog] Error regenerating password:", err);
+      console.error("Error regenerating password:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -236,7 +235,7 @@ export function ProjectPasswordDialog({
         });
       }
     } catch (err) {
-      console.error("[ProjectPasswordDialog] Error saving password:", err);
+      console.error("Error saving password:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -257,16 +256,15 @@ export function ProjectPasswordDialog({
       return;
     }
     
-    console.log("[ProjectPasswordDialog] Navigating to portal with slug:", slug);
+    console.log("Navigating to portal with slug:", slug);
     setOpen(false);
     navigate(`/${slug}`);
   };
 
   const getPortalUrl = () => {
     if (!slug) return "No portal URL configured";
-    // Fixed URL construction to use window.location.origin and ensure proper slug formatting
     const url = `${window.location.origin}/${slug}`;
-    console.log("[ProjectPasswordDialog] Generated portal URL:", url);
+    console.log("Generated portal URL:", url);
     return url;
   };
 
