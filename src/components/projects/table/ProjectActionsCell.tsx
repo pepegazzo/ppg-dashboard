@@ -1,12 +1,7 @@
 
 import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ExternalLink } from "lucide-react";
 
 interface ProjectActionsCellProps {
   projectId: string;
@@ -14,33 +9,13 @@ interface ProjectActionsCellProps {
   setSelectedProjects: (ids: string[]) => void;
 }
 
-export function ProjectActionsCell({ projectId, setShowDeleteModal, setSelectedProjects }: ProjectActionsCellProps) {
+export function ProjectActionsCell({ projectId }: ProjectActionsCellProps) {
   return (
     <TableCell className="text-center">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            Actions
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => console.log('View details', projectId)}>
-            View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => console.log('Edit', projectId)}>
-            Edit Project
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setSelectedProjects([projectId]);
-              setShowDeleteModal(true);
-            }}
-            className="text-destructive focus:text-destructive"
-          >
-            Delete Project
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-1">
+        Portal
+        <ExternalLink className="ml-1 h-4 w-4" />
+      </Button>
     </TableCell>
   );
 }
