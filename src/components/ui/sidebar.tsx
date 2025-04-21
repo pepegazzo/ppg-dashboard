@@ -311,8 +311,7 @@ const SidebarInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "relative flex min-h-svh flex-1 flex-col bg-background",
-        "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))]",
+        "relative flex min-h-svh flex-1 flex-col bg-background w-full p-0 m-0",
         className
       )}
       {...props}
