@@ -18,7 +18,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [assignedProjectIds, setAssignedProjectIds] = useState<string[]>([]);
 
   // Fetch assigned projects (to not double-assign)
   const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
@@ -29,35 +28,29 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         .select('project_id')
         .eq('client_id', clientId);
       if (error) throw error;
-      const projectIds = (data ?? []).map(item => item.project_id);
-      setAssignedProjectIds(projectIds);
-      return projectIds;
+      return (data ?? []).map(item => item.project_id);
     }
   });
 
   // Available projects not assigned to this client
   const { data: availableProjects, isLoading: isLoadingAvailable, refetch: refetchAvailable } = useQuery({
-    queryKey: ['client-available-projects', clientId, assignedProjectIds],
+    queryKey: ['client-available-projects', clientId, assignedProjects],
     queryFn: async () => {
-      const excludeIds = assignedProjectIds || [];
-      let query = supabase
+      // Get all projects first
+      const { data: allProjects, error: projectsError } = await supabase
         .from('projects')
         .select('id, name')
         .order('name');
-
-      if (excludeIds.length > 0) {
-        query = query.not('id', 'in', excludeIds);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      return data ?? [];
+      
+      if (projectsError) throw projectsError;
+      
+      // Filter out projects that are already assigned to this client
+      const currentAssignments = assignedProjects || [];
+      return (allProjects || []).filter(project => 
+        !currentAssignments.includes(project.id)
+      );
     },
-    enabled: false
+    enabled: !!assignedProjects // Only run when we have the assigned projects
   });
 
   useEffect(() => {
@@ -98,7 +91,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
       if (updateError) throw updateError;
 
-      setAssignedProjectIds(prev => [...prev, projectId]);
       setIsPopoverOpen(false);
 
       toast({
