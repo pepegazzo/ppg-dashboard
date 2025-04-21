@@ -46,6 +46,8 @@ export function ProjectPasswordDialog({
   const fetchProjectData = async () => {
     try {
       console.log("Fetching project data for ID:", projectId);
+      setLoading(true);
+      
       const { data, error } = await supabase
         .from("projects")
         .select("slug, portal_password")
@@ -59,6 +61,7 @@ export function ProjectPasswordDialog({
           description: error.message,
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
@@ -84,7 +87,10 @@ export function ProjectPasswordDialog({
         } else {
           setCurrentPassword(data.portal_password);
           setEditedPassword(data.portal_password);
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     } catch (err) {
       console.error("Unexpected error fetching project:", err);
@@ -93,6 +99,7 @@ export function ProjectPasswordDialog({
         description: "Failed to load project information",
         variant: "destructive",
       });
+      setLoading(false);
     }
   };
 

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,11 +70,22 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const formattedSlug = values.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
       
       // Check if the slug already exists
-      const { data: existingProject } = await supabase
+      const { data: existingProject, error: slugCheckError } = await supabase
         .from('projects')
         .select('id')
         .eq('slug', formattedSlug)
         .maybeSingle();
+
+      if (slugCheckError) {
+        console.error("Error checking slug:", slugCheckError);
+        toast({
+          title: "Error",
+          description: "Could not verify slug uniqueness. Please try again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       if (existingProject) {
         toast({
@@ -89,14 +101,14 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,
-        client_name: clientName || "No Client",
+        client_name: clientName || values.client_name || "No Client",
         status: values.status,
         priority: values.priority,
         start_date: formattedStartDate,
         due_date: formattedDueDate,
         revenue: values.revenue || null,
         portal_password: null,
-        slug: formattedSlug,
+        slug: formattedSlug, // Use the formatted slug
       };
 
       console.log("Creating project with slug:", formattedSlug);
@@ -160,6 +172,11 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
             description: "Project and pending invoice created successfully.",
           });
         }
+      } else {
+        toast({
+          title: "Success",
+          description: "Project created successfully.",
+        });
       }
 
       onSubmitted();
