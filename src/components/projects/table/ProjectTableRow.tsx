@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Project } from "../types";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +42,7 @@ export function TableRow({
   const [loadingContacts, setLoadingContacts] = useState(false);
 
   useEffect(() => {
-    if (localProject.client_name) {
+    if (localProject.client_name && localProject.client_id) {
       setLoadingContacts(true);
       supabase
         .from("contacts")
@@ -159,10 +160,9 @@ export function TableRow({
         />
       </TableCell>
       
-      <ProjectClientCell 
-        clientName={localProject.client_name} 
-        projectId={localProject.id} 
-      />
+      <TableCell className="text-sm">
+        {localProject.client_name || "No Client"}
+      </TableCell>
       
       <TableCell className="text-sm min-w-[180px]">
         <Select 

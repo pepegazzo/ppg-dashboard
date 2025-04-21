@@ -1,18 +1,18 @@
-
 import { Database } from "@/integrations/supabase/types";
 
 export type Project = {
   id: string;
   name: string;
   client_name: string;
+  client_id?: string | null;  // Added client_id property
   status: 'Onboarding' | 'Active' | 'Completed' | 'Cancelled';
   priority: 'Low' | 'Medium' | 'High';
   start_date: string | null;
   due_date: string | null;
   slug: string | null;
   created_at: string;
-  contact_id?: string | null;        // <-- add contact_id for new column!
-  contact_name?: string | null;      // For easier access in table (when joining)
+  contact_id?: string | null;
+  contact_name?: string | null;
   package_name?: string | null;
   package_id?: string | null;
   revenue?: number | null;
