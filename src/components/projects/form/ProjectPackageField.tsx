@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
-import { Wrench, Palette, Video, Globe, Heart } from "lucide-react";
+import { Wrench, Palette, Video, Globe, Heart, Search, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 interface PackageType {
   id: string;
@@ -43,6 +51,7 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   
   const { field } = useController({
     name: "package",
@@ -75,6 +84,7 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
 
   const selectPackage = (packageId: string) => {
     field.onChange(packageId);
+    setOpen(false);
   };
 
   const getSelectedPackageName = () => {
@@ -87,11 +97,13 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
     <div className="space-y-2">
       <Label>Service</Label>
       
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
             className="w-full justify-start h-auto min-h-10 py-2"
+            role="combobox"
+            aria-expanded={open}
           >
             {field.value ? (
               getServiceIcon(getSelectedPackageName())
@@ -108,27 +120,25 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
         </PopoverTrigger>
         
         <PopoverContent className="w-full p-0" align="start">
-          <div className="p-2">
-            <div className="font-medium text-sm mb-2">Available Services</div>
-            {loading ? (
-              <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
-            ) : error ? (
-              <div className="p-2 text-sm text-red-500">Error: {error}</div>
-            ) : packages.length === 0 ? (
-              <div className="p-2 text-sm text-muted-foreground">No services available</div>
-            ) : (
-              <div className="max-h-[300px] overflow-auto">
-                {packages.map((pkg) => (
-                  <Button
-                    key={pkg.id}
-                    variant="ghost"
-                    className="w-full justify-start mb-1 h-auto py-2"
-                    onClick={() => selectPackage(pkg.id)}
-                  >
-                    {field.value === pkg.id && (
-                      <span className="absolute left-2">•</span>
-                    )}
-                    <div className="flex items-center w-full">
+          <Command>
+            <CommandInput placeholder="Search services..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No services found.</CommandEmpty>
+              <CommandGroup>
+                {loading ? (
+                  <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
+                ) : error ? (
+                  <div className="p-2 text-sm text-red-500">Error: {error}</div>
+                ) : packages.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground">No services available</div>
+                ) : (
+                  packages.map((pkg) => (
+                    <CommandItem
+                      key={pkg.id}
+                      value={pkg.name}
+                      onSelect={() => selectPackage(pkg.id)}
+                      className="flex items-center gap-2 py-2"
+                    >
                       {getServiceIcon(pkg.name)}
                       <div className="flex flex-col items-start">
                         <span>{pkg.name}</span>
@@ -136,12 +146,15 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
                           <span className="text-xs text-muted-foreground">{pkg.description}</span>
                         )}
                       </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
+                      {field.value === pkg.id && (
+                        <Check className="ml-auto h-4 w-4 opacity-70" />
+                      )}
+                    </CommandItem>
+                  ))
+                )}
+              </CommandGroup>
+            </CommandList>
+          </Command>
         </PopoverContent>
       </Popover>
     </div>
