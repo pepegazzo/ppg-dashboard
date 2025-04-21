@@ -47,9 +47,9 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome back, Pepe!</CardTitle>
           <CardDescription>
-            Enter your email and password to access your account
+            Enter your email and password to access your dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
