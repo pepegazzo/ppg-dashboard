@@ -121,7 +121,7 @@ export function ProjectContactCell({
           >
             {isSubmitting && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
             {currentContact
-              ? `${currentContact.name}${currentContact.email ? ` (${currentContact.email})` : ""}`
+              ? currentContact.name
               : "No Contact"}
           </Button>
         </DropdownMenuTrigger>
@@ -143,9 +143,6 @@ export function ProjectContactCell({
             >
               <span className="flex-1">
                 {contact.name}
-                {contact.email ? (
-                  <span className="ml-1 text-muted-foreground">({contact.email})</span>
-                ) : null}
               </span>
               {localContactId === contact.id && (
                 <Badge variant="secondary" className="ml-2">Current</Badge>
@@ -157,3 +154,4 @@ export function ProjectContactCell({
     </TableCell>
   );
 }
+
