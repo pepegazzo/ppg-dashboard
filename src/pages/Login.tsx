@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,14 +101,7 @@ const Login = () => {
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="flex justify-center">
-            <span className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
-                Register
-              </Link>
-            </span>
-          </div>
+          {/* Removed the "Don't have an account? Register" section */}
         </CardFooter>
       </Card>
     </div>
@@ -116,3 +109,4 @@ const Login = () => {
 };
 
 export default Login;
+
