@@ -10,13 +10,14 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user } = useAuth();
-  
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
         <Sidebar />
         <SidebarInset className="bg-zinc-50 text-foreground">
-          <div className="w-full py-8 px-[16px] max-w-full mx-auto">
+          {/* Removed mx-auto and max-w-full to prevent side gaps */}
+          <div className="w-full py-8 px-[16px]">
             {children}
           </div>
         </SidebarInset>
