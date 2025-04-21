@@ -291,14 +291,12 @@ export function TableRow({
         setUpdatingProjectId={setUpdatingProjectId}
         onUpdate={updateProjectField}
       />
-      <ProjectClientCell
-        clientName={currentProject.client_name}
-        projectId={currentProject.id}
-        value={currentProject.client_name}
-        updatingProjectId={updatingProjectId}
-        setUpdatingProjectId={setUpdatingProjectId}
-        onUpdate={updateProjectField}
-      />
+      <TableCell className="text-sm">
+        <ProjectClientCell
+          clientName={currentProject.client_name}
+          projectId={currentProject.id}
+        />
+      </TableCell>
       <ProjectStatusCell
         project={currentProject}
         updatingProjectId={updatingProjectId}

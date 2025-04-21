@@ -119,41 +119,43 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="text-sm hover:bg-muted px-2"
-          disabled={isSubmitting}
-        >
-          {clientName || "No Client"}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuItem
-          onClick={() => setPrimaryClient(undefined, undefined)}
-          disabled={isSubmitting || !clientName}
-        >
-          No Client
-          {!clientName && (
-            <Badge variant="secondary" className="ml-2">Current</Badge>
-          )}
-        </DropdownMenuItem>
-        {availableClients &&
-          availableClients.map((client: any) => (
-            <DropdownMenuItem
-              key={client.id}
-              onClick={() => setPrimaryClient(client.id, client.company_name)}
-              disabled={isSubmitting}
-            >
-              <span className="flex-1">{client.company_name}</span>
-              {clientName === client.company_name && (
-                <Badge variant="secondary" className="ml-2">Current</Badge>
-              )}
-            </DropdownMenuItem>
-          ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <TableCell>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="text-sm hover:bg-muted px-2"
+            disabled={isSubmitting}
+          >
+            {clientName || "No Client"}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuItem
+            onClick={() => setPrimaryClient(undefined, undefined)}
+            disabled={isSubmitting || !clientName}
+          >
+            No Client
+            {!clientName && (
+              <Badge variant="secondary" className="ml-2">Current</Badge>
+            )}
+          </DropdownMenuItem>
+          {availableClients &&
+            availableClients.map((client: any) => (
+              <DropdownMenuItem
+                key={client.id}
+                onClick={() => setPrimaryClient(client.id, client.company_name)}
+                disabled={isSubmitting}
+              >
+                <span className="flex-1">{client.company_name}</span>
+                {clientName === client.company_name && (
+                  <Badge variant="secondary" className="ml-2">Current</Badge>
+                )}
+              </DropdownMenuItem>
+            ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </TableCell>
   );
 }
