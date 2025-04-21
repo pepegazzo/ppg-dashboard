@@ -40,16 +40,16 @@ export function ProjectPasswordDialog({
     setLoading(true);
     
     try {
-      console.log("Fetching project with ID:", projectId);
+      console.log("[ProjectPasswordDialog] Fetching project with ID:", projectId);
       
       const { data, error } = await supabase
         .from("projects")
         .select("slug, portal_password")
         .eq("id", projectId)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error("Error fetching project:", error);
+        console.error("[ProjectPasswordDialog] Error fetching project:", error);
         toast({
           title: "Error",
           description: "Failed to load project details",
@@ -59,15 +59,14 @@ export function ProjectPasswordDialog({
         return;
       }
 
-      console.log("Fetched project data:", data);
-      console.log("Fetched slug:", data.slug);
+      console.log("[ProjectPasswordDialog] Fetched project data:", data);
       
       // Set the slug state from DB data
-      if (data.slug) {
-        console.log("Setting slug state to:", data.slug);
+      if (data?.slug) {
+        console.log("[ProjectPasswordDialog] Setting slug state to:", data.slug);
         setSlug(data.slug);
       } else {
-        console.error("No slug found for project");
+        console.error("[ProjectPasswordDialog] No slug found for project");
         toast({
           title: "Error",
           description: "This project doesn't have a portal URL configured",
@@ -76,7 +75,7 @@ export function ProjectPasswordDialog({
       }
       
       // Handle password
-      if (data.portal_password) {
+      if (data?.portal_password) {
         setPassword(data.portal_password);
         setEditedPassword(data.portal_password);
       } else {
@@ -84,7 +83,7 @@ export function ProjectPasswordDialog({
         generateAndSavePassword();
       }
     } catch (err) {
-      console.error("Error in fetchProjectData:", err);
+      console.error("[ProjectPasswordDialog] Error in fetchProjectData:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -122,7 +121,7 @@ export function ProjectPasswordDialog({
         });
       }
     } catch (err) {
-      console.error("Error generating password:", err);
+      console.error("[ProjectPasswordDialog] Error generating password:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -153,7 +152,7 @@ export function ProjectPasswordDialog({
     }
     
     const portalUrl = `${window.location.origin}/${slug}`;
-    console.log("Copying portal URL:", portalUrl);
+    console.log("[ProjectPasswordDialog] Copying portal URL:", portalUrl);
     navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Copied",
@@ -188,7 +187,7 @@ export function ProjectPasswordDialog({
         });
       }
     } catch (err) {
-      console.error("Error regenerating password:", err);
+      console.error("[ProjectPasswordDialog] Error regenerating password:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -237,7 +236,7 @@ export function ProjectPasswordDialog({
         });
       }
     } catch (err) {
-      console.error("Error saving password:", err);
+      console.error("[ProjectPasswordDialog] Error saving password:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -258,15 +257,16 @@ export function ProjectPasswordDialog({
       return;
     }
     
-    console.log("Navigating to portal with slug:", slug);
+    console.log("[ProjectPasswordDialog] Navigating to portal with slug:", slug);
     setOpen(false);
     navigate(`/${slug}`);
   };
 
   const getPortalUrl = () => {
     if (!slug) return "No portal URL configured";
+    // Fixed URL construction to use window.location.origin
     const url = `${window.location.origin}/${slug}`;
-    console.log("Generated portal URL:", url);
+    console.log("[ProjectPasswordDialog] Generated portal URL:", url);
     return url;
   };
 

@@ -23,22 +23,24 @@ export function ProjectActionsCell({
   useEffect(() => {
     async function fetchProjectSlug() {
       try {
-        console.log("Verifying slug for project ID:", projectId);
+        console.log("[ProjectActionsCell] Verifying slug for project ID:", projectId);
         const { data, error } = await supabase
           .from("projects")
           .select("slug, name")
           .eq("id", projectId)
-          .single();
+          .maybeSingle();
         
         if (error) {
-          console.error("Error fetching project slug:", error);
+          console.error("[ProjectActionsCell] Error fetching project slug:", error);
           return;
         }
         
-        console.log("Project data for verification:", data);
-        setSlug(data.slug);
+        console.log("[ProjectActionsCell] Project data for verification:", data);
+        if (data) {
+          setSlug(data.slug);
+        }
       } catch (err) {
-        console.error("Unexpected error fetching slug:", err);
+        console.error("[ProjectActionsCell] Unexpected error fetching slug:", err);
       }
     }
     
@@ -46,8 +48,8 @@ export function ProjectActionsCell({
   }, [projectId]);
 
   const handlePortalClick = () => {
-    console.log("Opening portal dialog for project:", projectId);
-    console.log("Current slug from verification:", slug);
+    console.log("[ProjectActionsCell] Opening portal dialog for project:", projectId);
+    console.log("[ProjectActionsCell] Current slug from verification:", slug);
     setOpen(true);
   };
 
