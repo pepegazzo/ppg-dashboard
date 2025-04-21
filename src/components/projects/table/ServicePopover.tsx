@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -123,7 +122,7 @@ export function ServicePopover({
                 No package
               </span>
             )}
-            <ChevronDown className="ml-1 h-4 w-4 group-hover:opacity-80 transition" />
+            {/* Removed ChevronDown icon */}
           </span>
         </Button>
       </PopoverTrigger>
