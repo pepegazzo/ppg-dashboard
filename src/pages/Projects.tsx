@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import ProjectForm from "@/components/projects/ProjectForm";
-import { ProjectList } from "@/components/projects";
+import { ProjectList } from "@/components/projects/list";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
