@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase, X } from "lucide-react";
@@ -148,7 +147,7 @@ export const ClientsTable = ({
           {filteredAndSortedClients?.map(client => (
             <React.Fragment key={client.id}>
               <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
-                <TableCell>
+                <TableCell className="flex items-center">
                   <Checkbox 
                     checked={selectedClients.includes(client.id)} 
                     onCheckedChange={() => toggleClientSelection(client.id)} 
@@ -269,4 +268,3 @@ export const ClientsTable = ({
     </div>
   );
 };
-
