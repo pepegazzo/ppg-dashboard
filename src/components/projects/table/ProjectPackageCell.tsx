@@ -212,7 +212,7 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
         <PopoverContent className="w-auto p-2">
           <div className="flex flex-col gap-1">
             <Button variant="ghost" size="sm"
-              className={`justify-start ${!project.package_id ? "bg-blue-50" : ""}`}
+              className={ !project.package_id ? "" : ""}
               onClick={() => updateService(null, null)}
               disabled={isUpdating || updatingProjectId === project.id}
             >
@@ -228,7 +228,7 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
                 key={pkg.id}
                 variant="ghost"
                 size="sm"
-                className={`justify-start ${project.package_id === pkg.id ? "bg-blue-50" : ""} text-left`}
+                className={`justify-start text-left`}
                 onClick={() => updateService(pkg.id, pkg.name)}
                 disabled={isUpdating || updatingProjectId === project.id}
               >
@@ -247,3 +247,4 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
     </TableCell>
   );
 }
+
