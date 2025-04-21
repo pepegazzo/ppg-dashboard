@@ -17,6 +17,7 @@ interface ProjectTableProps {
   handleSelectAllProjects: () => void;
   sortField: SortableProjectField;
   sortDirection: SortDirection;
+  onEditProject: (projectId: string) => void;
 }
 
 export function ProjectTable({
@@ -32,6 +33,7 @@ export function ProjectTable({
   handleSelectAllProjects,
   sortField,
   sortDirection,
+  onEditProject,
 }: ProjectTableProps) {
   return (
     <div className="rounded-md border">
@@ -53,10 +55,8 @@ export function ProjectTable({
               selectedProjects={selectedProjects}
               toggleProjectSelection={toggleProjectSelection}
               setSelectedProjects={setSelectedProjects}
-              updatingProjectId={updatingProjectId}
-              setUpdatingProjectId={setUpdatingProjectId}
               setShowDeleteModal={setShowDeleteModal}
-              fetchProjects={fetchProjects}
+              onEditProject={onEditProject}
             />
           ))}
         </TableBody>

@@ -142,8 +142,8 @@ const Projects = () => {
     setIsCreating(false);
     fetchProjects();
     toast({
-      title: "Project created",
-      description: "Your new project has been created successfully.",
+      title: "Success",
+      description: "Your project has been saved successfully.",
     });
   };
 

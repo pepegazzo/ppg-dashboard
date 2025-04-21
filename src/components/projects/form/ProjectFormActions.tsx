@@ -5,9 +5,10 @@ import { Loader2 } from "lucide-react";
 interface ProjectFormActionsProps {
   isSubmitting: boolean;
   onCancel: () => void;
+  isEditing?: boolean;
 }
 
-export function ProjectFormActions({ isSubmitting, onCancel }: ProjectFormActionsProps) {
+export function ProjectFormActions({ isSubmitting, onCancel, isEditing = false }: ProjectFormActionsProps) {
   return (
     <div className="flex justify-end gap-3">
       <Button type="button" variant="outline" onClick={onCancel}>
@@ -15,7 +16,7 @@ export function ProjectFormActions({ isSubmitting, onCancel }: ProjectFormAction
       </Button>
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Create Project
+        {isEditing ? 'Update Project' : 'Create Project'}
       </Button>
     </div>
   );
