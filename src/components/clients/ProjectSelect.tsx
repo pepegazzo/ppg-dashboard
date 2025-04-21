@@ -39,35 +39,27 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const { data: availableProjects, isLoading: isLoadingAvailable, refetch: refetchAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId, assignedProjectIds],
     queryFn: async () => {
-      // Make sure assignedProjects is defined before using it
       const excludeIds = assignedProjectIds || [];
-      
-      console.log("Fetching available projects, excluding:", excludeIds);
-      
       let query = supabase
         .from('projects')
         .select('id, name')
         .order('name');
-      
-      // Only apply the filter if there are IDs to exclude
+
       if (excludeIds.length > 0) {
         query = query.not('id', 'in', excludeIds);
       }
-      
+
       const { data, error } = await query;
-        
+
       if (error) {
-        console.error("Error fetching available projects:", error);
         throw error;
       }
-      
-      console.log("Available projects fetched:", data);
+
       return data ?? [];
     },
-    enabled: false // Don't run automatically
+    enabled: false
   });
 
-  // When popover opens, fetch available projects
   useEffect(() => {
     if (isPopoverOpen) {
       refetchAvailable();
@@ -78,7 +70,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     try {
       setIsUpdating(true);
 
-      // Get client company name for project update
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('company_name')
@@ -88,20 +79,18 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       if (clientError) throw clientError;
       const clientName = clientData?.company_name || 'Unknown';
 
-      // 1. Insert into client_project_assignments
       const { error: assignError } = await supabase
         .from('client_project_assignments')
-        .insert({ 
+        .insert({
           client_id: clientId,
-          project_id: projectId 
+          project_id: projectId
         });
 
       if (assignError) throw assignError;
 
-      // 2. Always update the projects table with this client as primary
       const { error: updateError } = await supabase
         .from('projects')
-        .update({ 
+        .update({
           client_id: clientId,
           client_name: clientName
         })
@@ -109,7 +98,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
       if (updateError) throw updateError;
 
-      // Update local state immediately
       setAssignedProjectIds(prev => [...prev, projectId]);
       setIsPopoverOpen(false);
 
@@ -118,7 +106,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         description: `${projectName} has been assigned to this client`,
       });
 
-      // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
@@ -128,7 +115,6 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         onUpdate();
       }
     } catch (error) {
-      console.error("Error assigning project to client:", error);
       toast({
         title: "Error",
         description: "Failed to assign project to client",
@@ -143,12 +129,13 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button 
-          variant="outline"
+          variant="default"
           size="sm"
-          className="h-7 px-2 text-xs"
+          className="h-7 px-3 text-xs bg-amber-300 text-amber-900 hover:bg-amber-400 hover:text-amber-950 focus:ring-amber-400"
           disabled={isUpdating}
         >
-          <Plus className="h-3 w-3 mr-1" /> Add Project
+          <Plus className="h-3 w-3 mr-1" />
+          Add Project
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-2 rounded shadow-lg min-w-[180px]" align="start">
