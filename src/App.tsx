@@ -1,11 +1,11 @@
-import { useState } from "react";
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
+// Removed import of Register
 import Projects from "./pages/Projects";
 import ProjectPortal from "./pages/ProjectPortal";
 import Clients from "./pages/Clients";
@@ -27,7 +27,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* Removed Register route */}
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/projects/:projectSlug/portal" element={<ProjectPortal />} />
             <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
@@ -44,3 +44,4 @@ function App() {
 }
 
 export default App;
+

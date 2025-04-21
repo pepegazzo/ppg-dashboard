@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, Briefcase, CheckSquare, Receipt, FolderArchive, FileText, Users, LogOut, User, LogIn, UserPlus } from "lucide-react";
@@ -93,12 +92,7 @@ const Sidebar = () => {
               </Button>
             </Link>
             
-            <Link to="/register">
-              <Button variant="ghost" className="w-full justify-start text-zinc-400 hover:text-zinc-100 text-xs h-7 px-3">
-                <UserPlus className="w-3 h-3 mr-1" />
-                Register
-              </Button>
-            </Link>
+            
           </>}
       </div>
     </aside>;
