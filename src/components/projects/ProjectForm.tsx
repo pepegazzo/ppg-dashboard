@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,9 +22,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      client_id: "",
       client_name: "",
-      contact_id: "",
       status: "Onboarding",
       priority: "Medium",
       start_date: undefined,
@@ -34,6 +33,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
   });
 
   const generateInvoiceNumber = () => {
+    // Ensure exactly 3 digits between 100-999
     const randomNum = Math.floor(100 + Math.random() * 900);
     return `INV-${randomNum}`;
   };
@@ -41,7 +41,8 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
   const onSubmit = async (values: ProjectFormValues) => {
     try {
       setIsSubmitting(true);
-
+      
+      // If a client was selected, get their company_name
       let clientName = "";
       if (values.client_id) {
         const { data: client } = await supabase
@@ -54,22 +55,24 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           clientName = client.company_name;
         }
       }
-
+      
+      // Format dates as ISO strings for Supabase
       const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
-
+      
+      // Create properly typed data object for Supabase
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,
         client_name: clientName || "No Client",
-        contact_id: values.contact_id || null,
         status: values.status,
         priority: values.priority,
         start_date: formattedStartDate,
         due_date: formattedDueDate,
         revenue: values.revenue || null,
       };
-
+      
+      // Insert project into Supabase
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert(projectPayload)
@@ -77,15 +80,18 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         .single();
 
       if (projectError) throw projectError;
-
+      
+      // If a package is selected, create package association
       if (values.package) {
         const packageData = {
           project_id: newProject.id,
           package_id: values.package
         };
+        
         const { error: packageError } = await supabase
           .from('project_packages')
           .insert(packageData);
+          
         if (packageError) {
           console.error("Error linking package:", packageError);
           toast({
@@ -95,11 +101,13 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           });
         }
       }
-
+      
+      // Create a pending invoice for the project if revenue is specified
       if (newProject.revenue) {
         const invoiceNumber = generateInvoiceNumber();
         const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 30);
+        dueDate.setDate(dueDate.getDate() + 30); // Due date 30 days from now
+        
         const invoiceData = {
           project_id: newProject.id,
           invoice_number: invoiceNumber,
@@ -107,10 +115,13 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           status: "Pending",
           issue_date: new Date().toISOString().split('T')[0],
           due_date: dueDate.toISOString().split('T')[0],
+          // No description for auto-generated invoices from project creation
         };
+        
         const { error: invoiceError } = await supabase
           .from('invoices')
           .insert(invoiceData);
+        
         if (invoiceError) {
           console.error("Error creating invoice:", invoiceError);
           toast({
@@ -125,6 +136,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           });
         }
       }
+      
       onSubmitted();
     } catch (error) {
       console.error("Error creating project:", error);
@@ -142,7 +154,9 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <h2 className="text-xl font-semibold">Create New Project</h2>
+        
         <ProjectFormFields control={form.control} />
+        
         <ProjectFormActions 
           isSubmitting={isSubmitting} 
           onCancel={onCancel} 
