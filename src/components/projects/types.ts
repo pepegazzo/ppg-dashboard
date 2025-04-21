@@ -1,4 +1,6 @@
 
+// Add portal_password property to the Project type
+
 import { Database } from "@/integrations/supabase/types";
 
 export type Project = {
@@ -17,6 +19,7 @@ export type Project = {
   package_id?: string | null;
   revenue?: number | null;
   progress?: number;
+  portal_password?: string | null; // Added this property
 };
 
 export type PackageType = {
@@ -28,3 +31,4 @@ export type PackageType = {
 export type SortDirection = 'asc' | 'desc';
 
 export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';
+
