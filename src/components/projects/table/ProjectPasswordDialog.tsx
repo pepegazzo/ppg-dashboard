@@ -156,10 +156,10 @@ export function ProjectPasswordDialog({
     setSaving(false);
   };
 
-  // Open event triggers when dialog opens, perfect to initialize state if needed
+  // Fixed the issue by removing onOpenAutoFocus and handling initialization in a different way
   return (
-    <Dialog open={open} onOpenChange={setOpen} onOpenAutoFocus={handleDialogOpen}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent onPointerDownOutside={() => {}}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Key className="w-5 h-5" />
@@ -182,6 +182,11 @@ export function ProjectPasswordDialog({
             disabled={loading || saving}
             autoFocus
             maxLength={32}
+            onFocus={() => {
+              if (open) {
+                handleDialogOpen();
+              }
+            }}
           />
           <Button
             variant="ghost"
@@ -264,4 +269,3 @@ export function ProjectPasswordDialog({
     </Dialog>
   );
 }
-
