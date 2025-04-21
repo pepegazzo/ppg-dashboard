@@ -1,78 +1,50 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
+import { useState } from "react";
 
 interface ProjectNameCellProps {
   name: string;
-  fieldName: "name" | "client_name";
   projectId: string;
-  onUpdateField: (projectId: string, field: string, value: string) => Promise<void>;
-  disabled: boolean;
+  fieldName: string;
+  value: string;
+  updatingProjectId: string | null;
+  setUpdatingProjectId: (id: string | null) => void;
+  onUpdate: (projectId: string, field: string, value: string) => void;
 }
 
-export function ProjectNameCell({
-  name,
-  fieldName,
-  projectId,
-  onUpdateField,
-  disabled
-}: ProjectNameCellProps) {
+export function ProjectNameCell({ name, projectId, fieldName, value, updatingProjectId, setUpdatingProjectId, onUpdate }: ProjectNameCellProps) {
   const [editMode, setEditMode] = useState(false);
-  const [value, setValue] = useState(name);
-
-  const startEdit = () => {
-    if (!disabled) {
-      setEditMode(true);
-      setValue(name);
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditMode(false);
-    setValue(name);
-  };
-
-  const saveEdit = () => {
-    onUpdateField(projectId, fieldName, value);
-    setEditMode(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      saveEdit();
-    } else if (e.key === 'Escape') {
-      cancelEdit();
-    }
-  };
+  const [editValue, setEditValue] = useState(value);
 
   return (
-    <div onDoubleClick={startEdit}>
+    <TableCell className="font-medium" onDoubleClick={() => setEditMode(true)}>
       {editMode ? (
         <div className="flex items-center gap-2">
           <Input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={handleKeyDown}
+            value={editValue}
+            onChange={e => setEditValue(e.target.value)}
             autoFocus
             className="py-1 h-9"
           />
           <div className="flex gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7" 
-              onClick={saveEdit}
-            >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => {
+                onUpdate(projectId, fieldName, editValue);
+                setEditMode(false);
+              }}>
               <Check className="h-4 w-4 text-green-600" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7" 
-              onClick={cancelEdit}
-            >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setEditMode(false)}>
               <X className="h-4 w-4 text-red-600" />
             </Button>
           </div>
@@ -80,6 +52,6 @@ export function ProjectNameCell({
       ) : (
         <span className="cursor-pointer">{name}</span>
       )}
-    </div>
+    </TableCell>
   );
 }

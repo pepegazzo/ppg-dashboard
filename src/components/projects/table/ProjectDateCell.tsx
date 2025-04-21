@@ -1,103 +1,76 @@
 
-import { useState } from "react";
-import { format, parseISO } from "date-fns";
-import { cn } from "@/lib/utils";
+import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface ProjectDateCellProps {
   date: string | null;
-  fieldName: "start_date" | "due_date";
+  fieldName: string;
   projectId: string;
-  onUpdateDate: (projectId: string, field: string, value: string) => Promise<void>;
-  disabled: boolean;
+  onUpdate: (projectId: string, field: string, value: string) => void;
+  updatingProjectId: string | null;
+  setUpdatingProjectId: (id: string | null) => void;
 }
 
-export function ProjectDateCell({
-  date,
-  fieldName,
-  projectId,
-  onUpdateDate,
-  disabled
-}: ProjectDateCellProps) {
+export function ProjectDateCell({ date, fieldName, projectId, onUpdate, updatingProjectId, setUpdatingProjectId }: ProjectDateCellProps) {
   const [editMode, setEditMode] = useState(false);
-  const [dateValue, setDateValue] = useState(date || '');
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const handleDateSelect = (dateObj: Date | undefined) => {
+    if (dateObj) {
+      const year = dateObj.getUTCFullYear();
+      const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getUTCDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      onUpdate(projectId, fieldName, formattedDate);
+      setPopoverOpen(false);
+      setEditMode(false);
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
-      return format(parseISO(dateString), 'MM/dd/yy');
-    } catch (e) {
-      console.error('Error formatting date:', dateString, e);
+      return format(parseISO(dateString), 'MMM d, yyyy');
+    } catch {
       return dateString || '-';
     }
   };
-  
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
-      const formattedDate = `${year}-${month}-${day}`;
-      setDateValue(formattedDate);
-      onUpdateDate(projectId, fieldName, formattedDate).then(() => {
-        setIsPopoverOpen(false);
-        setEditMode(false);
-      }).catch(err => {
-        console.error('Error updating date:', err);
-      });
-    }
-  };
-  
-  const startEdit = () => {
-    if (!disabled) {
-      setEditMode(true);
-      setIsPopoverOpen(true);
-    }
-  };
-  
+
   return (
-    <div onDoubleClick={startEdit} className="cursor-pointer min-w-[80px] align-center">
+    <TableCell className="text-sm text-muted-foreground" onDoubleClick={() => setEditMode(true)}>
       {editMode ? (
-        <Popover 
-          open={isPopoverOpen} 
-          onOpenChange={open => {
-            setIsPopoverOpen(open);
-            if (!open) {
-              setEditMode(false);
-            }
-          }}
-        >
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className={cn(
-                "min-w-[80px] px-2 text-left justify-start font-normal text-xs", 
-                !dateValue && "text-muted-foreground"
-              )} 
-              disabled={disabled}
+                "w-[180px] justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
             >
-              {dateValue ? format(parseISO(dateValue), "MM/dd/yyyy") : <span>Pick</span>}
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(parseISO(date), "PPP") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent 
-            className="w-auto p-0" 
-            align="start" 
-            sideOffset={4}
-          >
-            <Calendar 
-              mode="single" 
-              selected={dateValue ? parseISO(dateValue) : undefined} 
-              onSelect={handleDateSelect} 
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date ? parseISO(date) : undefined}
+              onSelect={handleDateSelect}
               initialFocus
+              className="p-3 pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
       ) : (
-        <span className="object-left text-left">{formatDate(date)}</span>
+        <span className="cursor-pointer">{formatDate(date)}</span>
       )}
-    </div>
+    </TableCell>
   );
 }

@@ -1,4 +1,5 @@
 
+import { TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
 interface ProjectPriorityCellProps {
@@ -20,8 +21,10 @@ export function ProjectPriorityCell({ priority }: ProjectPriorityCellProps) {
   };
 
   return (
-    <Badge variant="outline" className={getPriorityColor(priority)}>
-      {priority}
-    </Badge>
+    <TableCell>
+      <Badge variant="outline" className={getPriorityColor(priority)}>
+        {priority}
+      </Badge>
+    </TableCell>
   );
 }

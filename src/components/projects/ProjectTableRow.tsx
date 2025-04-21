@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "./types";
 import { format, parseISO } from "date-fns";
@@ -16,6 +15,15 @@ import { Database } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { ProjectNameCell } from "./table/ProjectNameCell";
+import { ProjectClientCell } from "./table/ProjectClientCell";
+import { ProjectStatusCell } from "./table/ProjectStatusCell";
+import { ProjectProgressCell } from "./table/ProjectProgressCell";
+import { ProjectPriorityCell } from "./table/ProjectPriorityCell";
+import { ProjectPackageCell } from "./table/ProjectPackageCell";
+import { ProjectRevenueCell } from "./table/ProjectRevenueCell";
+import { ProjectDateCell } from "./table/ProjectDateCell";
+import { ProjectActionsCell } from "./table/ProjectActionsCell";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -269,213 +277,62 @@ export function TableRow({
 
   const currentProject = localProject;
 
-  return <UITableRow className="hover:bg-muted/30 transition-colors">
+  return (
+    <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell>
         <Checkbox checked={selectedProjects.includes(currentProject.id)} onCheckedChange={() => toggleProjectSelection(currentProject.id)} aria-label={`Select project ${currentProject.name}`} />
       </TableCell>
-      
-      <TableCell className="font-medium" onDoubleClick={() => startEdit('name')}>
-        {editMode.name ? (
-          <div className="flex items-center gap-2">
-            <Input
-              value={editValues.name}
-              onChange={(e) => setEditValues({...editValues, name: e.target.value})}
-              onKeyDown={(e) => handleEnterKeyPress('name', e)}
-              autoFocus
-              className="py-1 h-9"
-            />
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => updateProjectField(currentProject.id, 'name', editValues.name)}>
-                <Check className="h-4 w-4 text-green-600" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => cancelEdit('name')}>
-                <X className="h-4 w-4 text-red-600" />
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <span className="cursor-pointer">{currentProject.name}</span>
-        )}
-      </TableCell>
-      
-      <TableCell className="text-sm" onDoubleClick={() => startEdit('client_name')}>
-        {editMode.client_name ? (
-          <div className="flex items-center gap-2">
-            <Input
-              value={editValues.client_name}
-              onChange={(e) => setEditValues({...editValues, client_name: e.target.value})}
-              onKeyDown={(e) => handleEnterKeyPress('client_name', e)}
-              autoFocus
-              className="py-1 h-9"
-            />
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => updateProjectField(currentProject.id, 'client_name', editValues.client_name)}>
-                <Check className="h-4 w-4 text-green-600" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={() => cancelEdit('client_name')}>
-                <X className="h-4 w-4 text-red-600" />
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <span className="cursor-pointer">{currentProject.client_name}</span>
-        )}
-      </TableCell>
-      
-      <TableCell>
-        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
-              <Badge className={getStatusColor(currentProject.status)}>
-                {updatingProjectId === currentProject.id ? <span className="flex items-center">
-                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    Updating...
-                  </span> : currentProject.status}
-              </Badge>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <div className="flex flex-col gap-1">
-              <Button variant="ghost" size="sm" className={`justify-start ${currentProject.status === 'Onboarding' ? 'bg-blue-50' : ''}`} onClick={() => updateProjectStatus(currentProject.id, 'Onboarding')} disabled={updatingProjectId === currentProject.id}>
-                <Badge className={getStatusColor('Onboarding')}>Onboarding</Badge>
-              </Button>
-              <Button variant="ghost" size="sm" className={`justify-start ${currentProject.status === 'Active' ? 'bg-blue-50' : ''}`} onClick={() => updateProjectStatus(currentProject.id, 'Active')} disabled={updatingProjectId === currentProject.id}>
-                <Badge className={getStatusColor('Active')}>Active</Badge>
-              </Button>
-              <Button variant="ghost" size="sm" className={`justify-start ${currentProject.status === 'Completed' ? 'bg-blue-50' : ''}`} onClick={() => updateProjectStatus(currentProject.id, 'Completed')} disabled={updatingProjectId === currentProject.id}>
-                <Badge className={getStatusColor('Completed')}>Completed</Badge>
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </TableCell>
-      
-      <TableCell>
-        <div className="w-[120px] flex items-center gap-2">
-          <Progress value={currentProject.progress} className="h-2 flex-grow" />
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {currentProject.progress}%
-          </span>
-        </div>
-      </TableCell>
-      
-      <TableCell>
-        <Badge variant="outline" className={getPriorityColor(currentProject.priority)}>
-          {currentProject.priority}
-        </Badge>
-      </TableCell>
-      
-      <TableCell>
-        {currentProject.package_name ? <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
-            <Package className="h-3 w-3 shrink-0" />
-            <span className="truncate">{currentProject.package_name}</span>
-          </Badge> : <span className="text-muted-foreground text-xs">No package</span>}
-      </TableCell>
-      
-      <TableCell>
-        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
-          {formatRevenue(currentProject.revenue)}
-        </Badge>
-      </TableCell>
-      
-      <TableCell className="text-sm text-muted-foreground" onDoubleClick={() => startEdit('start_date')}>
-        {editMode.start_date ? (
-          <Popover open={datePopoverOpen.start_date} onOpenChange={(open) => setDatePopoverOpen(prev => ({ ...prev, start_date: open }))}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[180px] justify-start text-left font-normal",
-                  !editValues.start_date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {editValues.start_date ? format(parseISO(editValues.start_date), "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={editValues.start_date ? parseISO(editValues.start_date) : undefined}
-                onSelect={(date) => handleDateSelect('start_date', date)}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        ) : (
-          <span className="cursor-pointer">{formatDate(currentProject.start_date)}</span>
-        )}
-      </TableCell>
-      
-      <TableCell className="text-sm text-muted-foreground" onDoubleClick={() => startEdit('due_date')}>
-        {editMode.due_date ? (
-          <Popover open={datePopoverOpen.due_date} onOpenChange={(open) => setDatePopoverOpen(prev => ({ ...prev, due_date: open }))}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[180px] justify-start text-left font-normal",
-                  !editValues.due_date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {editValues.due_date ? format(parseISO(editValues.due_date), "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={editValues.due_date ? parseISO(editValues.due_date) : undefined}
-                onSelect={(date) => handleDateSelect('due_date', date)}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        ) : (
-          <span className="cursor-pointer">{formatDate(currentProject.due_date)}</span>
-        )}
-      </TableCell>
-      
-      <TableCell className="text-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              Actions
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => console.log('View details', currentProject.id)}>
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log('Edit', currentProject.id)}>
-              Edit Project
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => {
-            setSelectedProjects([currentProject.id]);
-            setShowDeleteModal(true);
-          }} className="text-destructive focus:text-destructive">
-              Delete Project
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </UITableRow>;
+      <ProjectNameCell
+        name={currentProject.name}
+        fieldName="name"
+        projectId={currentProject.id}
+        value={currentProject.name}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
+      />
+      <ProjectClientCell
+        clientName={currentProject.client_name}
+        projectId={currentProject.id}
+        value={currentProject.client_name}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
+      />
+      <ProjectStatusCell
+        project={currentProject}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
+      />
+      <ProjectProgressCell progress={currentProject.progress} />
+      <ProjectPriorityCell priority={currentProject.priority} />
+      <ProjectPackageCell
+        packageName={currentProject.package_name}
+        projectId={currentProject.id}
+      />
+      <ProjectRevenueCell revenue={currentProject.revenue} />
+      <ProjectDateCell
+        date={currentProject.start_date}
+        fieldName="start_date"
+        projectId={currentProject.id}
+        onUpdate={updateProjectField}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+      />
+      <ProjectDateCell
+        date={currentProject.due_date}
+        fieldName="due_date"
+        projectId={currentProject.id}
+        onUpdate={updateProjectField}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+      />
+      <ProjectActionsCell
+        projectId={currentProject.id}
+        setShowDeleteModal={setShowDeleteModal}
+        setSelectedProjects={setSelectedProjects}
+      />
+    </UITableRow>
+  );
 }
