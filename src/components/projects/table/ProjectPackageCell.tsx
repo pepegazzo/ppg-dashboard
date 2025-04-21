@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,9 +101,9 @@ export function ProjectPackageCell({
             </span>
           ) : (
             currentPackageName ? (
-              <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
+              <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit align-middle">
                 {getServiceIcon(currentPackageName)}
-                <span className="truncate">{currentPackageName}</span>
+                <span className="truncate leading-none">{currentPackageName}</span>
               </Badge>
             ) : (
               <span className="text-muted-foreground text-xs">No service</span>
@@ -127,7 +128,7 @@ export function ProjectPackageCell({
                 onClick={() => handleSelectPackage(pkg.id, pkg.name)}
                 disabled={updatingPackageId !== null}
               >
-                <Badge variant="outline" className="w-full justify-start">
+                <Badge variant="outline" className="w-full justify-start items-center">
                   {getServiceIcon(pkg.name)}
                   {pkg.name}
                 </Badge>
