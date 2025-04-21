@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, ArrowUpDown, Plus, Mail, Phone, Briefcase, X } from "lucide-react";
@@ -183,9 +184,6 @@ export const ClientsTable = ({
                         </button>
                       </Badge>
                     ))}
-                    {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").length === 0 && 
-                      <span className="text-xs text-muted-foreground">No active projects</span>
-                    }
                     <ProjectSelect clientId={client.id} onUpdate={handleProjectUpdate} />
                   </div>
                 </TableCell>
@@ -271,3 +269,4 @@ export const ClientsTable = ({
     </div>
   );
 };
+
