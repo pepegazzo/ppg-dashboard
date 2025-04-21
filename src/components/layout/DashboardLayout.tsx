@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
