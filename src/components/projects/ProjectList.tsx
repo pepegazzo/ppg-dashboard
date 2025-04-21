@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Project, PackageType, SortDirection, SortableProjectField } from "./types";
 import { TableRow } from "./table/ProjectTableRow";
@@ -58,7 +59,9 @@ export function ProjectList({
   const filteredAndSortedProjects = useMemo(() => {
     let result = projects.filter(project => {
       const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
-      const clientMatch = project.client_name.toLowerCase().includes(clientFilter.toLowerCase());
+      const clientMatch = project.client_name 
+        ? project.client_name.toLowerCase().includes(clientFilter.toLowerCase()) 
+        : clientFilter === ''; // Only match null client_name when clientFilter is empty
       const statusMatch = !statusFilter || statusFilter === "all" || project.status === statusFilter;
       const priorityMatch = !priorityFilter || priorityFilter === "all" || project.priority === priorityFilter;
       return nameMatch && clientMatch && statusMatch && priorityMatch;

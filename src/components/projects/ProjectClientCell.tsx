@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -13,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 interface ProjectClientCellProps {
-  clientName: string;
+  clientName: string | null;
   projectId: string;
 }
 
@@ -22,7 +23,6 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch current client by clientName (keep as fallback to show the button label)
   // Fetch all available clients for assignment
   const { data: availableClients, isLoading: isLoadingClients } = useQuery({
     queryKey: ['all-clients'],
