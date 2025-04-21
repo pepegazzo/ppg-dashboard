@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, RefreshCw } from "lucide-react";
@@ -19,25 +18,17 @@ const Clients = () => {
     <DashboardLayout>
       <div className="animate-fade-in">
         <div className="flex flex-col gap-2 mb-8">
-          <span className="text-xs font-medium px-2.5 py-1 bg-purple-100 text-purple-800 rounded-full w-fit">
+          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
             Relationships
           </span>
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
             <div className="flex gap-2">
-              <Button 
-                onClick={() => setIsModalOpen(true)} 
-                className="bg-purple-500 hover:bg-purple-600 text-white"
-              >
+              <Button onClick={() => setIsModalOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Client
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleRefresh} 
-                disabled={isRefreshing} 
-                className="border-purple-200 text-purple-800 hover:bg-purple-50"
-              >
+              <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
                 {isRefreshing ? (
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
