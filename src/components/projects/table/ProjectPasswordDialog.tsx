@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, Key, Link as LinkIcon, Copy, RefreshCw } from "lucide-react";
+import { Eye, Key, Copy, Link as LinkIcon, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Helper to generate an 8-character alphanumeric password
 function generateSimplePassword() {
@@ -89,6 +90,18 @@ export function ProjectPasswordDialog({
       toast({
         title: "Password copied",
         description: "The portal password was copied to clipboard.",
+      });
+    }
+  };
+
+  const handleCopyPortalLink = () => {
+    if (projectSlug) {
+      const baseUrl = window.location.origin;
+      const portalUrl = `${baseUrl}/projects/${projectSlug}/portal`;
+      navigator.clipboard.writeText(portalUrl);
+      toast({
+        title: "Portal link copied",
+        description: "The link to the project portal was copied to clipboard.",
       });
     }
   };
@@ -213,6 +226,20 @@ export function ProjectPasswordDialog({
             <Copy className="w-5 h-5" />
           </Button>
         </div>
+        {/* Copy Portal Link Button */}
+        <div className="flex justify-end mb-6">
+          <Button
+            variant="outline"
+            type="button"
+            className="w-full flex items-center gap-2"
+            onClick={handleCopyPortalLink}
+            disabled={!projectSlug}
+            aria-label="Copy portal link"
+          >
+            <Copy className="w-4 h-4" />
+            Copy Portal Link
+          </Button>
+        </div>
         <div className="flex space-x-2 mb-4">
           <Button
             variant="outline"
@@ -262,3 +289,4 @@ export function ProjectPasswordDialog({
     </Dialog>
   );
 }
+
