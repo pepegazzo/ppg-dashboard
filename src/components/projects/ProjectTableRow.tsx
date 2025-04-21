@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "./types";
 import { format, parseISO } from "date-fns";
@@ -34,6 +35,7 @@ interface ProjectTableRowProps {
   setUpdatingProjectId: (projectId: string | null) => void;
   setShowDeleteModal: (show: boolean) => void;
   fetchProjects?: () => void; // Optional prop to refresh all projects
+  onEditProject?: (projectId: string) => void; // Add this optional prop
 }
 
 export function TableRow({
@@ -44,7 +46,8 @@ export function TableRow({
   updatingProjectId,
   setUpdatingProjectId,
   setShowDeleteModal,
-  fetchProjects
+  fetchProjects,
+  onEditProject
 }: ProjectTableRowProps) {
   const { toast } = useToast();
 
@@ -330,6 +333,7 @@ export function TableRow({
         projectId={currentProject.id}
         setShowDeleteModal={setShowDeleteModal}
         setSelectedProjects={setSelectedProjects}
+        onEdit={onEditProject || (() => {})} // Provide a default empty function if onEditProject is undefined
       />
     </UITableRow>
   );
