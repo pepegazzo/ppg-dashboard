@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Loader2, Package as PackageIcon, Wrench, Palette, Video, Globe, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PackageType {
   id: string;
@@ -25,7 +26,7 @@ interface ProjectPackageCellProps {
 }
 
 const getServiceIcon = (packageName: string) => {
-  switch(packageName.toLowerCase()) {
+  switch(packageName?.toLowerCase()) {
     case 'branding':
       return <Heart className="h-3 w-3 opacity-80 mr-1" />;
     case 'custom':
@@ -41,16 +42,19 @@ const getServiceIcon = (packageName: string) => {
   }
 };
 
-export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProjectId, onUpdate }: ProjectPackageCellProps) {
+export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProjectId }: ProjectPackageCellProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPopover, setShowPopover] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
     
     const fetchPackages = async () => {
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from("package_types")
           .select("*")
@@ -77,22 +81,116 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
     return () => { mounted = false; }
   }, []);
 
-  const updateService = (packageId: string | null, name?: string | null) => {
-    setShowPopover(false);
-    setUpdatingProjectId(project.id);
-    onUpdate(project.id, "package_id", packageId || "");
-    onUpdate(project.id, "package_name", name || "");
+  const updateService = async (packageId: string | null, packageName: string | null) => {
+    try {
+      setShowPopover(false);
+      setUpdatingProjectId(project.id);
+      setIsUpdating(true);
+      
+      if (packageId) {
+        // First, check if a relationship already exists
+        const { data: existingPackage, error: checkError } = await supabase
+          .from('project_packages')
+          .select('*')
+          .eq('project_id', project.id);
+          
+        if (checkError) {
+          console.error("Error checking existing package:", checkError);
+          toast({
+            title: "Error updating service",
+            description: checkError.message || "Please try again later.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        if (existingPackage && existingPackage.length > 0) {
+          // Update existing relationship
+          const { error: updateError } = await supabase
+            .from('project_packages')
+            .update({ package_id: packageId })
+            .eq('project_id', project.id);
+            
+          if (updateError) {
+            console.error("Error updating package:", updateError);
+            toast({
+              title: "Error updating service",
+              description: updateError.message || "Please try again later.",
+              variant: "destructive"
+            });
+            return;
+          }
+        } else {
+          // Create new relationship
+          const { error: insertError } = await supabase
+            .from('project_packages')
+            .insert({ project_id: project.id, package_id: packageId });
+            
+          if (insertError) {
+            console.error("Error creating package relationship:", insertError);
+            toast({
+              title: "Error updating service",
+              description: insertError.message || "Please try again later.",
+              variant: "destructive"
+            });
+            return;
+          }
+        }
+        
+        // Update local state to reflect change
+        project.package_id = packageId;
+        project.package_name = packageName;
+        
+        toast({
+          title: "Service updated",
+          description: `Service changed to ${packageName || "None"}`
+        });
+      } else {
+        // Remove package assignment if packageId is null
+        const { error: deleteError } = await supabase
+          .from('project_packages')
+          .delete()
+          .eq('project_id', project.id);
+          
+        if (deleteError) {
+          console.error("Error removing package:", deleteError);
+          toast({
+            title: "Error updating service",
+            description: deleteError.message || "Please try again later.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Update local state
+        project.package_id = null;
+        project.package_name = null;
+        
+        toast({
+          title: "Service removed",
+          description: "Project service has been unassigned"
+        });
+      }
+    } catch (error: any) {
+      console.error("Unexpected error updating service:", error);
+      toast({
+        title: "Error updating service",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+      setUpdatingProjectId(null);
+    }
   };
-
-  const currentPkg = packages.find(pkg => pkg.id === project.package_id);
 
   return (
     <TableCell>
       <Popover open={showPopover} onOpenChange={setShowPopover}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer" disabled={updatingProjectId === project.id}>
+          <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer" disabled={isUpdating || updatingProjectId === project.id}>
             <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
-              {updatingProjectId === project.id ? (
+              {isUpdating || updatingProjectId === project.id ? (
                 <>
                   <Loader2 className="h-3 w-3 animate-spin mr-1" />
                   Updating...
@@ -116,7 +214,7 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
             <Button variant="ghost" size="sm"
               className={`justify-start ${!project.package_id ? "bg-blue-50" : ""}`}
               onClick={() => updateService(null, null)}
-              disabled={updatingProjectId === project.id}
+              disabled={isUpdating || updatingProjectId === project.id}
             >
               <Badge variant="secondary">{getServiceIcon("none")}Unassigned</Badge>
             </Button>
@@ -132,7 +230,7 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
                 size="sm"
                 className={`justify-start ${project.package_id === pkg.id ? "bg-blue-50" : ""} text-left`}
                 onClick={() => updateService(pkg.id, pkg.name)}
-                disabled={updatingProjectId === project.id}
+                disabled={isUpdating || updatingProjectId === project.id}
               >
                 <Badge className="flex gap-1 items-center px-2 py-1 font-normal">
                   {getServiceIcon(pkg.name)}

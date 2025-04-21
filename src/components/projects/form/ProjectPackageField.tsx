@@ -23,7 +23,7 @@ interface ProjectPackageFieldProps {
 }
 
 export const getServiceIcon = (packageName: string) => {
-  switch(packageName.toLowerCase()) {
+  switch(packageName?.toLowerCase()) {
     case 'branding':
       return <Heart className="h-4 w-4 mr-2 opacity-70" />;
     case 'custom':
@@ -51,6 +51,8 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   });
 
   useEffect(() => {
+    let mounted = true;
+    
     async function fetchPackages() {
       try {
         setLoading(true);
@@ -61,16 +63,24 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
         
         if (error) throw error;
         
-        setPackages(data || []);
+        if (mounted) {
+          setPackages(data || []);
+        }
       } catch (error: any) {
         console.error('Error fetching packages:', error);
-        setError(error.message);
+        if (mounted) {
+          setError(error.message);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
     
     fetchPackages();
+    
+    return () => { mounted = false; };
   }, []);
 
   const selectPackage = (packageId: string) => {
