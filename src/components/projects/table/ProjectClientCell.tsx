@@ -131,7 +131,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
           <Button 
             variant="ghost" 
             size="sm"
-            className="text-sm hover:bg-muted px-2"
+            className="text-sm hover:bg-muted px-0" // Changed px-2 to px-0 for alignment
             disabled={isSubmitting}
           >
             {isSubmitting ? (
