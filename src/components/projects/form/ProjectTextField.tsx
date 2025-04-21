@@ -22,6 +22,7 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
     formatted = formatted.replace(/-+/g, '-');
     // Remove leading and trailing hyphens
     formatted = formatted.replace(/^-+|-+$/g, '');
+    console.log(`[ProjectTextField] Formatted slug from "${value}" to "${formatted}"`);
     return formatted;
   };
 
@@ -42,9 +43,9 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
               onChange={(e) => {
                 // For slug field, enforce proper slug format
                 if (name === "slug") {
-                  console.log("Formatting slug input:", e.target.value);
+                  console.log("[ProjectTextField] Formatting slug input:", e.target.value);
                   const formattedValue = formatSlug(e.target.value);
-                  console.log("Formatted slug:", formattedValue);
+                  console.log("[ProjectTextField] Formatted slug:", formattedValue);
                   field.onChange(formattedValue);
                 } else {
                   field.onChange(e.target.value);

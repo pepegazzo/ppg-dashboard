@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Eye, Key, Copy, Link as LinkIcon, RefreshCw } from "lucide-react";
@@ -59,10 +60,11 @@ export function ProjectPasswordDialog({
       }
 
       console.log("Fetched project data:", data);
+      console.log("Fetched slug:", data.slug);
       
       // Set the slug state from DB data
       if (data.slug) {
-        console.log("Setting slug:", data.slug);
+        console.log("Setting slug state to:", data.slug);
         setSlug(data.slug);
       } else {
         console.error("No slug found for project");
@@ -151,6 +153,7 @@ export function ProjectPasswordDialog({
     }
     
     const portalUrl = `${window.location.origin}/${slug}`;
+    console.log("Copying portal URL:", portalUrl);
     navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Copied",
@@ -263,7 +266,7 @@ export function ProjectPasswordDialog({
   const getPortalUrl = () => {
     if (!slug) return "No portal URL configured";
     const url = `${window.location.origin}/${slug}`;
-    console.log("Portal URL:", url);
+    console.log("Generated portal URL:", url);
     return url;
   };
 
@@ -326,6 +329,9 @@ export function ProjectPasswordDialog({
           <p className="text-sm font-medium mb-1">Portal URL:</p>
           <p className="text-sm font-mono break-all">
             {getPortalUrl()}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {slug ? `Using slug: "${slug}"` : "No slug configured"}
           </p>
         </div>
         

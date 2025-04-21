@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LinkIcon } from "lucide-react";
 import { ProjectPasswordDialog } from "./ProjectPasswordDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectActionsCellProps {
   projectId: string;
@@ -16,9 +17,37 @@ export function ProjectActionsCell({
   setSelectedProjects,
 }: ProjectActionsCellProps) {
   const [open, setOpen] = useState(false);
+  const [slug, setSlug] = useState<string | null>(null);
+
+  // Fetch the slug separately just for verification
+  useEffect(() => {
+    async function fetchProjectSlug() {
+      try {
+        console.log("Verifying slug for project ID:", projectId);
+        const { data, error } = await supabase
+          .from("projects")
+          .select("slug, name")
+          .eq("id", projectId)
+          .single();
+        
+        if (error) {
+          console.error("Error fetching project slug:", error);
+          return;
+        }
+        
+        console.log("Project data for verification:", data);
+        setSlug(data.slug);
+      } catch (err) {
+        console.error("Unexpected error fetching slug:", err);
+      }
+    }
+    
+    fetchProjectSlug();
+  }, [projectId]);
 
   const handlePortalClick = () => {
     console.log("Opening portal dialog for project:", projectId);
+    console.log("Current slug from verification:", slug);
     setOpen(true);
   };
 
