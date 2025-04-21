@@ -55,7 +55,8 @@ export function ProjectTableHeader({
         <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[70px]">
           End {renderSortIndicator('due_date')}
         </TableHead>
-        <TableHead className="text-center w-[60px]">Portal</TableHead>
+        <TableHead className="w-[60px]">Portal</TableHead>
       </TableRow>
     </TableHeader>;
 }
+
