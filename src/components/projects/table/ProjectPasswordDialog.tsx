@@ -7,14 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-function generateSimplePassword() {
-  return Math.random().toString(36).slice(-8).toUpperCase();
-}
-
 interface ProjectPasswordDialogProps {
   projectId: string;
-  projectPassword?: string | null;
-  projectSlug?: string | null;
   open: boolean;
   setOpen: (show: boolean) => void;
 }
@@ -260,6 +254,10 @@ export function ProjectPasswordDialog({
     if (!slug) return "No portal URL configured";
     return `${window.location.origin}/${slug}`;
   };
+
+  function generateSimplePassword() {
+    return Math.random().toString(36).slice(-8).toUpperCase();
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

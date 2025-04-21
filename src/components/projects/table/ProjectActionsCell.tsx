@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { LinkIcon } from "lucide-react";
 import { ProjectPasswordDialog } from "./ProjectPasswordDialog";
@@ -23,7 +22,7 @@ export function ProjectActionsCell({
   };
 
   return (
-    <TableCell className="flex items-center gap-2 p-0">
+    <div className="flex items-center gap-2 p-0">
       <Button
         variant="default"
         size="sm"
@@ -38,6 +37,6 @@ export function ProjectActionsCell({
         setOpen={setOpen}
         projectId={projectId}
       />
-    </TableCell>
+    </div>
   );
 }
