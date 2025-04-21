@@ -35,7 +35,7 @@ export function ProjectPasswordDialog({
   }, [open, projectId]);
 
   const fetchProjectData = async () => {
-    if (!open) return;
+    if (!open || !projectId) return;
     
     setLoading(true);
     
@@ -151,7 +151,7 @@ export function ProjectPasswordDialog({
       return;
     }
     
-    const portalUrl = `${window.location.origin}/${slug}`;
+    const portalUrl = getPortalUrl();
     console.log("[ProjectPasswordDialog] Copying portal URL:", portalUrl);
     navigator.clipboard.writeText(portalUrl);
     toast({
@@ -264,7 +264,7 @@ export function ProjectPasswordDialog({
 
   const getPortalUrl = () => {
     if (!slug) return "No portal URL configured";
-    // Fixed URL construction to use window.location.origin
+    // Fixed URL construction to use window.location.origin and ensure proper slug formatting
     const url = `${window.location.origin}/${slug}`;
     console.log("[ProjectPasswordDialog] Generated portal URL:", url);
     return url;

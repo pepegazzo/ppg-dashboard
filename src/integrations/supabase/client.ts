@@ -16,9 +16,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     detectSessionInUrl: true,
   },
   global: {
-    fetch: (...args) => {
-      // Fix: Properly type and handle the fetch arguments
-      const [url, options] = args;
+    fetch: (url, options) => {
       console.log('Supabase API call:', url);
       return fetch(url, options);
     }
