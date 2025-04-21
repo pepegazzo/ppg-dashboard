@@ -74,7 +74,7 @@ const Sidebar = () => {
 
   return (
     <ShadcnSidebar
-      className="bg-sidebar border-sidebar-border !border-r-0" 
+      className="bg-sidebar border-sidebar-border" 
       variant="sidebar"
       collapsible="icon"
       style={{ 
