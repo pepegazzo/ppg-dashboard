@@ -32,8 +32,45 @@ export function ProjectPasswordDialog({
   const [editedPassword, setEditedPassword] = useState<string>(projectPassword || "");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [currentSlug, setCurrentSlug] = useState<string | null>(projectSlug || null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Fetch the project slug from the database to ensure we have the latest value
+  useEffect(() => {
+    if (open) {
+      fetchProjectData();
+    }
+  }, [open, projectId]);
+
+  const fetchProjectData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("slug, portal_password")
+        .eq("id", projectId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching project data:", error);
+        return;
+      }
+
+      if (data) {
+        setCurrentSlug(data.slug);
+        
+        // If no password exists, we'll need to generate one
+        if (!data.portal_password || data.portal_password.trim() === "") {
+          generateAndSavePassword();
+        } else {
+          setCurrentPassword(data.portal_password);
+          setEditedPassword(data.portal_password);
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error fetching project:", err);
+    }
+  };
 
   // Generate and save a password if it doesn't exist when the dialog opens
   useEffect(() => {
@@ -95,14 +132,19 @@ export function ProjectPasswordDialog({
   };
 
   const handleCopyPortalLink = () => {
-    if (projectSlug) {
+    if (currentSlug) {
       const baseUrl = window.location.origin;
-      // Use the slug directly from the database for the URL
-      const portalUrl = `${baseUrl}/${projectSlug}`;
+      const portalUrl = `${baseUrl}/${currentSlug}`;
       navigator.clipboard.writeText(portalUrl);
       toast({
         title: "Portal link copied",
         description: "The link to the project portal was copied to clipboard.",
+      });
+    } else {
+      toast({
+        title: "No slug available",
+        description: "This project doesn't have a valid URL slug defined.",
+        variant: "destructive",
       });
     }
   };
@@ -177,9 +219,15 @@ export function ProjectPasswordDialog({
 
   const handlePortalAccess = () => {
     setOpen(false);
-    if (projectSlug) {
-      // Navigate directly using the slug from the database
-      navigate(`/${projectSlug}`);
+    if (currentSlug) {
+      // Navigate directly using the slug we fetched from the database
+      navigate(`/${currentSlug}`);
+    } else {
+      toast({
+        title: "No slug available",
+        description: "This project doesn't have a valid URL slug defined.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -237,7 +285,7 @@ export function ProjectPasswordDialog({
             type="button"
             className="w-full flex items-center gap-2"
             onClick={handleCopyPortalLink}
-            disabled={!projectSlug}
+            disabled={!currentSlug}
             aria-label="Copy portal link"
           >
             <Copy className="w-4 h-4" />
@@ -271,7 +319,7 @@ export function ProjectPasswordDialog({
           </Button>
         </div>
         <DialogFooter>
-          {projectSlug ? (
+          {currentSlug ? (
             <Button
               variant="default"
               className="w-full"
