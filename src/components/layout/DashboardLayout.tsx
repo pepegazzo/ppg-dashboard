@@ -16,7 +16,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex min-h-screen w-full bg-zinc-50">
         <Sidebar />
         <SidebarInset className="bg-zinc-50 text-foreground">
-          <div className="container py-8 px-6 w-full">
+          <div className="w-full py-8 px-2 max-w-[98%] mx-auto">
             {children}
           </div>
         </SidebarInset>
