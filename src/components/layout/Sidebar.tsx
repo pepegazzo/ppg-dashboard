@@ -1,7 +1,6 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -32,20 +31,6 @@ export function useSidebarState() {
     throw new Error("useSidebarState must be used within a SidebarProvider");
   }
   return context;
-}
-
-export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
-
-  return (
-    <SidebarContext.Provider value={{ collapsed, toggleSidebar }}>
-      {children}
-    </SidebarContext.Provider>
-  );
 }
 
 const menuItems = [
@@ -96,10 +81,9 @@ const Sidebar = () => {
   };
 
   const sidebarWidth = collapsed ? "w-[3rem]" : "w-[14rem]";
-  const mainMargin = collapsed ? "ml-[3rem]" : "ml-[14rem]";
 
   return (
-    <>
+    <SidebarContext.Provider value={{ collapsed, toggleSidebar }}>
       <aside 
         className={`h-screen bg-zinc-900 fixed left-0 top-0 ${sidebarWidth} transition-all duration-300 ease-in-out border-r border-zinc-800/30 flex flex-col z-40`}
       >
@@ -218,10 +202,7 @@ const Sidebar = () => {
           )}
         </div>
       </aside>
-      <div className={`${mainMargin} transition-all duration-300 flex-1`}>
-        {/* This div ensures the main content is pushed to the right */}
-      </div>
-    </>
+    </SidebarContext.Provider>
   );
 };
 
