@@ -110,6 +110,11 @@ export function TableRow({
         clientName={localProject.client_name} 
         projectId={localProject.id} 
       />
+
+      {/* Contact cell: currently displays "-" as no contact field */}
+      <TableCell className="text-sm text-muted-foreground">
+        -
+      </TableCell>
       
       <ProjectStatusCell 
         project={localProject} 
@@ -162,4 +167,3 @@ export function TableRow({
       </TableCell>
     </UITableRow>;
 }
-
