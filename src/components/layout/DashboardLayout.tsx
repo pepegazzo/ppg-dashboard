@@ -1,8 +1,8 @@
-
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import Sidebar from "./Sidebar";
+import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -13,7 +13,11 @@ const MainContent = ({ children }: { children: ReactNode }) => {
 
   return (
     <SidebarInset
-      className="bg-zinc-50 text-foreground transition-[margin,padding] duration-200"
+      className={cn(
+        "bg-zinc-50 text-foreground transition-[margin,padding] duration-200",
+        // Remove any fixed padding/margin when sidebar is collapsed
+        state === "collapsed" && "!p-0 !m-0"
+      )}
     >
       <div className="w-full py-8 px-4">
         {children}
