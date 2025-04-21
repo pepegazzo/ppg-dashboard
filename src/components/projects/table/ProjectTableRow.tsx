@@ -123,8 +123,10 @@ export function TableRow({
       <ProjectPriorityCell priority={localProject.priority} />
       
       <ProjectPackageCell 
-        packageName={localProject.package_name} 
-        projectId={localProject.id}
+        project={localProject}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
       />
       
       <ProjectRevenueCell revenue={localProject.revenue} />
@@ -160,3 +162,4 @@ export function TableRow({
       </TableCell>
     </UITableRow>;
 }
+
