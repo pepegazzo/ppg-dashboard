@@ -12,6 +12,7 @@ interface ProjectTextFieldProps {
 }
 
 export function ProjectTextField({ control, name, label, placeholder }: ProjectTextFieldProps) {
+  // Function to format slug - ensures consistent formatting between components
   const formatSlug = (value: string): string => {
     // Convert to lowercase
     let formatted = value.toLowerCase();
@@ -41,7 +42,9 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
               onChange={(e) => {
                 // For slug field, enforce proper slug format
                 if (name === "slug") {
+                  console.log("Formatting slug input:", e.target.value);
                   const formattedValue = formatSlug(e.target.value);
+                  console.log("Formatted slug:", formattedValue);
                   field.onChange(formattedValue);
                 } else {
                   field.onChange(e.target.value);

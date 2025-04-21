@@ -18,6 +18,7 @@ export function ProjectActionsCell({
   const [open, setOpen] = useState(false);
 
   const handlePortalClick = () => {
+    console.log("Opening portal dialog for project:", projectId);
     setOpen(true);
   };
 

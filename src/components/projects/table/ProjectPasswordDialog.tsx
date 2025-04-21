@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Eye, Key, Copy, Link as LinkIcon, RefreshCw } from "lucide-react";
@@ -62,7 +61,17 @@ export function ProjectPasswordDialog({
       console.log("Fetched project data:", data);
       
       // Set the slug state from DB data
-      setSlug(data.slug);
+      if (data.slug) {
+        console.log("Setting slug:", data.slug);
+        setSlug(data.slug);
+      } else {
+        console.error("No slug found for project");
+        toast({
+          title: "Error",
+          description: "This project doesn't have a portal URL configured",
+          variant: "destructive",
+        });
+      }
       
       // Handle password
       if (data.portal_password) {
@@ -246,13 +255,16 @@ export function ProjectPasswordDialog({
       return;
     }
     
+    console.log("Navigating to portal with slug:", slug);
     setOpen(false);
     navigate(`/${slug}`);
   };
 
   const getPortalUrl = () => {
     if (!slug) return "No portal URL configured";
-    return `${window.location.origin}/${slug}`;
+    const url = `${window.location.origin}/${slug}`;
+    console.log("Portal URL:", url);
+    return url;
   };
 
   function generateSimplePassword() {

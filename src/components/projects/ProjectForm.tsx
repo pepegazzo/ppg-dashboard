@@ -38,9 +38,23 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     return `INV-${randomNum}`;
   };
 
+  // Helper function to format a slug
+  const formatSlug = (value: string): string => {
+    // Convert to lowercase
+    let formatted = value.toLowerCase();
+    // Replace spaces and special characters with hyphens
+    formatted = formatted.replace(/[^a-z0-9-]/g, '-');
+    // Replace multiple consecutive hyphens with a single one
+    formatted = formatted.replace(/-+/g, '-');
+    // Remove leading and trailing hyphens
+    formatted = formatted.replace(/^-+|-+$/g, '');
+    return formatted;
+  };
+
   const onSubmit = async (values: ProjectFormValues) => {
     try {
       setIsSubmitting(true);
+      console.log("Form values submitted:", values);
 
       let clientName = "";
       if (values.client_id) {
@@ -66,8 +80,9 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         return;
       }
 
-      // Enforce slug format
-      const formattedSlug = values.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+      // Ensure proper slug format
+      const formattedSlug = formatSlug(values.slug.trim());
+      console.log("Formatted slug:", formattedSlug);
       
       // Check if the slug already exists
       const { data: existingProject, error: slugCheckError } = await supabase
