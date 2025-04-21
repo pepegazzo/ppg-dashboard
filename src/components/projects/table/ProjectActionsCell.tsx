@@ -5,11 +5,6 @@ import { Button } from "@/components/ui/button";
 import { LinkIcon } from "lucide-react";
 import { ProjectPasswordDialog } from "./ProjectPasswordDialog";
 
-// Helper to generate an 8-character alphanumeric password
-function generateSimplePassword() {
-  return Math.random().toString(36).slice(-8).toUpperCase();
-}
-
 interface ProjectActionsCellProps {
   projectId: string;
   projectPassword?: string | null;

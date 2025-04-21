@@ -32,11 +32,11 @@ export function ProjectPasswordDialog({
   const [editedPassword, setEditedPassword] = useState<string>(projectPassword || "");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [currentSlug, setCurrentSlug] = useState<string | null>(projectSlug || null);
+  const [currentSlug, setCurrentSlug] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch the project slug from the database to ensure we have the latest value
+  // Critical: Fetch the project data with the slug whenever the dialog opens
   useEffect(() => {
     if (open) {
       fetchProjectData();
@@ -45,6 +45,7 @@ export function ProjectPasswordDialog({
 
   const fetchProjectData = async () => {
     try {
+      console.log("Fetching project data for ID:", projectId);
       const { data, error } = await supabase
         .from("projects")
         .select("slug, portal_password")
@@ -53,13 +54,22 @@ export function ProjectPasswordDialog({
 
       if (error) {
         console.error("Error fetching project data:", error);
+        toast({
+          title: "Error fetching project data",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
 
+      console.log("Fetched project data:", data);
+      
       if (data) {
+        // Important: Set the current slug from the database directly
         setCurrentSlug(data.slug);
+        console.log("Set current slug to:", data.slug);
         
-        // If no password exists, we'll need to generate one
+        // Handle password if needed
         if (!data.portal_password || data.portal_password.trim() === "") {
           generateAndSavePassword();
         } else {
@@ -69,6 +79,11 @@ export function ProjectPasswordDialog({
       }
     } catch (err) {
       console.error("Unexpected error fetching project:", err);
+      toast({
+        title: "Error",
+        description: "Failed to load project information",
+        variant: "destructive",
+      });
     }
   };
 
@@ -133,6 +148,7 @@ export function ProjectPasswordDialog({
 
   const handleCopyPortalLink = () => {
     if (currentSlug) {
+      console.log("Copying portal link with slug:", currentSlug);
       const baseUrl = window.location.origin;
       const portalUrl = `${baseUrl}/${currentSlug}`;
       navigator.clipboard.writeText(portalUrl);
@@ -220,7 +236,8 @@ export function ProjectPasswordDialog({
   const handlePortalAccess = () => {
     setOpen(false);
     if (currentSlug) {
-      // Navigate directly using the slug we fetched from the database
+      console.log("Navigating to project portal with slug:", currentSlug);
+      // Navigate using the slug we fetched from the database
       navigate(`/${currentSlug}`);
     } else {
       toast({
