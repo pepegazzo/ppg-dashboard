@@ -154,6 +154,8 @@ export function TableRow({
       <TableCell className="text-center px-[10px]">
         <ProjectActionsCell 
           projectId={localProject.id} 
+          projectPassword={localProject.portal_password || ""}
+          projectSlug={localProject.slug || ""}
           setShowDeleteModal={setShowDeleteModal}
           setSelectedProjects={setSelectedProjects}
         />
