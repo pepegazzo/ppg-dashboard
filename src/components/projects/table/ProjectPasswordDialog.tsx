@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Eye, Key, Link as LinkIcon, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,22 +34,22 @@ export function ProjectPasswordDialog({
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  // Sync props to state if dialog is re-opened on different project
-  // or password changes externally.
-  // UseEffect not required on every input change.
-  // Disable exhaustive-deps because only want to react to open.
-  // eslint-disable-next-line
-  if (open && currentPassword !== (projectPassword || "")) {
-    setCurrentPassword(projectPassword || "");
-    setEditedPassword(projectPassword || "");
-  }
+  // Generate and save a password if it doesn't exist when the dialog opens
+  useEffect(() => {
+    if (open && (!projectPassword || projectPassword.trim() === "")) {
+      generateAndSavePassword();
+    } else if (open) {
+      // Sync props to state when dialog is opened
+      setCurrentPassword(projectPassword || "");
+      setEditedPassword(projectPassword || "");
+    }
+  }, [open, projectPassword]);
 
-  const handleDialogOpen = async () => {
-    // If password absent, generate & save password to backend, update modal
-    if (!currentPassword) {
-      setLoading(true);
-      const newPass = generateSimplePassword();
+  const generateAndSavePassword = async () => {
+    setLoading(true);
+    const newPass = generateSimplePassword();
 
+    try {
       const { error, data } = await supabase
         .from("projects")
         .update({ portal_password: newPass })
@@ -63,18 +63,23 @@ export function ProjectPasswordDialog({
           description: error.message,
           variant: "destructive",
         });
-        setLoading(false);
-        return;
+      } else {
+        setCurrentPassword(data.portal_password);
+        setEditedPassword(data.portal_password);
+        toast({
+          title: "Portal password created",
+          description: "A password was generated and saved for this project.",
+        });
       }
-      setCurrentPassword(data.portal_password);
-      setEditedPassword(data.portal_password);
+    } catch (err) {
+      console.error("Error generating password:", err);
       toast({
-        title: "Portal password created",
-        description: "A password was generated and saved for this project.",
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
       });
+    } finally {
       setLoading(false);
-    } else {
-      setEditedPassword(currentPassword);
     }
   };
 
@@ -156,7 +161,6 @@ export function ProjectPasswordDialog({
     setSaving(false);
   };
 
-  // Fixed the issue by removing onOpenAutoFocus and handling initialization in a different way
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent onPointerDownOutside={() => {}}>
@@ -182,11 +186,6 @@ export function ProjectPasswordDialog({
             disabled={loading || saving}
             autoFocus
             maxLength={32}
-            onFocus={() => {
-              if (open) {
-                handleDialogOpen();
-              }
-            }}
           />
           <Button
             variant="ghost"
