@@ -25,6 +25,15 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
               {...field} 
               className="h-10" 
               autoComplete="off" 
+              value={field.value} // Explicitly set value to ensure it's controlled
+              onChange={(e) => {
+                // For slug field, enforce lowercase and only allow letters, numbers, and hyphens
+                if (name === "slug") {
+                  field.onChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'));
+                } else {
+                  field.onChange(e.target.value);
+                }
+              }}
             />
           </FormControl>
           <FormMessage />

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,10 +55,24 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
 
       // Check if the slug already exists in the database
+      if (!values.slug || values.slug.trim() === '') {
+        toast({
+          title: "Missing Slug",
+          description: "Please provide a portal slug for this project.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Enforce slug format
+      const formattedSlug = values.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+      
+      // Check if the slug already exists
       const { data: existingProject } = await supabase
         .from('projects')
         .select('id')
-        .eq('slug', values.slug)
+        .eq('slug', formattedSlug)
         .maybeSingle();
 
       if (existingProject) {
@@ -72,7 +85,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         return;
       }
 
-      // Make sure the slug is properly formatted and saved
+      // Save the project with the properly formatted slug
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,
@@ -83,8 +96,10 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         due_date: formattedDueDate,
         revenue: values.revenue || null,
         portal_password: null,
-        slug: values.slug.trim().toLowerCase(),
+        slug: formattedSlug,
       };
+
+      console.log("Creating project with slug:", formattedSlug);
 
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
@@ -93,6 +108,8 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         .single();
 
       if (projectError) throw projectError;
+
+      console.log("Created project with data:", newProject);
 
       if (values.package) {
         const packageData = {

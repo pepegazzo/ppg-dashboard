@@ -36,7 +36,7 @@ export function ProjectPasswordDialog({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Critical: Fetch the project data with the slug whenever the dialog opens
+  // Fetch project data when dialog opens
   useEffect(() => {
     if (open) {
       fetchProjectData();
@@ -65,9 +65,18 @@ export function ProjectPasswordDialog({
       console.log("Fetched project data:", data);
       
       if (data) {
-        // Important: Set the current slug from the database directly
-        setCurrentSlug(data.slug);
-        console.log("Set current slug to:", data.slug);
+        // Set the current slug from the database
+        if (data.slug) {
+          setCurrentSlug(data.slug);
+          console.log("Set current slug to:", data.slug);
+        } else {
+          console.error("No slug found for project:", projectId);
+          toast({
+            title: "Missing Slug",
+            description: "This project doesn't have a portal slug defined.",
+            variant: "destructive",
+          });
+        }
         
         // Handle password if needed
         if (!data.portal_password || data.portal_password.trim() === "") {
@@ -88,16 +97,6 @@ export function ProjectPasswordDialog({
   };
 
   // Generate and save a password if it doesn't exist when the dialog opens
-  useEffect(() => {
-    if (open && (!projectPassword || projectPassword.trim() === "")) {
-      generateAndSavePassword();
-    } else if (open) {
-      // Sync props to state when dialog is opened
-      setCurrentPassword(projectPassword || "");
-      setEditedPassword(projectPassword || "");
-    }
-  }, [open, projectPassword]);
-
   const generateAndSavePassword = async () => {
     setLoading(true);
     const newPass = generateSimplePassword();
@@ -234,18 +233,19 @@ export function ProjectPasswordDialog({
   };
 
   const handlePortalAccess = () => {
-    setOpen(false);
-    if (currentSlug) {
-      console.log("Navigating to project portal with slug:", currentSlug);
-      // Navigate using the slug we fetched from the database
-      navigate(`/${currentSlug}`);
-    } else {
+    if (!currentSlug) {
       toast({
         title: "No slug available",
         description: "This project doesn't have a valid URL slug defined.",
         variant: "destructive",
       });
+      return;
     }
+    
+    console.log("Navigating to project portal with slug:", currentSlug);
+    setOpen(false);
+    // Use the current slug fetched from the database for navigation
+    navigate(`/${currentSlug}`);
   };
 
   return (
@@ -295,6 +295,18 @@ export function ProjectPasswordDialog({
             <Copy className="w-5 h-5" />
           </Button>
         </div>
+        
+        {/* Slug information */}
+        <div className="mb-4 p-3 bg-muted rounded-md">
+          <p className="text-sm font-medium mb-1">Portal URL:</p>
+          <p className="text-sm font-mono break-all">
+            {currentSlug 
+              ? `${window.location.origin}/${currentSlug}`
+              : "No portal URL available"
+            }
+          </p>
+        </div>
+        
         {/* Copy Portal Link Button */}
         <div className="flex justify-end mb-6">
           <Button
