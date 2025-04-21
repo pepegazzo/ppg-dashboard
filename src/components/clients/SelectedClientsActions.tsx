@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2 } from "lucide-react";
@@ -17,16 +16,15 @@ export const SelectedClientsActions = ({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="p-2 bg-purple-50 border border-purple-200 rounded-md flex items-center justify-between">
-      <span className="text-sm text-purple-900">
+    <div className="mb-4 p-2 bg-muted rounded-md flex items-center justify-between">
+      <span className="text-sm">
         {selectedCount} client{selectedCount !== 1 ? 's' : ''} selected
       </span>
       <Button 
-        variant="outline" 
+        variant="destructive" 
         size="sm" 
         onClick={onDelete} 
         disabled={isDeleting}
-        className="border-purple-200 text-purple-800 hover:bg-purple-50"
       >
         {isDeleting ? (
           <>
