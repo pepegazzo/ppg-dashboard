@@ -306,8 +306,10 @@ export function TableRow({
       <ProjectProgressCell progress={currentProject.progress} />
       <ProjectPriorityCell priority={currentProject.priority} />
       <ProjectPackageCell
-        packageName={currentProject.package_name}
-        projectId={currentProject.id}
+        project={currentProject}
+        updatingProjectId={updatingProjectId}
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
       />
       <ProjectRevenueCell revenue={currentProject.revenue} />
       <ProjectDateCell
