@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +32,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
   });
 
   const generateInvoiceNumber = () => {
-    // Ensure exactly 3 digits between 100-999
     const randomNum = Math.floor(100 + Math.random() * 900);
     return `INV-${randomNum}`;
   };
@@ -42,7 +40,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     try {
       setIsSubmitting(true);
       
-      // If a client was selected, get their company_name
       let clientName = "";
       if (values.client_id) {
         const { data: client } = await supabase
@@ -56,11 +53,9 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         }
       }
       
-      // Format dates as ISO strings for Supabase
       const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
       
-      // Create properly typed data object for Supabase
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,
@@ -70,18 +65,17 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         start_date: formattedStartDate,
         due_date: formattedDueDate,
         revenue: values.revenue || null,
+        portal_password: null,
       };
       
-      // Insert project into Supabase
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert(projectPayload)
-        .select('id, name, client_name, revenue')
+        .select('id, name, client_name, revenue, portal_password')
         .single();
 
       if (projectError) throw projectError;
       
-      // If a package is selected, create package association
       if (values.package) {
         const packageData = {
           project_id: newProject.id,
@@ -102,11 +96,10 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         }
       }
       
-      // Create a pending invoice for the project if revenue is specified
       if (newProject.revenue) {
         const invoiceNumber = generateInvoiceNumber();
         const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 30); // Due date 30 days from now
+        dueDate.setDate(dueDate.getDate() + 30);
         
         const invoiceData = {
           project_id: newProject.id,
@@ -115,7 +108,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           status: "Pending",
           issue_date: new Date().toISOString().split('T')[0],
           due_date: dueDate.toISOString().split('T')[0],
-          // No description for auto-generated invoices from project creation
         };
         
         const { error: invoiceError } = await supabase
