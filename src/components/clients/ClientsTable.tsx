@@ -153,7 +153,7 @@ export const ClientsTable = ({
         <TableBody>
           {filteredAndSortedClients?.map(client => (
             <React.Fragment key={client.id}>
-              <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
+              <TableRow className={`border-b group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`}>
                 <TableCell className="align-middle">
                   <div className="flex items-center h-10">
                     <Checkbox 
@@ -163,7 +163,13 @@ export const ClientsTable = ({
                     />
                   </div>
                 </TableCell>
-                <TableCell className="align-middle p-4">
+                <TableCell
+                  className={`align-middle p-4 cursor-pointer select-none hover:bg-muted/25 transition-colors rounded`}
+                  onClick={() => handleRowClick(client.id)}
+                  tabIndex={0}
+                  aria-expanded={openAccordionId === client.id}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleRowClick(client.id); }}
+                >
                   <ClientCompanyCell name={client.company_name} isOpen={openAccordionId === client.id} />
                 </TableCell>
                 <TableCell className="align-middle">
