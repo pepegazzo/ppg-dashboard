@@ -28,6 +28,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       due_date: undefined,
       package: undefined,
       revenue: undefined,
+      slug: "",
     },
   });
 
@@ -39,7 +40,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
   const onSubmit = async (values: ProjectFormValues) => {
     try {
       setIsSubmitting(true);
-      
+
       let clientName = "";
       if (values.client_id) {
         const { data: client } = await supabase
@@ -47,15 +48,28 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           .select('company_name')
           .eq('id', values.client_id)
           .single();
-        
-        if (client) {
-          clientName = client.company_name;
-        }
+        if (client) clientName = client.company_name;
       }
-      
+
       const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
-      
+
+      const { data: existingProject } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('slug', values.slug)
+        .maybeSingle();
+
+      if (existingProject) {
+        toast({
+          title: "Duplicate Slug",
+          description: "The portal slug you chose is already in use. Please pick another one.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,
@@ -66,26 +80,25 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         due_date: formattedDueDate,
         revenue: values.revenue || null,
         portal_password: null,
+        slug: values.slug.trim().toLowerCase(),
       };
-      
+
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert(projectPayload)
-        .select('id, name, client_name, revenue, portal_password')
+        .select('id, name, client_name, revenue, portal_password, slug')
         .single();
 
       if (projectError) throw projectError;
-      
+
       if (values.package) {
         const packageData = {
           project_id: newProject.id,
           package_id: values.package
         };
-        
         const { error: packageError } = await supabase
           .from('project_packages')
           .insert(packageData);
-          
         if (packageError) {
           console.error("Error linking package:", packageError);
           toast({
@@ -95,12 +108,12 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           });
         }
       }
-      
+
       if (newProject.revenue) {
         const invoiceNumber = generateInvoiceNumber();
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 30);
-        
+
         const invoiceData = {
           project_id: newProject.id,
           invoice_number: invoiceNumber,
@@ -109,11 +122,11 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           issue_date: new Date().toISOString().split('T')[0],
           due_date: dueDate.toISOString().split('T')[0],
         };
-        
+
         const { error: invoiceError } = await supabase
           .from('invoices')
           .insert(invoiceData);
-        
+
         if (invoiceError) {
           console.error("Error creating invoice:", invoiceError);
           toast({
@@ -128,7 +141,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           });
         }
       }
-      
+
       onSubmitted();
     } catch (error) {
       console.error("Error creating project:", error);
@@ -146,12 +159,12 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <h2 className="text-xl font-semibold">Create New Project</h2>
-        
+
         <ProjectFormFields control={form.control} />
-        
-        <ProjectFormActions 
-          isSubmitting={isSubmitting} 
-          onCancel={onCancel} 
+
+        <ProjectFormActions
+          isSubmitting={isSubmitting}
+          onCancel={onCancel}
         />
       </form>
     </Form>

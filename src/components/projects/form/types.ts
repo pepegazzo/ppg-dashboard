@@ -11,6 +11,12 @@ export const formSchema = z.object({
   due_date: z.date().optional(),
   package: z.string().optional(),
   revenue: z.number().optional(),
+  slug: z.string()
+    .regex(/^[a-zA-Z0-9-]+$/, {
+      message: "Slug can only contain letters, numbers, and hyphens",
+    })
+    .min(4, "Slug must be at least 4 characters")
+    .max(40, "Slug too long"),
 });
 
 export type ProjectFormValues = z.infer<typeof formSchema>;

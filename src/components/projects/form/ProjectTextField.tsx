@@ -6,7 +6,7 @@ import { ProjectFormValues } from "./types";
 
 interface ProjectTextFieldProps {
   control: Control<ProjectFormValues>;
-  name: "name" | "client_name";
+  name: "name" | "client_name" | "slug";
   label: string;
   placeholder: string;
 }
@@ -20,7 +20,7 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input placeholder={placeholder} {...field} />
+            <Input placeholder={placeholder} {...field} autoComplete="off" />
           </FormControl>
           <FormMessage />
         </FormItem>
