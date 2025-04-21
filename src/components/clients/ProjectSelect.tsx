@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus } from "lucide-react";
@@ -20,7 +20,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Fetch assigned projects (to not double-assign)
-  const { data: assignedProjects } = useQuery({
+  const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
     queryKey: ['client-assigned-projects', clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,10 +33,13 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   });
 
   // Available projects not assigned to this client
-  const { data: availableProjects, isLoading: isLoadingAvailable } = useQuery({
+  const { data: availableProjects, isLoading: isLoadingAvailable, refetch: refetchAvailable } = useQuery({
     queryKey: ['client-available-projects', clientId, assignedProjects],
     queryFn: async () => {
-      let excludeIds = assignedProjects ?? [];
+      // Make sure assignedProjects is defined before using it
+      const excludeIds = assignedProjects || [];
+      
+      console.log("Fetching available projects, excluding:", excludeIds);
       
       const { data, error } = await supabase
         .from('projects')
@@ -44,11 +47,23 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         .not('id', 'in', excludeIds.length > 0 ? excludeIds : ["000"]) // Use placeholder ID when empty
         .order('name');
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching available projects:", error);
+        throw error;
+      }
+      
+      console.log("Available projects fetched:", data);
       return data ?? [];
     },
-    enabled: !!assignedProjects // Only run when assignedProjects is loaded
+    enabled: false // Don't run automatically
   });
+
+  // When popover opens, fetch available projects
+  useEffect(() => {
+    if (isPopoverOpen) {
+      refetchAvailable();
+    }
+  }, [isPopoverOpen, refetchAvailable]);
 
   const assignProjectToClient = async (projectId: string, projectName: string) => {
     try {
@@ -131,7 +146,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-2 rounded shadow-lg min-w-[180px]" align="start">
         <div className="flex flex-col gap-1">
-          {isLoadingAvailable ? (
+          {isLoadingAssigned || isLoadingAvailable ? (
             <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading...
