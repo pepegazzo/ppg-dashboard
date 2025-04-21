@@ -58,7 +58,6 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[70px] px-[10px] text-left">
         End {renderSortIndicator('due_date')}
       </TableHead>
-      {/* Changed text-left to text-center and consistent padding */}
       <TableHead className="w-[60px] px-[10px] text-center">Portal</TableHead>
     </TableRow>
   </TableHeader>;
