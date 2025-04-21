@@ -30,7 +30,7 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
       control={control}
       name="client_id"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="h-full flex flex-col">
           <FormLabel>Client</FormLabel>
           <FormControl>
             <Select 
@@ -38,7 +38,7 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
               value={field.value || 'null'} 
               disabled={isLoading}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

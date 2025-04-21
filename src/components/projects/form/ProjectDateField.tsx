@@ -20,7 +20,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className="flex flex-col">
+        <FormItem className="h-full flex flex-col">
           <FormLabel>{label}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
@@ -28,7 +28,7 @@ export function ProjectDateField({ control, name, label }: ProjectDateFieldProps
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full min-w-[120px] pl-3 text-left justify-start font-normal",
+                    "w-full min-w-[120px] pl-3 text-left justify-start font-normal h-10",
                     !field.value && "text-muted-foreground"
                   )}
                 >

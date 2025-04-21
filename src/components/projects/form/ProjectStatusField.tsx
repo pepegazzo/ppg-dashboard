@@ -14,14 +14,14 @@ export function ProjectStatusField({ control }: ProjectStatusFieldProps) {
       control={control}
       name="status"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="h-full flex flex-col">
           <FormLabel>Status</FormLabel>
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
             </FormControl>

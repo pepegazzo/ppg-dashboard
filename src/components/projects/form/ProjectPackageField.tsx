@@ -94,14 +94,14 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 h-full flex flex-col">
       <Label>Service</Label>
       
       <Popover>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
-            className="w-full justify-start h-auto min-h-10 py-2"
+            className="w-full justify-start h-10 py-2"
           >
             {field.value ? (
               getServiceIcon(getSelectedPackageName())

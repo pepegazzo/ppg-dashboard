@@ -14,14 +14,14 @@ export function ProjectPriorityField({ control }: ProjectPriorityFieldProps) {
       control={control}
       name="priority"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="h-full flex flex-col">
           <FormLabel>Priority</FormLabel>
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
             </FormControl>

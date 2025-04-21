@@ -16,7 +16,7 @@ export function ProjectRevenueField({ control }: ProjectRevenueFieldProps) {
       control={control}
       name="revenue"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="h-full flex flex-col">
           <div className="flex items-center gap-2">
             <FormLabel>Revenue (S/)</FormLabel>
             <TooltipProvider>
@@ -41,7 +41,7 @@ export function ProjectRevenueField({ control }: ProjectRevenueFieldProps) {
               <Input 
                 type="number"
                 placeholder="0.00" 
-                className="pl-10" 
+                className="pl-10 h-10" 
                 {...field} 
                 value={field.value || ''}
                 onChange={(e) => {
