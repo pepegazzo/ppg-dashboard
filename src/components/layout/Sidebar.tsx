@@ -71,7 +71,7 @@ const Sidebar = () => {
       
       {/* Navigation */}
       <nav className="py-5 px-2 flex-1 overflow-y-auto">
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-2"> {/* Increased gap from 1 to 2 */}
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             
@@ -155,3 +155,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
