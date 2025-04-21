@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,7 +48,7 @@ const Login = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome back, Pepe!</CardTitle>
           <CardDescription>
-            Enter your email and password to access your dashboard.
+            Enter your email and password to access your dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,4 +108,3 @@ const Login = () => {
 };
 
 export default Login;
-
