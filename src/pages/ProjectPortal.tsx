@@ -10,9 +10,15 @@ import { Project } from "@/components/projects/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 
-const ProjectPortal = () => {
+interface ProjectPortalProps {
+  isLegacyRoute?: boolean;
+}
+
+const ProjectPortal = ({ isLegacyRoute }: ProjectPortalProps = {}) => {
   const params = useParams<{ projectSlug?: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
+  
   const RESERVED_PATHS = [
     "login",
     "projects",
@@ -30,7 +36,6 @@ const ProjectPortal = () => {
     projectSlug = undefined;
   }
 
-  const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,12 +48,12 @@ const ProjectPortal = () => {
   const [isAdminLoading, setIsAdminLoading] = useState(false);
   const { user } = useAuth();
 
-  // Check if we're on the old URL format (/projects/slug/portal) and redirect to new format (/slug)
+  // Redirect from legacy route to new format if needed
   useEffect(() => {
-    if (location.pathname.includes('/projects/') && location.pathname.includes('/portal') && projectSlug) {
+    if (isLegacyRoute && projectSlug) {
       navigate(`/${projectSlug}`, { replace: true });
     }
-  }, [location.pathname, projectSlug, navigate]);
+  }, [isLegacyRoute, projectSlug, navigate]);
 
   useEffect(() => {
     if (user) {
