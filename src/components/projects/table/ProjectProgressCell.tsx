@@ -8,10 +8,10 @@ interface ProjectProgressCellProps {
 
 export function ProjectProgressCell({ progress }: ProjectProgressCellProps) {
   return (
-    <TableCell>
-      <div className="w-[120px] flex items-center gap-2">
-        <Progress value={progress} className="h-2 flex-grow" />
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
+    <TableCell className="p-2">
+      <div className="w-[95px] flex items-center gap-1">
+        <Progress value={progress} className="h-1 flex-grow" />
+        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
           {progress}%
         </span>
       </div>
