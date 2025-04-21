@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,12 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       revenue: undefined,
     },
   });
+
+  const generateInvoiceNumber = () => {
+    // Ensure exactly 3 digits between 100-999
+    const randomNum = Math.floor(100 + Math.random() * 900);
+    return `INV-${randomNum}`;
+  };
 
   const onSubmit = async (values: ProjectFormValues) => {
     try {
@@ -97,7 +104,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       
       // Create a pending invoice for the project if revenue is specified
       if (newProject.revenue) {
-        const invoiceNumber = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
+        const invoiceNumber = generateInvoiceNumber();
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 30); // Due date 30 days from now
         
@@ -108,7 +115,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
           status: "Pending",
           issue_date: new Date().toISOString().split('T')[0],
           due_date: dueDate.toISOString().split('T')[0],
-          description: `Invoice for ${newProject.name} - ${newProject.client_name}`
+          // No description for auto-generated invoices from project creation
         };
         
         const { error: invoiceError } = await supabase
