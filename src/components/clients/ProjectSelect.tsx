@@ -41,11 +41,17 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       
       console.log("Fetching available projects, excluding:", excludeIds);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('projects')
         .select('id, name')
-        .not('id', 'in', excludeIds.length > 0 ? excludeIds : ["000"]) // Use placeholder ID when empty
         .order('name');
+      
+      // Only apply the filter if there are IDs to exclude
+      if (excludeIds.length > 0) {
+        query = query.not('id', 'in', excludeIds);
+      }
+      
+      const { data, error } = await query;
         
       if (error) {
         console.error("Error fetching available projects:", error);

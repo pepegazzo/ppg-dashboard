@@ -41,9 +41,10 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
                 <SelectValue placeholder="Select a client (optional)" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">No Client</SelectItem>
                 {clients?.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
-                    {client.company_name} - {client.company}
+                    {client.company_name}
                   </SelectItem>
                 ))}
               </SelectContent>

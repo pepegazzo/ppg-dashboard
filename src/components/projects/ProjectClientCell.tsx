@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, Loader2, Users } from "lucide-react";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -178,7 +177,6 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
           size="sm"
           className="text-sm hover:bg-muted"
         >
-          <Users className="h-3.5 w-3.5 mr-2" />
           {clientName || "No Client"}
         </Button>
       </DropdownMenuTrigger>
