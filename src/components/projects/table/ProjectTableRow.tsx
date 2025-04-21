@@ -14,6 +14,7 @@ import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
 import { ProjectClientCell } from "./ProjectClientCell";
 import { ProjectContactCell } from "./ProjectContactCell";
+import { Key, Link as LinkIcon, Copy } from "lucide-react";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -24,6 +25,23 @@ interface ProjectTableRowProps {
   setUpdatingProjectId: (projectId: string | null) => void;
   setShowDeleteModal: (show: boolean) => void;
   fetchProjects?: () => void;
+}
+
+function CopyButton({ value, label }: { value: string; label?: string }) {
+  const { toast } = useToast();
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value);
+    toast({
+      title: "Copied!",
+      description: `${label || "Value"} copied to clipboard`,
+    });
+  };
+  return (
+    <button className="ml-2" title={label} onClick={handleCopy}>
+      <Copy className="h-4 w-4 inline" />
+    </button>
+  );
 }
 
 export function TableRow({
@@ -89,6 +107,8 @@ export function TableRow({
 
   const isUpdating = updatingProjectId === localProject.id;
 
+  const shareUrl = project.slug ? `${window.location.origin}/client-portal/${project.slug}` : "";
+
   return <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell className="px-2 py-0 w-[28px]">
         <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
@@ -103,6 +123,36 @@ export function TableRow({
           setUpdatingProjectId={setUpdatingProjectId}
           onUpdate={updateProjectField}
         />
+      </TableCell>
+      <TableCell className="px-[10px] max-w-xs">
+        {project.slug ? (
+          <div className="flex flex-col gap-1 text-xs">
+            <div className="flex items-center truncate">
+              <LinkIcon className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span className="truncate">{project.slug}</span>
+              <CopyButton value={project.slug} label="Slug" />
+            </div>
+            <div className="flex items-center truncate">
+              <Key className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span className="truncate">{project.portal_password}</span>
+              <CopyButton value={project.portal_password ?? ""} label="Portal password" />
+            </div>
+            <div className="flex items-center">
+              <a
+                href={shareUrl}
+                className="underline text-primary text-xs hover:text-primary/90"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+              >
+                Open client portal
+              </a>
+              <CopyButton value={shareUrl} label="Client portal link" />
+            </div>
+          </div>
+        ) : (
+          <span className="italic text-muted-foreground">—</span>
+        )}
       </TableCell>
       <ProjectClientCell 
         clientName={localProject.client_name} 

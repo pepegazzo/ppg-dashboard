@@ -12,6 +12,7 @@ export type Project = {
   start_date: string | null;
   due_date: string | null;
   slug: string | null;
+  portal_password?: string | null;
   created_at: string;
   package_name?: string | null;
   package_id?: string | null;

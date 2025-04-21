@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import ProjectForm from "@/components/projects/ProjectForm";
 import { ProjectList } from "@/components/projects/list";
+import { Copy, Link as LinkIcon, Key } from "lucide-react";
+import { useCallback } from "react";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -26,9 +28,9 @@ const Projects = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log("Attempting to fetch projects from Supabase...");
-      
+
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -38,7 +40,7 @@ const Projects = () => {
             package_types(id, name, description)
           )
         `);
-      
+
       if (error) {
         console.error('Error fetching projects:', error);
         setError(`Failed to load projects: ${error.message}`);
@@ -49,37 +51,37 @@ const Projects = () => {
         });
         return;
       }
-      
+
       console.log("Raw Supabase response:", data);
-      
+
       if (!data || data.length === 0) {
         console.log("No projects found in the database");
-        
+
         const { data: allProjects, error: allProjectsError } = await supabase
           .from('projects')
-          .select('*');
-        
+          .select('*, slug, portal_password');
+
         if (allProjectsError) {
           console.error('Error fetching all projects:', allProjectsError);
           setError(`Failed to load projects: ${allProjectsError.message}`);
           setProjects([]);
           return;
         }
-        
+
         console.log("Found projects without packages:", allProjects);
-        
+
         const projectsWithProgress = allProjects?.map(project => ({
           ...project,
           progress: Math.floor(Math.random() * 101)
         })) || [];
-        
+
         setProjects(projectsWithProgress);
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
-        
+
         const transformedProjects = data.map(project => {
           const packageInfo = project.project_packages?.[0]?.package_types;
-          
+
           return {
             ...project,
             package_name: packageInfo?.name || null,
@@ -87,23 +89,23 @@ const Projects = () => {
             progress: Math.floor(Math.random() * 101)
           };
         });
-        
+
         console.log("Transformed projects:", transformedProjects);
         setProjects(transformedProjects);
-        
+
         const { data: projectsWithoutPackages, error: withoutPackagesError } = await supabase
           .from('projects')
-          .select('*')
+          .select('*, slug, portal_password')
           .not('id', 'in', transformedProjects.map(p => p.id));
-        
+
         if (!withoutPackagesError && projectsWithoutPackages && projectsWithoutPackages.length > 0) {
           console.log("Found projects without packages:", projectsWithoutPackages);
-          
+
           const projectsWithProgress = projectsWithoutPackages.map(project => ({
             ...project,
             progress: Math.floor(Math.random() * 101)
           }));
-          
+
           setProjects([...transformedProjects, ...projectsWithProgress]);
         }
       }
@@ -126,12 +128,12 @@ const Projects = () => {
         .from('package_types')
         .select('*')
         .order('name');
-      
+
       if (error) {
         console.error('Error fetching package types:', error);
         return;
       }
-      
+
       setPackageTypes(data || []);
     } catch (error) {
       console.error('Unexpected error fetching package types:', error);
@@ -163,12 +165,12 @@ const Projects = () => {
         status: "Onboarding" as const,
         priority: "Medium" as const,
       };
-      
+
       const { data, error } = await supabase
         .from('projects')
         .insert(testProject)
         .select();
-      
+
       if (error) {
         console.error("Error creating test project:", error);
         toast({
