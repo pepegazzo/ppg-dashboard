@@ -15,12 +15,20 @@ interface ProjectNameCellProps {
   onUpdate: (projectId: string, field: string, value: string) => void;
 }
 
-export function ProjectNameCell({ name, projectId, fieldName, value, updatingProjectId, setUpdatingProjectId, onUpdate }: ProjectNameCellProps) {
+export function ProjectNameCell({ 
+  name, 
+  projectId, 
+  fieldName, 
+  value, 
+  updatingProjectId, 
+  setUpdatingProjectId, 
+  onUpdate 
+}: ProjectNameCellProps) {
   const [editMode, setEditMode] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
   return (
-    <TableCell className="font-medium" onDoubleClick={() => setEditMode(true)}>
+    <div onDoubleClick={() => setEditMode(true)}>
       {editMode ? (
         <div className="flex items-center gap-2">
           <Input
@@ -52,6 +60,6 @@ export function ProjectNameCell({ name, projectId, fieldName, value, updatingPro
       ) : (
         <span className="cursor-pointer">{name}</span>
       )}
-    </TableCell>
+    </div>
   );
 }

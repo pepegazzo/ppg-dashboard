@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "../types";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +13,7 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectRevenueCell } from "./ProjectRevenueCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
-import { ProjectClientCell } from "../../projects/ProjectClientCell";
+import { ProjectClientCell } from "./ProjectClientCell";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -94,7 +95,15 @@ export function TableRow({
       </TableCell>
       
       <TableCell className="font-medium">
-        <ProjectNameCell name={localProject.name} fieldName="name" projectId={localProject.id} onUpdateField={updateProjectField} disabled={isUpdating} />
+        <ProjectNameCell 
+          name={localProject.name} 
+          fieldName="name" 
+          projectId={localProject.id} 
+          value={localProject.name}
+          updatingProjectId={updatingProjectId}
+          setUpdatingProjectId={setUpdatingProjectId}
+          onUpdate={updateProjectField}
+        />
       </TableCell>
       
       <TableCell className="text-sm">
@@ -104,42 +113,52 @@ export function TableRow({
         />
       </TableCell>
       
-      <TableCell>
-        <ProjectStatusCell project={localProject} updatingProjectId={updatingProjectId} setUpdatingProjectId={setUpdatingProjectId} />
-      </TableCell>
+      <ProjectStatusCell 
+        project={localProject} 
+        updatingProjectId={updatingProjectId} 
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
+      />
       
-      <TableCell>
-        <ProjectProgressCell progress={localProject.progress || 0} />
-      </TableCell>
+      <ProjectProgressCell progress={localProject.progress || 0} />
       
-      <TableCell>
-        <ProjectPriorityCell priority={localProject.priority} />
-      </TableCell>
+      <ProjectPriorityCell priority={localProject.priority} />
       
-      <TableCell>
-        <ProjectPackageCell 
-          packageName={localProject.package_name} 
-          projectId={localProject.id}
-        />
-      </TableCell>
+      <ProjectPackageCell 
+        packageName={localProject.package_name} 
+        projectId={localProject.id}
+      />
       
-      <TableCell>
-        <ProjectRevenueCell 
-          revenue={localProject.revenue} 
-          projectName={localProject.name}
-        />
-      </TableCell>
+      <ProjectRevenueCell revenue={localProject.revenue} />
       
       <TableCell className="text-sm text-muted-foreground justify-items-center">
-        <ProjectDateCell date={localProject.start_date} fieldName="start_date" projectId={localProject.id} onUpdateDate={updateProjectField} disabled={isUpdating} />
+        <ProjectDateCell 
+          date={localProject.start_date} 
+          fieldName="start_date" 
+          projectId={localProject.id} 
+          onUpdate={updateProjectField} 
+          updatingProjectId={updatingProjectId} 
+          setUpdatingProjectId={setUpdatingProjectId}
+        />
       </TableCell>
       
       <TableCell className="text-sm text-muted-foreground">
-        <ProjectDateCell date={localProject.due_date} fieldName="due_date" projectId={localProject.id} onUpdateDate={updateProjectField} disabled={isUpdating} />
+        <ProjectDateCell 
+          date={localProject.due_date} 
+          fieldName="due_date" 
+          projectId={localProject.id} 
+          onUpdate={updateProjectField} 
+          updatingProjectId={updatingProjectId}
+          setUpdatingProjectId={setUpdatingProjectId}
+        />
       </TableCell>
       
       <TableCell className="text-center">
-        <ProjectActionsCell projectId={localProject.id} onDelete={handleDeleteClick} />
+        <ProjectActionsCell 
+          projectId={localProject.id} 
+          setShowDeleteModal={setShowDeleteModal}
+          setSelectedProjects={setSelectedProjects}
+        />
       </TableCell>
     </UITableRow>;
 }

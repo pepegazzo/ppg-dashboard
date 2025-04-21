@@ -43,7 +43,7 @@ export function ProjectDateCell({ date, fieldName, projectId, onUpdate, updating
   };
 
   return (
-    <TableCell className="text-sm text-muted-foreground" onDoubleClick={() => setEditMode(true)}>
+    <div onDoubleClick={() => setEditMode(true)}>
       {editMode ? (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
@@ -71,6 +71,6 @@ export function ProjectDateCell({ date, fieldName, projectId, onUpdate, updating
       ) : (
         <span className="cursor-pointer">{formatDate(date)}</span>
       )}
-    </TableCell>
+    </div>
   );
 }

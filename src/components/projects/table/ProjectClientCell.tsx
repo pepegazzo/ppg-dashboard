@@ -1,56 +1,159 @@
 
 import { TableCell } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface ProjectClientCellProps {
-  clientName: string;
+  clientName: string | null;
   projectId: string;
-  value: string;
-  updatingProjectId: string | null;
-  setUpdatingProjectId: (id: string | null) => void;
-  onUpdate: (projectId: string, field: string, value: string) => void;
 }
 
-export function ProjectClientCell({ clientName, projectId, value, updatingProjectId, setUpdatingProjectId, onUpdate }: ProjectClientCellProps) {
-  const [editMode, setEditMode] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+export function ProjectClientCell({ clientName, projectId }: ProjectClientCellProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch all available clients for assignment
+  const { data: availableClients, isLoading: isLoadingClients } = useQuery({
+    queryKey: ['all-clients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, company_name')
+        .order('company_name');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Helper for updating the client for a project (assign or clear client)
+  const setPrimaryClient = async (clientId?: string, clientName?: string) => {
+    try {
+      setIsSubmitting(true);
+
+      // 1. Update the projects table
+      const updateData: { client_id: string | null; client_name: string | null } = {
+        client_id: clientId || null,
+        client_name: clientName || null
+      };
+
+      const { error: projectUpdateError } = await supabase
+        .from('projects')
+        .update(updateData)
+        .eq('id', projectId);
+
+      if (projectUpdateError) throw projectUpdateError;
+
+      // 2. Update the client_project_assignments table
+      if (clientId) {
+        // First remove any existing assignments for this project
+        const { error: deleteError } = await supabase
+          .from('client_project_assignments')
+          .delete()
+          .eq('project_id', projectId);
+        
+        if (deleteError) throw deleteError;
+          
+        // Then add the new assignment
+        const { error: insertError } = await supabase
+          .from('client_project_assignments')
+          .insert({
+            client_id: clientId,
+            project_id: projectId
+          });
+          
+        if (insertError) throw insertError;
+      } else {
+        // If clearing the client, just delete any assignments
+        const { error: deleteError } = await supabase
+          .from('client_project_assignments')
+          .delete()
+          .eq('project_id', projectId);
+          
+        if (deleteError) throw deleteError;
+      }
+
+      toast({
+        title: "Project updated",
+        description: clientName
+          ? `${clientName} is now the client for this project`
+          : "No client assigned to this project.",
+      });
+
+      // Invalidate both projects and client-related queries
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['all-clients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
+    } catch (error) {
+      console.error("Error updating client:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update client",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoadingClients) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <TableCell className="text-sm" onDoubleClick={() => setEditMode(true)}>
-      {editMode ? (
-        <div className="flex items-center gap-2">
-          <Input
-            value={editValue}
-            onChange={e => setEditValue(e.target.value)}
-            autoFocus
-            className="py-1 h-9"
-          />
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => {
-                onUpdate(projectId, "client_name", editValue);
-                setEditMode(false);
-              }}>
-              <Check className="h-4 w-4 text-green-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setEditMode(false)}>
-              <X className="h-4 w-4 text-red-600" />
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <span className="cursor-pointer">{clientName}</span>
-      )}
-    </TableCell>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="text-sm hover:bg-muted px-2"
+          disabled={isSubmitting}
+        >
+          {clientName || "No Client"}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuItem
+          onClick={() => setPrimaryClient(undefined, undefined)}
+          disabled={isSubmitting || !clientName}
+        >
+          No Client
+          {!clientName && (
+            <Badge variant="secondary" className="ml-2">Current</Badge>
+          )}
+        </DropdownMenuItem>
+        {availableClients &&
+          availableClients.map((client: any) => (
+            <DropdownMenuItem
+              key={client.id}
+              onClick={() => setPrimaryClient(client.id, client.company_name)}
+              disabled={isSubmitting}
+            >
+              <span className="flex-1">{client.company_name}</span>
+              {clientName === client.company_name && (
+                <Badge variant="secondary" className="ml-2">Current</Badge>
+              )}
+            </DropdownMenuItem>
+          ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
