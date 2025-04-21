@@ -10,6 +10,7 @@ import { ProjectSelect } from "./ProjectSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import ClientCompanyCell from "./ClientCompanyCell";
 
 interface ClientsTableProps {
   filteredAndSortedClients: Client[];
@@ -128,8 +129,8 @@ export const ClientsTable = ({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="w-[50px]">
-              <div className="flex items-center">
+            <TableHead className="w-[50px] align-middle">
+              <div className="flex items-center h-10">
                 <Checkbox 
                   checked={filteredAndSortedClients?.length > 0 && selectedClients.length === filteredAndSortedClients?.length} 
                   onCheckedChange={handleSelectAll} 
@@ -137,13 +138,13 @@ export const ClientsTable = ({
                 />
               </div>
             </TableHead>
-            <TableHead className="w-[220px] cursor-pointer" onClick={() => handleSort('company_name')}>
-              <div className="flex items-center">
+            <TableHead className="w-[220px] cursor-pointer align-middle" onClick={() => handleSort('company_name')}>
+              <div className="flex items-center h-10">
                 Company / Brand {renderSortIndicator('company_name', sortConfig)}
               </div>
             </TableHead>
-            <TableHead>
-              <div className="flex items-center">
+            <TableHead className="align-middle">
+              <div className="flex items-center h-10">
                 Active Projects
               </div>
             </TableHead>
@@ -153,8 +154,8 @@ export const ClientsTable = ({
           {filteredAndSortedClients?.map(client => (
             <React.Fragment key={client.id}>
               <TableRow className={`border-b cursor-pointer group ${openAccordionId === client.id ? 'bg-muted/20' : ''}`} onClick={() => handleRowClick(client.id)}>
-                <TableCell>
-                  <div className="flex items-center">
+                <TableCell className="align-middle">
+                  <div className="flex items-center h-10">
                     <Checkbox 
                       checked={selectedClients.includes(client.id)} 
                       onCheckedChange={() => toggleClientSelection(client.id)} 
@@ -162,16 +163,11 @@ export const ClientsTable = ({
                     />
                   </div>
                 </TableCell>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    {client.company_name}
-                    <span className="ml-2">
-                      {openAccordionId === client.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-                    </span>
-                  </div>
+                <TableCell className="align-middle p-4">
+                  <ClientCompanyCell name={client.company_name} isOpen={openAccordionId === client.id} />
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-2 items-center">
+                <TableCell className="align-middle">
+                  <div className="flex flex-wrap gap-2 items-center min-h-10">
                     {client.active_projects?.filter(p => p.status !== "Completed" && p.status !== "Cancelled").map((project: any) => (
                       <Badge
                         key={project.id}
