@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -92,15 +93,23 @@ export function ProjectPackageCell({
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent cursor-pointer">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center min-h-[32px] rounded-full border-0 hover:bg-muted focus-visible:ring-2 focus-visible:outline-none !shadow-none data-[state=open]:bg-muted transition-all"
+          tabIndex={0}
+        >
           {updatingPackageId ? (
-            <span className="flex items-center">
+            <span className="flex items-center justify-center w-full text-xs">
               <Loader2 className="h-3 w-3 animate-spin mr-1" />
               Updating...
             </span>
           ) : (
             currentPackageName ? (
-              <Badge variant="outline" className="inline-flex items-center gap-1 text-xs w-fit">
+              <Badge
+                variant="outline"
+                className="inline-flex items-center gap-1 text-xs w-full justify-center py-1 px-4 rounded-full transition-all"
+              >
                 {getServiceIcon(currentPackageName)}
                 <span className="truncate">{currentPackageName}</span>
               </Badge>
@@ -110,12 +119,12 @@ export function ProjectPackageCell({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-2">
+      <PopoverContent align="center" className="min-w-[200px] p-1 rounded-lg">
         <div className="flex flex-col gap-1">
           {loading ? (
-            <div className="flex items-center justify-center p-2">
+            <div className="flex items-center justify-center p-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm">Loading services...</span>
+              Loading...
             </div>
           ) : (
             packages.map((pkg) => (
@@ -123,13 +132,19 @@ export function ProjectPackageCell({
                 key={pkg.id}
                 variant="ghost"
                 size="sm"
-                className={`justify-start ${currentPackageName === pkg.name ? 'bg-accent' : ''}`}
+                className={`flex items-center rounded-full w-full px-3 py-2 gap-2 justify-center transition-all ${
+                  currentPackageName === pkg.name ? "bg-muted" : ""
+                }`}
                 onClick={() => handleSelectPackage(pkg.id, pkg.name)}
-                disabled={updatingPackageId !== null}
+                disabled={!!updatingPackageId}
+                tabIndex={0}
               >
-                <Badge variant="outline" className="w-full justify-start">
+                <Badge
+                  variant="outline"
+                  className="flex items-center gap-1 text-xs py-1 px-2 w-fit rounded-full"
+                >
                   {getServiceIcon(pkg.name)}
-                  {pkg.name}
+                  <span className="truncate">{pkg.name}</span>
                 </Badge>
               </Button>
             ))
