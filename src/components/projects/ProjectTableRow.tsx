@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "./types";
 import { format, parseISO } from "date-fns";
@@ -24,6 +25,7 @@ import { ProjectPackageCell } from "./table/ProjectPackageCell";
 import { ProjectRevenueCell } from "./table/ProjectRevenueCell";
 import { ProjectDateCell } from "./table/ProjectDateCell";
 import { ProjectActionsCell } from "./table/ProjectActionsCell";
+import { ProjectContactCell } from "./table/ProjectContactCell";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -49,87 +51,14 @@ export function TableRow({
   const { toast } = useToast();
 
   const [localProject, setLocalProject] = useState<Project>(project);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  const [editMode, setEditMode] = useState<{ 
-    name: boolean; 
-    client_name: boolean;
-    start_date: boolean;
-    due_date: boolean;
-  }>({
-    name: false,
-    client_name: false,
-    start_date: false,
-    due_date: false
-  });
-  const [editValues, setEditValues] = useState({
-    name: localProject.name,
-    client_name: localProject.client_name,
-    start_date: localProject.start_date || '',
-    due_date: localProject.due_date || ''
-  });
-
-  const [datePopoverOpen, setDatePopoverOpen] = useState({
-    start_date: false,
-    due_date: false
-  });
-
-  const updateProjectStatus = async (projectId: string, newStatus: Database["public"]["Enums"]["project_status"]) => {
-    try {
-      setUpdatingProjectId(projectId);
-      const {
-        data,
-        error
-      } = await supabase.from('projects').update({
-        status: newStatus
-      }).eq('id', projectId).select();
-      if (error) {
-        console.error('Error updating project status:', error);
-        toast({
-          title: "Error updating status",
-          description: error.message || "Please try again later.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (data && data[0]) {
-        setLocalProject(prev => ({
-          ...prev,
-          status: newStatus
-        }));
-        setIsPopoverOpen(false);
-      }
-      toast({
-        title: "Status updated",
-        description: `Project status changed to ${newStatus}`
-      });
-    } catch (err) {
-      console.error('Unexpected error updating status:', err);
-      toast({
-        title: "Error updating status",
-        description: "An unexpected error occurred. Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
-      setUpdatingProjectId(null);
-    }
-  };
-
   const updateProjectField = async (projectId: string, field: string, value: string) => {
     try {
       setUpdatingProjectId(projectId);
-      
       const updateData: Record<string, any> = {
         [field]: value
       };
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .update(updateData)
-        .eq('id', projectId)
-        .select();
-        
+      const { data, error } = await supabase.from('projects').update(updateData).eq('id', projectId).select();
       if (error) {
         console.error(`Error updating project ${field}:`, error);
         toast({
@@ -139,22 +68,13 @@ export function TableRow({
         });
         return;
       }
-
       if (data && data[0]) {
         const updatedProject = {
           ...localProject,
           [field]: data[0][field]
         };
-        
         setLocalProject(updatedProject);
-        
-        setEditValues(prev => ({
-          ...prev,
-          [field]: data[0][field] || ''
-        }));
-        
         console.log(`Project ${field} updated:`, data[0][field]);
-        
         toast({
           title: `${field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')} updated`,
           description: `Project ${field.replace('_', ' ')} has been updated`
@@ -169,170 +89,98 @@ export function TableRow({
       });
     } finally {
       setUpdatingProjectId(null);
-      setEditMode(prev => ({
-        ...prev,
-        [field]: false
-      }));
-      if (field === 'start_date' || field === 'due_date') {
-        setDatePopoverOpen(prev => ({
-          ...prev,
-          [field]: false
-        }));
-      }
     }
   };
 
-  const handleEnterKeyPress = (field: string, e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      updateProjectField(localProject.id, field, editValues[field as keyof typeof editValues]);
-    } else if (e.key === 'Escape') {
-      cancelEdit(field as keyof typeof editMode);
-    }
-  };
-  
-  const startEdit = (field: keyof typeof editMode) => {
-    setEditMode(prev => ({
-      ...prev,
-      [field]: true
-    }));
-    setEditValues(prev => ({
-      ...prev,
-      [field]: localProject[field] || ''
-    }));
-  };
-  
-  const cancelEdit = (field: keyof typeof editMode) => {
-    setEditMode(prev => ({
-      ...prev,
-      [field]: false
-    }));
-    setEditValues(prev => ({
-      ...prev,
-      [field]: localProject[field] || ''
-    }));
-    if (field === 'start_date' || field === 'due_date') {
-      setDatePopoverOpen(prev => ({
-        ...prev,
-        [field]: false
-      }));
-    }
+  const handleDeleteClick = () => {
+    setSelectedProjects([localProject.id]);
+    setShowDeleteModal(true);
   };
 
-  const handleDateSelect = (field: 'start_date' | 'due_date', date: Date | undefined) => {
-    if (date) {
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
-      const formattedDate = `${year}-${month}-${day}`;
-      
-      setEditValues(prev => ({
-        ...prev,
-        [field]: formattedDate
-      }));
-      
-      updateProjectField(localProject.id, field, formattedDate);
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return 'bg-red-100 text-red-800';
-      case 'Medium':
-        return 'bg-amber-100 text-amber-800';
-      case 'Low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-slate-100 text-slate-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Onboarding':
-        return 'bg-blue-100 text-blue-800';
-      case 'Active':
-        return 'bg-emerald-100 text-emerald-800';
-      case 'Completed':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-slate-100 text-slate-800';
-    }
-  };
-
-  const formatRevenue = (amount: number | null | undefined) => {
-    if (amount === null || amount === undefined) return 'S/ 0.00';
-    return `S/ ${amount.toFixed(2)}`;
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    try {
-      return format(parseISO(dateString), 'MMM d, yyyy');
-    } catch (e) {
-      console.error('Error formatting date:', dateString, e);
-      return dateString || '-';
-    }
-  };
-
-  const currentProject = localProject;
+  const isUpdating = updatingProjectId === localProject.id;
 
   return (
     <UITableRow className="hover:bg-muted/30 transition-colors">
-      <TableCell className="w-auto max-w-[40px] p-[6px]">
-        <Checkbox checked={selectedProjects.includes(currentProject.id)} onCheckedChange={() => toggleProjectSelection(currentProject.id)} aria-label={`Select project ${currentProject.name}`} />
+      <TableCell className="w-auto p-[6px]">
+        <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
       </TableCell>
-      <ProjectNameCell
-        name={currentProject.name}
-        fieldName="name"
-        projectId={currentProject.id}
-        value={currentProject.name}
-        updatingProjectId={updatingProjectId}
-        setUpdatingProjectId={setUpdatingProjectId}
-        onUpdate={updateProjectField}
-      />
-      <TableCell className="text-sm">
-        <ProjectClientCell
-          clientName={currentProject.client_name}
-          projectId={currentProject.id}
+      
+      <TableCell className="font-medium">
+        <ProjectNameCell 
+          name={localProject.name} 
+          fieldName="name" 
+          projectId={localProject.id} 
+          value={localProject.name}
+          updatingProjectId={updatingProjectId}
+          setUpdatingProjectId={setUpdatingProjectId}
+          onUpdate={updateProjectField}
         />
       </TableCell>
-      <ProjectStatusCell
-        project={currentProject}
+      
+      <ProjectClientCell 
+        clientName={localProject.client_name} 
+        projectId={localProject.id} 
+      />
+
+      <ProjectContactCell
+        projectId={localProject.id}
+        clientId={localProject.client_id}
+        contactId={localProject.contact_id}
+        setUpdatingProjectId={setUpdatingProjectId}
+        updatingProjectId={updatingProjectId}
+        fetchProjects={fetchProjects}
+      />
+
+      <ProjectStatusCell 
+        project={localProject} 
+        updatingProjectId={updatingProjectId} 
+        setUpdatingProjectId={setUpdatingProjectId}
+        onUpdate={updateProjectField}
+      />
+      
+      <ProjectProgressCell progress={localProject.progress || 0} />
+      
+      <ProjectPriorityCell priority={localProject.priority} />
+      
+      <ProjectPackageCell 
+        project={localProject}
         updatingProjectId={updatingProjectId}
         setUpdatingProjectId={setUpdatingProjectId}
         onUpdate={updateProjectField}
       />
-      <ProjectProgressCell progress={currentProject.progress} />
-      <ProjectPriorityCell priority={currentProject.priority} />
-      <ProjectPackageCell
-        project={currentProject}
-        updatingProjectId={updatingProjectId}
-        setUpdatingProjectId={setUpdatingProjectId}
-        onUpdate={updateProjectField}
-      />
-      <ProjectRevenueCell revenue={currentProject.revenue} />
-      <ProjectDateCell
-        date={currentProject.start_date}
-        fieldName="start_date"
-        projectId={currentProject.id}
-        onUpdate={updateProjectField}
-        updatingProjectId={updatingProjectId}
-        setUpdatingProjectId={setUpdatingProjectId}
-      />
-      <ProjectDateCell
-        date={currentProject.due_date}
-        fieldName="due_date"
-        projectId={currentProject.id}
-        onUpdate={updateProjectField}
-        updatingProjectId={updatingProjectId}
-        setUpdatingProjectId={setUpdatingProjectId}
-      />
-      <ProjectActionsCell
-        projectId={currentProject.id}
-        setShowDeleteModal={setShowDeleteModal}
-        setSelectedProjects={setSelectedProjects}
-      />
+      
+      <ProjectRevenueCell revenue={localProject.revenue} />
+      
+      <TableCell className="text-sm text-muted-foreground justify-items-center">
+        <ProjectDateCell 
+          date={localProject.start_date} 
+          fieldName="start_date" 
+          projectId={localProject.id} 
+          onUpdate={updateProjectField} 
+          updatingProjectId={updatingProjectId} 
+          setUpdatingProjectId={setUpdatingProjectId}
+        />
+      </TableCell>
+      
+      <TableCell className="text-sm text-muted-foreground">
+        <ProjectDateCell 
+          date={localProject.due_date} 
+          fieldName="due_date" 
+          projectId={localProject.id} 
+          onUpdate={updateProjectField} 
+          updatingProjectId={updatingProjectId}
+          setUpdatingProjectId={setUpdatingProjectId}
+        />
+      </TableCell>
+      
+      <TableCell className="text-left px-[10px]">
+        <ProjectActionsCell 
+          projectId={localProject.id} 
+          setShowDeleteModal={setShowDeleteModal}
+          setSelectedProjects={setSelectedProjects}
+        />
+      </TableCell>
     </UITableRow>
   );
 }
+
