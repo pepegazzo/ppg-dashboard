@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -41,12 +40,12 @@ export function ClientFilter({
     <div className="flex flex-col sm:flex-row gap-3 mb-4">
       <div className="flex-1">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Filter by client name..."
             value={nameFilter}
             onChange={(e) => setNameFilter(e.target.value)}
-            className="pl-8 border-purple-200 focus-visible:ring-purple-500"
+            className="pl-8"
           />
         </div>
       </div>
@@ -55,19 +54,18 @@ export function ClientFilter({
           placeholder="Filter by company..."
           value={companyFilter}
           onChange={(e) => setCompanyFilter(e.target.value)}
-          className="border-purple-200 focus-visible:ring-purple-500"
         />
       </div>
       <div className="w-[200px]">
         <Select value={projectFilter} onValueChange={setProjectFilter}>
-          <SelectTrigger className="border-purple-200 text-purple-900 hover:bg-purple-50 focus:ring-purple-500">
+          <SelectTrigger>
             <SelectValue placeholder="Project" />
           </SelectTrigger>
-          <SelectContent className="border-purple-200">
+          <SelectContent>
             <SelectItem value="all">All Projects</SelectItem>
             {projects && projects.length > 0 && (
               <>
-                <SelectSeparator className="bg-purple-100" />
+                <SelectSeparator />
                 {projects.map(project => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
@@ -82,7 +80,7 @@ export function ClientFilter({
         variant="outline" 
         size="icon" 
         onClick={resetFilters} 
-        className="shrink-0 border-purple-200 text-purple-800 hover:bg-purple-50"
+        className="shrink-0"
       >
         ✕
       </Button>
