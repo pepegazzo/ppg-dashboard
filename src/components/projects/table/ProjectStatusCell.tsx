@@ -9,10 +9,9 @@ import {
 } from "@/components/ui/popover";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Project } from "@/components/projects/types";
 
 interface ProjectStatusCellProps {
-  project: Project;
+  project: any;
   updatingProjectId: string | null;
   setUpdatingProjectId: (id: string | null) => void;
   onUpdate: (projectId: string, field: string, value: string) => void;

@@ -12,20 +12,6 @@ interface ProjectTextFieldProps {
 }
 
 export function ProjectTextField({ control, name, label, placeholder }: ProjectTextFieldProps) {
-  // Function to format slug - ensures consistent formatting between components
-  const formatSlug = (value: string): string => {
-    // Convert to lowercase
-    let formatted = value.toLowerCase();
-    // Replace spaces and special characters with hyphens
-    formatted = formatted.replace(/[^a-z0-9-]/g, '-');
-    // Replace multiple consecutive hyphens with a single one
-    formatted = formatted.replace(/-+/g, '-');
-    // Remove leading and trailing hyphens
-    formatted = formatted.replace(/^-+|-+$/g, '');
-    console.log(`[ProjectTextField] Formatted slug from "${value}" to "${formatted}"`);
-    return formatted;
-  };
-
   return (
     <FormField
       control={control}
@@ -39,18 +25,6 @@ export function ProjectTextField({ control, name, label, placeholder }: ProjectT
               {...field} 
               className="h-10" 
               autoComplete="off" 
-              value={field.value} 
-              onChange={(e) => {
-                // For slug field, enforce proper slug format
-                if (name === "slug") {
-                  console.log("[ProjectTextField] Formatting slug input:", e.target.value);
-                  const formattedValue = formatSlug(e.target.value);
-                  console.log("[ProjectTextField] Formatted slug:", formattedValue);
-                  field.onChange(formattedValue);
-                } else {
-                  field.onChange(e.target.value);
-                }
-              }}
             />
           </FormControl>
           <FormMessage />

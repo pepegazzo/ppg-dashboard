@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,15 +10,9 @@ import { Project } from "@/components/projects/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 
-interface ProjectPortalProps {
-  isLegacyRoute?: boolean;
-}
-
-const ProjectPortal = ({ isLegacyRoute = false }: ProjectPortalProps) => {
+const ProjectPortal = () => {
   const params = useParams<{ projectSlug?: string }>();
   const location = useLocation();
-  const navigate = useNavigate();
-  
   const RESERVED_PATHS = [
     "login",
     "projects",
@@ -31,13 +26,11 @@ const ProjectPortal = ({ isLegacyRoute = false }: ProjectPortalProps) => {
 
   let projectSlug = params.projectSlug;
 
-  // Make sure we're not trying to use a reserved path as a slug
   if (!projectSlug || RESERVED_PATHS.includes(projectSlug.toLowerCase())) {
     projectSlug = undefined;
   }
 
-  console.log("Project Portal - Using slug:", projectSlug);
-
+  const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +43,12 @@ const ProjectPortal = ({ isLegacyRoute = false }: ProjectPortalProps) => {
   const [isAdminLoading, setIsAdminLoading] = useState(false);
   const { user } = useAuth();
 
-  // Redirect from legacy route to new format if needed
+  // Check if we're on the old URL format (/projects/slug/portal) and redirect to new format (/slug)
   useEffect(() => {
-    if (isLegacyRoute && projectSlug) {
+    if (location.pathname.includes('/projects/') && location.pathname.includes('/portal') && projectSlug) {
       navigate(`/${projectSlug}`, { replace: true });
     }
-  }, [isLegacyRoute, projectSlug, navigate]);
+  }, [location.pathname, projectSlug, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -78,7 +71,6 @@ const ProjectPortal = ({ isLegacyRoute = false }: ProjectPortalProps) => {
       setIsLoading(true);
       setError(null);
 
-      console.log("Fetching project with slug:", projectSlug);
       const { data, error } = await supabase
         .from("projects")
         .select("*")
@@ -92,7 +84,6 @@ const ProjectPortal = ({ isLegacyRoute = false }: ProjectPortalProps) => {
         return;
       }
 
-      console.log("Found project:", data);
       setProject(data as Project);
       setIsLoading(false);
     } catch (err) {

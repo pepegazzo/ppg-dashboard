@@ -11,7 +11,6 @@ import {
 import { Loader2, Package as PackageIcon, Wrench, Palette, Video, Globe, Heart, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Project } from "@/components/projects/types";
 
 interface PackageType {
   id: string;
@@ -20,7 +19,7 @@ interface PackageType {
 }
 
 interface ProjectPackageCellProps {
-  project: Project;
+  project: any;
   updatingProjectId: string | null;
   setUpdatingProjectId: (id: string | null) => void;
   onUpdate: (projectId: string, field: string, value: string) => void;
@@ -45,7 +44,7 @@ const getServiceIcon = (packageName: string) => {
   }
 };
 
-export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProjectId, onUpdate }: ProjectPackageCellProps) {
+export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProjectId }: ProjectPackageCellProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPopover, setShowPopover] = useState(false);
@@ -137,9 +136,8 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
           }
         }
         
-        // Also update the package details in the projects table via the onUpdate function
-        onUpdate(project.id, "package_id", packageId);
-        onUpdate(project.id, "package_name", packageName || "");
+        project.package_id = packageId;
+        project.package_name = packageName;
         
         toast({
           title: "Service updated",
@@ -161,9 +159,8 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
           return;
         }
         
-        // Also update the package details in the projects table
-        onUpdate(project.id, "package_id", ""); // Empty string will be converted to null
-        onUpdate(project.id, "package_name", ""); // Empty string
+        project.package_id = null;
+        project.package_name = null;
         
         toast({
           title: "Service removed",
@@ -181,6 +178,10 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
       setIsUpdating(false);
       setUpdatingProjectId(null);
     }
+  };
+
+  const isSelected = (id: string | null) => {
+    return project.package_id === id;
   };
 
   return (
@@ -256,3 +257,4 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
     </TableCell>
   );
 }
+

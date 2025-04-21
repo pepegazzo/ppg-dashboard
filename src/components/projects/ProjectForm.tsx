@@ -37,33 +37,9 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
     return `INV-${randomNum}`;
   };
 
-  // Helper function to format a slug
-  const formatSlug = (value: string): string => {
-    // Convert to lowercase
-    let formatted = value.toLowerCase();
-    // Replace spaces and special characters with hyphens
-    formatted = formatted.replace(/[^a-z0-9-]/g, '-');
-    // Replace multiple consecutive hyphens with a single one
-    formatted = formatted.replace(/-+/g, '-');
-    // Remove leading and trailing hyphens
-    formatted = formatted.replace(/^-+|-+$/g, '');
-    return formatted;
-  };
-
-  // Watch for name changes to auto-generate slug if empty
-  form.watch("name");
-  form.watch("slug");
-  
-  // Set up effect to auto-generate slug when name changes if slug is empty
-  if (form.getValues("name") && !form.getValues("slug")) {
-    const generatedSlug = formatSlug(form.getValues("name"));
-    form.setValue("slug", generatedSlug);
-  }
-
   const onSubmit = async (values: ProjectFormValues) => {
     try {
       setIsSubmitting(true);
-      console.log("Form values submitted:", values);
 
       let clientName = "";
       if (values.client_id) {
@@ -78,31 +54,11 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
 
-      // Validate and format the slug
-      let finalSlug = values.slug;
-      if (!finalSlug || finalSlug.trim() === '') {
-        finalSlug = formatSlug(values.name);
-      } else {
-        finalSlug = formatSlug(finalSlug);
-      }
-
-      // Check if the slug already exists
-      const { data: existingProject, error: slugCheckError } = await supabase
+      const { data: existingProject } = await supabase
         .from('projects')
         .select('id')
-        .eq('slug', finalSlug)
+        .eq('slug', values.slug)
         .maybeSingle();
-
-      if (slugCheckError) {
-        console.error("Error checking slug:", slugCheckError);
-        toast({
-          title: "Error",
-          description: "Could not verify slug uniqueness. Please try again.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
 
       if (existingProject) {
         toast({
@@ -114,21 +70,18 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         return;
       }
 
-      // Save the project with the properly formatted slug
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,
-        client_name: clientName || values.client_name || "No Client",
+        client_name: clientName || "No Client",
         status: values.status,
         priority: values.priority,
         start_date: formattedStartDate,
         due_date: formattedDueDate,
         revenue: values.revenue || null,
         portal_password: null,
-        slug: finalSlug,
+        slug: values.slug.trim().toLowerCase(),
       };
-
-      console.log("Creating project with slug:", finalSlug);
 
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
@@ -137,9 +90,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         .single();
 
       if (projectError) throw projectError;
-
-      console.log("PROJECT SAVED WITH DATA:", newProject);
-      console.log("SAVED PROJECT SLUG:", newProject.slug);
 
       if (values.package) {
         const packageData = {
@@ -190,11 +140,6 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
             description: "Project and pending invoice created successfully.",
           });
         }
-      } else {
-        toast({
-          title: "Success",
-          description: "Project created successfully.",
-        });
       }
 
       onSubmitted();
