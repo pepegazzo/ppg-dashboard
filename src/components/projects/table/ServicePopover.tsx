@@ -1,8 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Package, Heart, Wrench, Palette, Video, Globe, ChevronDown, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -16,17 +15,17 @@ interface ServicePopoverProps {
 export function getServiceIcon(name: string) {
   switch (name.toLowerCase()) {
     case "branding":
-      return <Heart className="h-4 w-4 mr-2 opacity-80 text-pink-500" />;
+      return <Badge variant="outline" className="inline-flex items-center gap-1 text-xs text-pink-500"><span aria-hidden="true">❤️</span></Badge>;
     case "custom":
-      return <Wrench className="h-4 w-4 mr-2 opacity-70 text-slate-500" />;
+      return <Badge variant="outline" className="inline-flex items-center gap-1 text-xs text-slate-500"><span aria-hidden="true">🔧</span></Badge>;
     case "design":
-      return <Palette className="h-4 w-4 mr-2 opacity-70 text-indigo-500" />;
+      return <Badge variant="outline" className="inline-flex items-center gap-1 text-xs text-indigo-500"><span aria-hidden="true">🎨</span></Badge>;
     case "video":
-      return <Video className="h-4 w-4 mr-2 opacity-70 text-orange-500" />;
+      return <Badge variant="outline" className="inline-flex items-center gap-1 text-xs text-orange-500"><span aria-hidden="true">📹</span></Badge>;
     case "website":
-      return <Globe className="h-4 w-4 mr-2 opacity-70 text-emerald-500" />;
+      return <Badge variant="outline" className="inline-flex items-center gap-1 text-xs text-emerald-500"><span aria-hidden="true">🌐</span></Badge>;
     default:
-      return <Package className="h-4 w-4 mr-2 opacity-70 text-neutral-500" />;
+      return <Badge variant="outline" className="inline-flex items-center gap-1 text-xs text-neutral-500"><span aria-hidden="true">📦</span></Badge>;
   }
 }
 
@@ -39,48 +38,34 @@ export function ServicePopover({
   const [open, setOpen] = useState(false);
   const [packages, setPackages] = useState<{id: string, name: string, description: string | null}[]>([]);
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
 
-  // Fetch available packages
   useEffect(() => {
     async function fetchPackages() {
-      setFetching(true);
+      setLoading(true);
       const { data, error } = await supabase
         .from("package_types")
         .select("*")
         .order("name");
       if (!error && data) setPackages(data);
-      setFetching(false);
+      setLoading(false);
     }
     if (open) fetchPackages();
   }, [open]);
 
-  // When user picks a new package
   const handleSelect = async (pkgId: string) => {
     if (disabled) return;
     setLoading(true);
-
-    // get the package name for the payload
     const selected = packages.find((p) => p.id === pkgId);
-    // 1. Update the linkage in project_packages
-    // Remove any old link for this project
     await supabase.from("project_packages").delete().eq("project_id", projectId);
-    // 2. Create new link
     let newPkg = null;
     if (pkgId) {
-      await supabase
-        .from("project_packages")
-        .insert({ project_id: projectId, package_id: pkgId });
+      await supabase.from("project_packages").insert({ project_id: projectId, package_id: pkgId });
       newPkg = selected || null;
     }
-    // 3. Optionally update projects.package_name (legacy redundancy)
     if (newPkg) {
-      // Update the projects table with the new package name as a string
-      // Note: We're using `.update()` with a record that contains only fields known to exist in the projects table
       await supabase
         .from("projects")
         .update({ 
-          // The `client_name` field is used to store package name information in the projects table
           client_name: newPkg.name 
         })
         .eq("id", projectId);
@@ -104,63 +89,54 @@ export function ServicePopover({
           aria-label="Edit service"
           variant="ghost"
           size="sm"
-          className="w-full flex px-0 py-0 h-auto min-h-6 rounded group border-0 shadow-none"
+          className="w-full flex px-1 py-1 h-auto min-h-6 rounded-full group border-0 shadow-none"
           disabled={disabled || loading}
           tabIndex={0}
         >
-          <span className="flex items-center w-full">
-            {currentPackageName ? (
-              <Badge
-                variant="outline"
-                className={`inline-flex items-center gap-1 text-xs w-full px-2 py-1 font-medium ring-0`}
-              >
-                {getServiceIcon(currentPackageName)}
-                <span className="truncate">{currentPackageName}</span>
-              </Badge>
-            ) : (
-              <span className="text-muted-foreground text-xs px-2">
-                No package
-              </span>
-            )}
-            {/* Removed ChevronDown icon */}
-          </span>
+          {currentPackageName ? (
+            <Badge
+              variant="outline"
+              className="inline-flex items-center gap-1 text-xs px-2 py-1 font-medium ring-0 truncate w-full"
+            >
+              {getServiceIcon(currentPackageName)}
+              <span className="truncate">{currentPackageName}</span>
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs px-2">
+              No package
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="min-w-[250px] p-0">
-        <Command>
-          <CommandInput placeholder="Search services..." disabled={fetching} />
-          <CommandEmpty>
-            {fetching ? (
-              <span className="flex items-center gap-2 text-sm text-muted-foreground pl-2">
-                <Loader2 className="animate-spin h-4 w-4" /> Loading...
-              </span>
-            ) : (
-              "No service found."
-            )}
-          </CommandEmpty>
-          <CommandGroup>
-            <CommandList className="max-h-[310px] overflow-auto">
-              {packages.map((pkg) => (
-                <CommandItem
-                  key={pkg.id}
-                  value={pkg.name}
-                  onSelect={() => handleSelect(pkg.id)}
-                  disabled={loading}
-                  className="flex items-start gap-2 cursor-pointer"
-                >
-                  {getServiceIcon(pkg.name)}
-                  <div className="flex flex-col text-left">
-                    <span className="font-medium">{pkg.name}</span>
-                    {pkg.description && (
-                      <span className="text-xs text-slate-500">{pkg.description}</span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandList>
-          </CommandGroup>
-        </Command>
+      <PopoverContent align="start" className="min-w-[200px] p-1">
+        <div className="flex flex-col gap-1">
+          {loading ? (
+            <div className="text-center text-sm text-muted-foreground py-2">Loading...</div>
+          ) : packages.length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-2">No services available</div>
+          ) : (
+            packages.map(pkg => (
+              <Button
+                key={pkg.id}
+                variant="ghost"
+                size="sm"
+                className="justify-start rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
+                onClick={() => handleSelect(pkg.id)}
+                disabled={loading}
+              >
+                {getServiceIcon(pkg.name)}
+                <div className="flex flex-col text-left truncate">
+                  <span className="font-medium truncate">{pkg.name}</span>
+                  {pkg.description && (
+                    <span className="text-xs text-muted-foreground truncate">{pkg.description}</span>
+                  )}
+                </div>
+              </Button>
+            ))
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );
 }
+
