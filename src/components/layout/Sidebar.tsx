@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, Briefcase, CheckSquare, Receipt, FolderArchive, FileText, Users, LogOut, User, LogIn, UserPlus } from "lucide-react";
@@ -75,7 +76,7 @@ const Sidebar = () => {
               <div className="overflow-hidden text-center w-full">
                 <h4 className="text-xs font-medium text-zinc-200 truncate">{user.email}</h4>
                 <p className="text-xs text-zinc-500 truncate">
-                  {isOwner ? "Owner" : "User"}
+                  {isOwner ? "Owner" : "Admin"}
                 </p>
               </div>
             </div>
