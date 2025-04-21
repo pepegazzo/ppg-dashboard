@@ -37,7 +37,7 @@ export function ProjectTableHeader({
         <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[120px]">
           Status {renderSortIndicator('status')}
         </TableHead>
-        <TableHead onClick={() => onSort('progress')} className="cursor-pointer w-[130px]">
+        <TableHead onClick={() => onSort('progress')} className="cursor-pointer w-[110px]">
           Progress {renderSortIndicator('progress')}
         </TableHead>
         <TableHead onClick={() => onSort('priority')} className="cursor-pointer w-[100px]">
@@ -59,3 +59,4 @@ export function ProjectTableHeader({
       </TableRow>
     </TableHeader>;
 }
+
