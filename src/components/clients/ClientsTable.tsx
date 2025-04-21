@@ -156,8 +156,8 @@ export const ClientsTable = ({
                 </TableCell>
                 <TableCell className="font-medium flex items-center gap-2">
                   {client.company_name}
-                  <span className="ml-2 text-amber-500">
-                    {openAccordionId === client.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  <span className="ml-2">
+                    {openAccordionId === client.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -166,12 +166,12 @@ export const ClientsTable = ({
                       <Badge
                         key={project.id}
                         variant="outline"
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-800 border-amber-200"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium"
                       >
                         {project.name}
                         <button
                           type="button"
-                          className="ml-1 p-0.5 rounded-full hover:bg-amber-100 transition-colors"
+                          className="ml-1 p-0.5 rounded-full hover:bg-muted transition-colors"
                           aria-label={`Remove ${project.name}`}
                           tabIndex={0}
                           onClick={e => {
@@ -179,7 +179,7 @@ export const ClientsTable = ({
                             removeProjectFromClient(client.id, project.id, project.name);
                           }}
                         >
-                          <X className="w-3 h-3 text-amber-500" />
+                          <X className="w-3 h-3" />
                         </button>
                       </Badge>
                     ))}
@@ -191,45 +191,49 @@ export const ClientsTable = ({
                 </TableCell>
               </TableRow>
               {openAccordionId === client.id && (
-                <TableRow className="bg-muted/10">
+                <TableRow>
                   <TableCell />
                   <TableCell colSpan={2}>
                     <div className="py-3">
-                      <div className="font-semibold mb-1 text-amber-900">Contacts</div>
+                      <div className="font-semibold mb-2 text-foreground">Contacts</div>
                       {client.contacts && client.contacts.length > 0 ? (
-                        <div className="divide-y divide-amber-100 rounded border border-amber-200 bg-amber-50/30">
+                        <div className="space-y-2">
                           {client.contacts.map((contact: Contact) => (
-                            <div key={contact.id} className="p-3 flex flex-col gap-2">
-                              <span className="font-medium text-amber-900">{contact.name}</span>
-                              <div className="grid grid-cols-3 gap-3 mt-1 text-amber-800 text-[13px]">
-                                <div className="flex items-center gap-1 min-w-0">
-                                  <span>
-                                    <Briefcase className="h-4 w-4 text-amber-500" />
+                            <div key={contact.id} className="p-4 border rounded-md bg-muted/10">
+                              <span className="font-medium text-foreground">{contact.name}</span>
+                              <div className="grid grid-cols-3 gap-4 mt-2">
+                                <div className="flex items-center gap-2">
+                                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {contact.role || "—"}
                                   </span>
-                                  <span className="truncate">{contact.role || <span className="text-amber-400">—</span>}</span>
                                 </div>
-                                <div className="flex items-center gap-1 min-w-0">
-                                  <span>
-                                    <Mail className="h-4 w-4 text-amber-500" />
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {contact.email ? (
+                                      <a href={`mailto:${contact.email}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
+                                        {contact.email}
+                                      </a>
+                                    ) : (
+                                      "—"
+                                    )}
                                   </span>
-                                  {contact.email ? (
-                                    <span className="underline truncate text-amber-700">{contact.email}</span>
-                                  ) : (
-                                    <span className="text-amber-400">—</span>
-                                  )}
                                 </div>
-                                <div className="flex items-center gap-1 min-w-0">
-                                  <span>
-                                    <Phone className="h-4 w-4 text-amber-500" />
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {contact.phone || "—"}
                                   </span>
-                                  <span className="truncate">{contact.phone || <span className="text-amber-400">—</span>}</span>
                                 </div>
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-amber-400 text-xs">No contacts</span>
+                        <div className="text-muted-foreground text-sm border rounded-md p-4 bg-muted/5">
+                          No contacts added yet for this company
+                        </div>
                       )}
                       <Button 
                         onClick={e => {
@@ -239,9 +243,9 @@ export const ClientsTable = ({
                         type="button" 
                         variant="outline"
                         size="sm"
-                        className="mt-3 text-xs text-amber-800 hover:bg-amber-50 border-amber-200"
+                        className="mt-4"
                       >
-                        <Plus className="h-3 w-3 mr-1" /> Manage Contacts
+                        <Plus className="h-4 w-4 mr-1" /> Manage Contacts
                       </Button>
                       {openModalClientId === client.id && (
                         <ClientContactsModal 
