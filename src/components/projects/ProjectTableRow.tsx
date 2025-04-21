@@ -279,7 +279,7 @@ export function TableRow({
 
   return (
     <UITableRow className="hover:bg-muted/30 transition-colors">
-      <TableCell>
+      <TableCell className="w-auto max-w-[40px] p-[6px]">
         <Checkbox checked={selectedProjects.includes(currentProject.id)} onCheckedChange={() => toggleProjectSelection(currentProject.id)} aria-label={`Select project ${currentProject.name}`} />
       </TableCell>
       <ProjectNameCell

@@ -26,7 +26,7 @@ export function ProjectTableHeader({
 
   return <TableHeader>
       <TableRow className="bg-muted/50 hover:bg-muted/50 text-xs">
-        <TableHead className="w-[50px] px-[10px] text-left">
+        <TableHead className="px-[10px] text-left w-auto max-w-[40px]">
           <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
         </TableHead>
         <TableHead onClick={() => onSort('name')} className="cursor-pointer w-[170px] px-[10px] text-left">
