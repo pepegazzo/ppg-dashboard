@@ -10,6 +10,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user } = useAuth();
 
+  // Sidebar is always expanded so we set margin accordingly
   return (
     <div className="flex min-h-screen bg-zinc-50">
       <Sidebar />
@@ -21,3 +22,4 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 };
 
 export default DashboardLayout;
+
