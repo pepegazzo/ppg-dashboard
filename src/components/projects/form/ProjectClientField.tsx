@@ -5,6 +5,7 @@ import { Control } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
+import { Loader2 } from "lucide-react";
 
 interface ProjectClientFieldProps {
   control: Control<ProjectFormValues>;
@@ -38,7 +39,14 @@ export function ProjectClientField({ control }: ProjectClientFieldProps) {
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a client (optional)" />
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Loading clients...</span>
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Select a client (optional)" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="null">No Client</SelectItem>

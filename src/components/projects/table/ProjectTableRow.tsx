@@ -106,12 +106,10 @@ export function TableRow({
         />
       </TableCell>
       
-      <TableCell className="text-sm">
-        <ProjectClientCell 
-          clientName={localProject.client_name} 
-          projectId={localProject.id} 
-        />
-      </TableCell>
+      <ProjectClientCell 
+        clientName={localProject.client_name} 
+        projectId={localProject.id} 
+      />
       
       <ProjectStatusCell 
         project={localProject} 

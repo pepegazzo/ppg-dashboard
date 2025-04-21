@@ -18,6 +18,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [assignedProjectIds, setAssignedProjectIds] = useState<string[]>([]);
 
   // Fetch assigned projects (to not double-assign)
   const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
@@ -28,16 +29,18 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         .select('project_id')
         .eq('client_id', clientId);
       if (error) throw error;
-      return (data ?? []).map(item => item.project_id);
+      const projectIds = (data ?? []).map(item => item.project_id);
+      setAssignedProjectIds(projectIds);
+      return projectIds;
     }
   });
 
   // Available projects not assigned to this client
   const { data: availableProjects, isLoading: isLoadingAvailable, refetch: refetchAvailable } = useQuery({
-    queryKey: ['client-available-projects', clientId, assignedProjects],
+    queryKey: ['client-available-projects', clientId, assignedProjectIds],
     queryFn: async () => {
       // Make sure assignedProjects is defined before using it
-      const excludeIds = assignedProjects || [];
+      const excludeIds = assignedProjectIds || [];
       
       console.log("Fetching available projects, excluding:", excludeIds);
       
@@ -106,6 +109,8 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
       if (updateError) throw updateError;
 
+      // Update local state immediately
+      setAssignedProjectIds(prev => [...prev, projectId]);
       setIsPopoverOpen(false);
 
       toast({

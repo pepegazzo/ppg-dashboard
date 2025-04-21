@@ -1,5 +1,4 @@
 
-import { TableCell } from "@/components/ui/table";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -13,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { TableCell } from "@/components/ui/table";
 
 interface ProjectClientCellProps {
   clientName: string | null;
@@ -21,6 +21,7 @@ interface ProjectClientCellProps {
 
 export function ProjectClientCell({ clientName, projectId }: ProjectClientCellProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localClientName, setLocalClientName] = useState(clientName);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,6 +42,9 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
   const setPrimaryClient = async (clientId?: string, clientName?: string) => {
     try {
       setIsSubmitting(true);
+
+      // Update local state immediately for a responsive UI
+      setLocalClientName(clientName || null);
 
       // 1. Update the projects table
       const updateData: { client_id: string | null; client_name: string | null } = {
@@ -99,6 +103,8 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
     } catch (error) {
       console.error("Error updating client:", error);
+      // Revert local state on error
+      setLocalClientName(clientName);
       toast({
         title: "Error",
         description: "Failed to update client",
@@ -128,16 +134,19 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
             className="text-sm hover:bg-muted px-2"
             disabled={isSubmitting}
           >
-            {clientName || "No Client"}
+            {isSubmitting ? (
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+            ) : null}
+            {localClientName || "No Client"}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
           <DropdownMenuItem
             onClick={() => setPrimaryClient(undefined, undefined)}
-            disabled={isSubmitting || !clientName}
+            disabled={isSubmitting || !localClientName}
           >
             No Client
-            {!clientName && (
+            {!localClientName && (
               <Badge variant="secondary" className="ml-2">Current</Badge>
             )}
           </DropdownMenuItem>
@@ -149,7 +158,7 @@ export function ProjectClientCell({ clientName, projectId }: ProjectClientCellPr
                 disabled={isSubmitting}
               >
                 <span className="flex-1">{client.company_name}</span>
-                {clientName === client.company_name && (
+                {localClientName === client.company_name && (
                   <Badge variant="secondary" className="ml-2">Current</Badge>
                 )}
               </DropdownMenuItem>
