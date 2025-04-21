@@ -1,11 +1,11 @@
-
 import { useState } from "react";
 import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, Key, Link, Copy, RefreshCw } from "lucide-react";
+import { Eye, Key, Link as LinkIcon, Copy, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 // Helper to generate an 8-character alphanumeric password
 function generateSimplePassword() {
@@ -68,12 +68,6 @@ export function ProjectActionsCell({
       setLoading(false);
     } else {
       setEditedPassword(currentPassword);
-    }
-  };
-
-  const handleVisitPortal = () => {
-    if (projectSlug) {
-      window.open(`/projects/${projectSlug}/portal`, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -165,7 +159,7 @@ export function ProjectActionsCell({
         disabled={loading}
       >
         Portal
-        <Link className="ml-1 w-4 h-4" />
+        <LinkIcon className="ml-1 w-4 h-4" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -239,16 +233,32 @@ export function ProjectActionsCell({
             </Button>
           </div>
           <DialogFooter>
-            <Button
-              variant="default"
-              onClick={handleVisitPortal}
-              disabled={!projectSlug || loading || saving}
-              className="w-full"
-              type="button"
-            >
-              Visit Project Portal
-              <Link className="ml-2 w-4 h-4" />
-            </Button>
+            {projectSlug ? (
+              <Link
+                to={`/projects/${projectSlug}/portal`}
+                className="w-full"
+                style={{ textDecoration: "none" }}
+                tabIndex={-1}
+              >
+                <Button
+                  variant="default"
+                  className="w-full"
+                  disabled={loading || saving}
+                  type="button"
+                  asChild
+                >
+                  <span>
+                    Visit Project Portal
+                    <LinkIcon className="ml-2 w-4 h-4" />
+                  </span>
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="default" className="w-full" disabled>
+                Visit Project Portal
+                <LinkIcon className="ml-2 w-4 h-4" />
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
