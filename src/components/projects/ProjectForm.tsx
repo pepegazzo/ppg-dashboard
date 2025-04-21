@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,6 +55,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       const formattedStartDate = values.start_date ? values.start_date.toISOString().split('T')[0] : null;
       const formattedDueDate = values.due_date ? values.due_date.toISOString().split('T')[0] : null;
 
+      // Check if the slug already exists in the database
       const { data: existingProject } = await supabase
         .from('projects')
         .select('id')
@@ -70,6 +72,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
         return;
       }
 
+      // Make sure the slug is properly formatted and saved
       const projectPayload = {
         name: values.name,
         client_id: values.client_id || null,

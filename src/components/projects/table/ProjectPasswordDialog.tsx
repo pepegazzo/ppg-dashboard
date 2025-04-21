@@ -97,7 +97,7 @@ export function ProjectPasswordDialog({
   const handleCopyPortalLink = () => {
     if (projectSlug) {
       const baseUrl = window.location.origin;
-      // Use the new direct URL format with the proper slug
+      // Use the slug directly from the database for the URL
       const portalUrl = `${baseUrl}/${projectSlug}`;
       navigator.clipboard.writeText(portalUrl);
       toast({
@@ -177,8 +177,10 @@ export function ProjectPasswordDialog({
 
   const handlePortalAccess = () => {
     setOpen(false);
-    // Navigate to the new direct URL format with the proper slug
-    navigate(`/${projectSlug}`);
+    if (projectSlug) {
+      // Navigate directly using the slug from the database
+      navigate(`/${projectSlug}`);
+    }
   };
 
   return (
