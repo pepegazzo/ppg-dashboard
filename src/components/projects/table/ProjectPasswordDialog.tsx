@@ -39,7 +39,7 @@ export function ProjectPasswordDialog({
     setLoading(true);
     
     try {
-      console.log("Fetching project with ID:", projectId);
+      console.log("ATTEMPTING TO FETCH PROJECT DATA FOR ID:", projectId);
       
       const { data, error } = await supabase
         .from("projects")
@@ -58,7 +58,8 @@ export function ProjectPasswordDialog({
         return;
       }
 
-      console.log("Fetched project data:", data);
+      console.log("RAW PROJECT DATA FROM DATABASE:", data);
+      console.log("SLUG FOUND IN DATABASE:", data.slug);
       
       // Set the slug state from DB data
       if (data.slug) {
@@ -256,15 +257,22 @@ export function ProjectPasswordDialog({
       return;
     }
     
-    console.log("Navigating to portal with slug:", slug);
+    console.log("NAVIGATING TO PORTAL WITH SLUG:", slug);
     setOpen(false);
     navigate(`/${slug}`);
   };
 
   const getPortalUrl = () => {
-    if (!slug) return "No portal URL configured";
+    console.log("CURRENT SLUG STATE IN getPortalUrl:", slug);
+    
+    if (!slug) {
+      console.log("NO SLUG AVAILABLE - RETURNING PLACEHOLDER TEXT");
+      return "No portal URL configured";
+    }
+    
     const url = `${window.location.origin}/${slug}`;
-    console.log("Generated portal URL:", url);
+    console.log("GENERATED PORTAL URL:", url);
+    console.log("USING ACTUAL SLUG VALUE:", slug);
     return url;
   };
 
