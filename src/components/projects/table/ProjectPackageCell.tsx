@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Popover,
   PopoverTrigger,
   PopoverContent
@@ -90,7 +90,6 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
       setIsUpdating(true);
       
       if (packageId) {
-        // First, check if a relationship already exists
         const { data: existingPackage, error: checkError } = await supabase
           .from('project_packages')
           .select('*')
@@ -107,7 +106,6 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
         }
         
         if (existingPackage && existingPackage.length > 0) {
-          // Update existing relationship
           const { error: updateError } = await supabase
             .from('project_packages')
             .update({ package_id: packageId })
@@ -123,7 +121,6 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
             return;
           }
         } else {
-          // Create new relationship
           const { error: insertError } = await supabase
             .from('project_packages')
             .insert({ project_id: project.id, package_id: packageId });
@@ -139,7 +136,6 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
           }
         }
         
-        // Update local state to reflect change
         project.package_id = packageId;
         project.package_name = packageName;
         
@@ -148,7 +144,6 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
           description: `Service changed to ${packageName || "None"}`
         });
       } else {
-        // Remove package assignment if packageId is null
         const { error: deleteError } = await supabase
           .from('project_packages')
           .delete()
@@ -164,7 +159,6 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
           return;
         }
         
-        // Update local state
         project.package_id = null;
         project.package_name = null;
         
@@ -215,33 +209,40 @@ export function ProjectPackageCell({ project, updatingProjectId, setUpdatingProj
             </Badge>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-2">
+
+        <PopoverContent 
+          className="w-auto p-2 bg-white border border-gray-200 shadow-md rounded-md"
+        >
           <div className="flex flex-col gap-1">
-            <Button variant="ghost" size="sm"
-              className={`justify-start ${!project.package_id ? "border border-amber-400 rounded-md" : ""}`}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="justify-start"
               onClick={() => updateService(null, null)}
               disabled={isUpdating || updatingProjectId === project.id}
             >
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge className="flex items-center gap-1 bg-transparent text-default px-1 py-0.5">
                 {getServiceIcon("none")}
                 Unassigned
               </Badge>
             </Button>
+            
             {loading && (
               <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
                 <Loader2 className="animate-spin h-3 w-3" /> Loading...
               </div>
             )}
+            
             {!loading && packages.map((pkg) => (
               <Button
                 key={pkg.id}
                 variant="ghost"
                 size="sm"
-                className={`justify-start text-left ${isSelected(pkg.id) ? "border border-amber-400 rounded-md" : ""}`}
+                className="justify-start text-left"
                 onClick={() => updateService(pkg.id, pkg.name)}
                 disabled={isUpdating || updatingProjectId === project.id}
               >
-                <Badge className="flex gap-1 items-center px-2 py-1 font-normal">
+                <Badge className="flex gap-1 items-center bg-transparent text-default px-1 py-0.5 font-normal">
                   {getServiceIcon(pkg.name)}
                   <span>{pkg.name}</span>
                 </Badge>
