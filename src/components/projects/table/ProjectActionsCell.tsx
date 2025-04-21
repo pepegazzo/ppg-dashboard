@@ -21,11 +21,6 @@ export function ProjectActionsCell({
     window.open(`/projects/${projectId}/portal`, "_blank", "noopener,noreferrer");
   };
 
-  const handleDelete = () => {
-    setSelectedProjects([projectId]);
-    setShowDeleteModal(true);
-  };
-
   return (
     <TableCell className="flex items-center gap-2 p-0">
       <Button
@@ -36,16 +31,6 @@ export function ProjectActionsCell({
       >
         Portal
         <ExternalLink className="ml-1 w-4 h-4" />
-      </Button>
-      <Button
-        variant="destructive"
-        size="icon"
-        onClick={handleDelete}
-        aria-label="Delete project"
-      >
-        <span className="sr-only">Delete</span>
-        {/* You may want to add an icon here for delete */}
-        &#10005;
       </Button>
     </TableCell>
   );
