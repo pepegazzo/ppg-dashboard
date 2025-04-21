@@ -1,6 +1,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -12,21 +13,11 @@ import {
   LogOut,
   User,
   LogIn,
-  UserPlus
+  UserPlus,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sidebar as ShadcnSidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarRail,
-  SidebarTrigger,
-  useSidebar
-} from "@/components/ui/sidebar";
 
 const menuItems = [
   {
@@ -69,85 +60,87 @@ const menuItems = [
 const Sidebar = () => {
   const location = useLocation();
   const { user, signOut, isOwner } = useAuth();
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
+
+  const sidebarWidth = collapsed ? "w-[3rem]" : "w-[14rem]";
 
   return (
-    <ShadcnSidebar
-      className="bg-sidebar border-sidebar-border" 
-      variant="sidebar"
-      collapsible="icon"
-      style={{ 
-        "--sidebar-width": "14rem", 
-        "--sidebar-width-icon": "3rem" 
-      } as React.CSSProperties}
+    <aside 
+      className={`h-screen bg-zinc-900 fixed ${sidebarWidth} transition-all duration-300 ease-in-out border-r border-zinc-800/30 flex flex-col`}
     >
-      <SidebarRail />
-      <SidebarHeader className="h-16 flex items-center px-4 justify-between border-b border-zinc-800/30">
-        {!isCollapsed && (
+      {/* Header */}
+      <div className="h-16 flex items-center px-4 justify-between border-b border-zinc-800/30">
+        {!collapsed && (
           <div className="text-amber-500 font-semibold text-xl tracking-tight">
             Creative
           </div>
         )}
-        <SidebarTrigger 
+        <Button 
+          onClick={toggleSidebar}
           className={`
             w-8 h-8 rounded-full flex items-center justify-center 
             text-zinc-400 hover:text-amber-500 hover:bg-zinc-800/50
             transition-all duration-200
-            ${isCollapsed ? 'ml-auto mr-auto' : 'ml-auto'}
+            ${collapsed ? 'ml-auto mr-auto' : 'ml-auto'}
           `}
-        />
-      </SidebarHeader>
+          variant="ghost"
+          size="icon"
+        >
+          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+        </Button>
+      </div>
       
-      <SidebarContent className="py-6 px-3">
-        <SidebarMenu>
+      {/* Navigation */}
+      <nav className="py-6 px-3 flex-1 overflow-y-auto">
+        <ul className="flex flex-col gap-1">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             
             return (
-              <SidebarMenuItem key={item.path}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive}
-                  tooltip={isCollapsed ? item.title : undefined}
+              <li key={item.path}>
+                <Link 
+                  to={item.path}
                   className={`
-                    menu-item
-                    ${isActive ? 'menu-item-active' : ''}
+                    relative flex items-center gap-3 px-3 py-2 text-zinc-400 rounded-md transition-all duration-200 ease-in-out
+                    ${isActive ? 'bg-amber-500/10 text-amber-500' : 'hover:bg-zinc-800/50 hover:text-zinc-200'}
                   `}
                 >
-                  <Link to={item.path}>
-                    <item.icon className="menu-item-icon" />
-                    {!isCollapsed && (
-                      <span className="font-medium">
-                        {item.title}
-                      </span>
-                    )}
-                    {isActive && (
-                      <span className="absolute left-0 w-1 h-full bg-amber-500 rounded-r-full" />
-                    )}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                  <item.icon className="w-5 h-5" />
+                  {!collapsed && (
+                    <span className="font-medium whitespace-nowrap">
+                      {item.title}
+                    </span>
+                  )}
+                  {isActive && (
+                    <span className="absolute left-0 w-1 h-full bg-amber-500 rounded-r-full" />
+                  )}
+                </Link>
+              </li>
             );
           })}
-        </SidebarMenu>
-      </SidebarContent>
+        </ul>
+      </nav>
       
-      <SidebarFooter className="px-3 pb-6 space-y-3">
+      {/* Footer */}
+      <div className="px-3 pb-6 space-y-3">
         {user ? (
           <div className="flex flex-col items-center space-y-3">
             <div className={`
-              flex items-center justify-center w-full
-              ${isCollapsed ? 'flex-col' : 'gap-3'}
+              flex items-center w-full
+              ${collapsed ? 'flex-col' : 'gap-3'}
             `}>
               <div className={`
                 w-9 h-9 rounded-full bg-amber-500/20 
                 flex items-center justify-center text-amber-500
-                ${isCollapsed ? 'mb-2' : ''}
+                ${collapsed ? 'mb-2' : ''}
               `}>
                 <User className="w-5 h-5" />
               </div>
-              {!isCollapsed && (
+              {!collapsed && (
                 <div className="overflow-hidden text-center w-full">
                   <h4 className="text-sm font-medium text-zinc-200 truncate">{user.email}</h4>
                   <p className="text-xs text-zinc-500">
@@ -162,11 +155,11 @@ const Sidebar = () => {
               variant="ghost" 
               className={`
                 w-full justify-center text-zinc-400 hover:text-zinc-100
-                ${isCollapsed ? 'px-2' : 'px-4'}
+                ${collapsed ? 'px-2' : 'px-4'}
               `}
             >
               <LogOut className="w-4 h-4" />
-              {!isCollapsed && <span className="ml-2">Sign Out</span>}
+              {!collapsed && <span className="ml-2">Sign Out</span>}
             </Button>
           </div>
         ) : (
@@ -177,7 +170,7 @@ const Sidebar = () => {
                 className="w-full justify-start text-zinc-400 hover:text-zinc-100"
               >
                 <LogIn className="w-4 h-4 mr-2" />
-                {!isCollapsed && "Sign In"}
+                {!collapsed && "Sign In"}
               </Button>
             </Link>
             
@@ -187,13 +180,13 @@ const Sidebar = () => {
                 className="w-full justify-start text-zinc-400 hover:text-zinc-100"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                {!isCollapsed && "Register"}
+                {!collapsed && "Register"}
               </Button>
             </Link>
           </>
         )}
-      </SidebarFooter>
-    </ShadcnSidebar>
+      </div>
+    </aside>
   );
 };
 

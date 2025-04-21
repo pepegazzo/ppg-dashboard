@@ -1,7 +1,6 @@
 
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import Sidebar from "./Sidebar";
 
 interface DashboardLayoutProps {
@@ -12,16 +11,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user } = useAuth();
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full">
-        <Sidebar />
-        <SidebarInset className="bg-zinc-50 text-foreground">
-          <div className="w-full py-8 px-[16px]">
-            {children}
-          </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <div className="flex min-h-screen bg-zinc-50">
+      <Sidebar />
+      <main className="flex-1 w-full py-8 px-[16px]">
+        {children}
+      </main>
+    </div>
   );
 };
 
