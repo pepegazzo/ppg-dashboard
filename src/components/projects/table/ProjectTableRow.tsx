@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "../types";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,7 +27,7 @@ interface ProjectTableRowProps {
   fetchProjects?: () => void;
 }
 
-export function TableRow({
+export function ProjectTableRowComponent({
   project,
   selectedProjects,
   toggleProjectSelection,
@@ -89,7 +90,8 @@ export function TableRow({
 
   const isUpdating = updatingProjectId === localProject.id;
 
-  return <UITableRow className="hover:bg-muted/30 transition-colors">
+  return (
+    <UITableRow className="hover:bg-muted/30 transition-colors">
       <TableCell className="px-2 py-0 w-[28px]">
         <Checkbox checked={selectedProjects.includes(localProject.id)} onCheckedChange={() => toggleProjectSelection(localProject.id)} aria-label={`Select project ${localProject.name}`} />
       </TableCell>
@@ -160,5 +162,9 @@ export function TableRow({
           setSelectedProjects={setSelectedProjects}
         />
       </TableCell>
-    </UITableRow>;
+    </UITableRow>
+  );
 }
+
+// Export with the original name for backward compatibility
+export const TableRow = ProjectTableRowComponent;
