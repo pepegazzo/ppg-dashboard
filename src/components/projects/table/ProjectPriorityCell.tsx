@@ -18,7 +18,7 @@ export function ProjectPriorityCell({
     }
   };
   return (
-    <Badge variant="outline" className={getPriorityColor(priority)}>
+    <Badge variant="outline" className="text-xs font-medium px-2.5 py-1 rounded-full w-fit border border-zinc-300 bg-zinc-100 text-zinc-800 inline-flex items-center gap-1">
       {priority}
     </Badge>
   );
