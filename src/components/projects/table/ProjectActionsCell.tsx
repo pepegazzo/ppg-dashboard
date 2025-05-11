@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LinkIcon } from "lucide-react";
@@ -27,7 +28,7 @@ export function ProjectActionsCell({
   
   return (
     <>
-      <Button variant="default" size="sm" className="bg-yellow-400 text-zinc-800 hover:bg-yellow-500" onClick={handlePortalClick}>
+      <Button variant="default" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handlePortalClick}>
         <LinkIcon className="mr-1 w-4 h-4" />
         Portal
       </Button>
