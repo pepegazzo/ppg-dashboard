@@ -30,7 +30,7 @@ export function ProjectTableHeader({
         <div className="flex items-center">Project {renderSortIndicator('name')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('client_name')} className="w-[200px] p-2">
-        <div className="flex items-center">Client {renderSortIndicator('client_name')}</div>
+        <div className="flex items-left">Client {renderSortIndicator('client_name')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[110px] p-[10px] text-left">
         <div className="flex items-center">Status {renderSortIndicator('status')}</div>
