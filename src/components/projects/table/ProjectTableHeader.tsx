@@ -23,8 +23,10 @@ export function ProjectTableHeader({
   };
   return <TableHeader>
     <TableRow className="bg-muted/50 hover:bg-muted/50 text-xs">
-      <TableHead className="w-[40px] p-2">
-        <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
+      <TableHead className="w-[40px] p-4 align-middle">
+        <div className="flex items-center h-full justify-center">
+          <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
+        </div>
       </TableHead>
       <TableHead onClick={() => onSort('name')} className="w-[200px] p-4">
         <div className="flex items-left">Project {renderSortIndicator('name')}</div>
