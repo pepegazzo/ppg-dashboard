@@ -13,6 +13,7 @@ import Tasks from "./pages/Tasks";
 import Notes from "./pages/Notes";
 import Files from "./pages/Files";
 import Billing from "./pages/Billing";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { Toaster as SonnerToaster } from "sonner";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -27,7 +28,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} />
-            {/* Removed Register route */}
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             {/* Leave the old portal route for backwards compatibility */}
             <Route path="/projects/:projectSlug/portal" element={<ProjectPortal />} />

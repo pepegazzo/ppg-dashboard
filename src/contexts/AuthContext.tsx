@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -13,6 +12,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -142,6 +142,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+      
+      sonnerToast.success('Password updated successfully', {
+        description: 'Your password has been changed.'
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating password",
+        description: error.message || "Could not update password. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -152,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signUp,
         signOut,
+        updatePassword,
       }}
     >
       {children}
