@@ -48,7 +48,7 @@ export function ProjectTableRowComponent({
         <TableCell className="font-medium w-[200px] p-4">
           <span>{project.name}</span>
         </TableCell>
-        <TableCell className="w-[200px] p-4">
+        <TableCell className="w-[160px] p-4">
           <span>{project.client_name || "No Client"}</span>
         </TableCell>
         <TableCell className="w-[120px] p-4">
