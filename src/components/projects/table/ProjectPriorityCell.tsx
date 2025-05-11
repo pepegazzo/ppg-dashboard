@@ -1,4 +1,3 @@
-import { TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 interface ProjectPriorityCellProps {
   priority: string;
@@ -18,9 +17,9 @@ export function ProjectPriorityCell({
         return 'bg-slate-100 text-slate-800';
     }
   };
-  return <TableCell className="Deparent this div from its children, and delete the parent\n">
-      <Badge variant="outline" className={getPriorityColor(priority)}>
-        {priority}
-      </Badge>
-    </TableCell>;
+  return (
+    <Badge variant="outline" className={getPriorityColor(priority)}>
+      {priority}
+    </Badge>
+  );
 }
