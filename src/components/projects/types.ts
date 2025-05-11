@@ -17,9 +17,11 @@ export type Project = {
   created_at: string;
   package_name?: string | null;
   package_id?: string | null;
+  package_names?: string[] | null; // New property for multiple package names
+  package_ids?: string[] | null; // New property for multiple package IDs
   revenue?: number | null;
   progress?: number;
-  portal_password?: string | null; // Added this property
+  portal_password?: string | null;
 };
 
 export type PackageType = {
@@ -31,4 +33,3 @@ export type PackageType = {
 export type SortDirection = 'asc' | 'desc';
 
 export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';
-

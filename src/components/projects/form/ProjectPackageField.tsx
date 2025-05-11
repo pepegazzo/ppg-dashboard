@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
-import { Wrench, Palette, Video, Globe, Heart } from "lucide-react";
+import { Wrench, Palette, Video, Globe, Heart, Check, Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectFormValues } from "./types";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Popover,
   PopoverContent,
@@ -43,11 +44,12 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   
   const { field } = useController({
     name: "package",
     control,
-    defaultValue: "",
+    defaultValue: [],
   });
 
   useEffect(() => {
@@ -83,77 +85,112 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
     return () => { mounted = false; };
   }, []);
 
-  const selectPackage = (packageId: string) => {
-    field.onChange(packageId);
+  const isSelected = (packageId: string) => {
+    return field.value.includes(packageId);
   };
 
-  const getSelectedPackageName = () => {
-    if (!field.value) return "";
-    const pkg = packages.find(p => p.id === field.value);
-    return pkg ? pkg.name : "";
+  const togglePackage = (packageId: string) => {
+    if (isSelected(packageId)) {
+      field.onChange(field.value.filter(id => id !== packageId));
+    } else {
+      field.onChange([...field.value, packageId]);
+    }
+  };
+
+  const getSelectedPackageNames = () => {
+    return field.value.map(id => {
+      const pkg = packages.find(p => p.id === id);
+      return pkg ? pkg.name : "";
+    }).filter(name => name);
+  };
+
+  const removePackage = (packageId: string) => {
+    field.onChange(field.value.filter(id => id !== packageId));
   };
 
   return (
     <div className="space-y-2 h-full flex flex-col">
-      <Label>Service</Label>
+      <Label>Services</Label>
       
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button 
-            variant="outline" 
-            className="w-full justify-start h-10 py-2"
-          >
-            {field.value ? (
-              getServiceIcon(getSelectedPackageName())
-            ) : (
-              <Wrench className="h-4 w-4 mr-2 opacity-70" />
-            )}
-            <span className="font-normal">
-              {field.value 
-                ? getSelectedPackageName()
-                : "Select service..."
-              }
-            </span>
-          </Button>
-        </PopoverTrigger>
-        
-        <PopoverContent className="w-full p-0" align="start">
-          <div className="p-2">
-            <div className="font-medium text-sm mb-2">Available Services</div>
-            {loading ? (
-              <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
-            ) : error ? (
-              <div className="p-2 text-sm text-red-500">Error: {error}</div>
-            ) : packages.length === 0 ? (
-              <div className="p-2 text-sm text-muted-foreground">No services available</div>
-            ) : (
-              <div className="max-h-[300px] overflow-auto">
-                {packages.map((pkg) => (
-                  <Button
-                    key={pkg.id}
-                    variant="ghost"
-                    className="w-full justify-start mb-1 h-auto py-2"
-                    onClick={() => selectPackage(pkg.id)}
-                  >
-                    {field.value === pkg.id && (
-                      <span className="absolute left-2">•</span>
-                    )}
-                    <div className="flex items-center w-full">
-                      {getServiceIcon(pkg.name)}
-                      <div className="flex flex-col items-start">
-                        <span>{pkg.name}</span>
-                        {pkg.description && (
-                          <span className="text-xs text-muted-foreground">{pkg.description}</span>
-                        )}
-                      </div>
-                    </div>
-                  </Button>
-                ))}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-1.5 min-h-10">
+          {getSelectedPackageNames().map((name, index) => (
+            <Badge 
+              key={index} 
+              className="gap-1 pl-1 pr-1 py-1.5 h-7" 
+              variant="secondary"
+            >
+              {getServiceIcon(name)}
+              <span className="text-xs">{name}</span>
+              <Button 
+                type="button"
+                variant="ghost" 
+                size="sm" 
+                className="h-4 w-4 p-0 rounded-full hover:bg-muted" 
+                onClick={() => removePackage(field.value[index])}
+              >
+                <X className="h-3 w-3" />
+                <span className="sr-only">Remove {name}</span>
+              </Button>
+            </Badge>
+          ))}
+
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="h-7 px-2 text-sm"
+                type="button"
+              >
+                <Plus className="h-3.5 w-3.5 mr-1" />
+                Add Service
+              </Button>
+            </PopoverTrigger>
+            
+            <PopoverContent className="w-[250px] p-0" align="start">
+              <div className="p-2">
+                <div className="font-medium text-sm mb-2">Available Services</div>
+                {loading ? (
+                  <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
+                ) : error ? (
+                  <div className="p-2 text-sm text-red-500">Error: {error}</div>
+                ) : packages.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground">No services available</div>
+                ) : (
+                  <div className="max-h-[300px] overflow-auto">
+                    {packages.map((pkg) => (
+                      <Button
+                        key={pkg.id}
+                        type="button"
+                        variant="ghost"
+                        className="w-full justify-start mb-1 h-auto py-2 relative"
+                        onClick={() => {
+                          togglePackage(pkg.id);
+                        }}
+                      >
+                        <div className="flex items-center w-full">
+                          {isSelected(pkg.id) && (
+                            <Check className="h-3.5 w-3.5 absolute left-2" />
+                          )}
+                          <div className="flex items-center ml-6">
+                            {getServiceIcon(pkg.name)}
+                            <div className="flex flex-col items-start">
+                              <span>{pkg.name}</span>
+                              {pkg.description && (
+                                <span className="text-xs text-muted-foreground">{pkg.description}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ export const formSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"]),
   start_date: z.date().optional(),
   due_date: z.date().optional(),
-  package: z.string().optional(),
+  package: z.array(z.string()).default([]),
   revenue: z.number().optional(),
   slug: z.string()
     .regex(/^[a-zA-Z0-9-]+$/, {

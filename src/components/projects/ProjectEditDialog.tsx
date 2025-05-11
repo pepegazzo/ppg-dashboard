@@ -36,7 +36,7 @@ export function ProjectEditDialog({
       priority: "Medium",
       start_date: undefined,
       due_date: undefined,
-      package: undefined,
+      package: [],
       revenue: undefined,
       slug: "",
     }
@@ -56,7 +56,7 @@ export function ProjectEditDialog({
         priority: project.priority as any,
         start_date: startDate,
         due_date: dueDate,
-        package: project.package_id,
+        package: project.package_ids || [],
         revenue: project.revenue || undefined,
         slug: project.slug || ""
       });
@@ -120,42 +120,26 @@ export function ProjectEditDialog({
 
       if (projectError) throw projectError;
 
-      // Handle package association
-      if (values.package !== project.package_id) {
-        const { data: existingPackage, error: checkError } = await supabase
+      // Handle package association - first delete all existing packages
+      const { error: deleteError } = await supabase
+        .from('project_packages')
+        .delete()
+        .eq('project_id', project.id);
+        
+      if (deleteError) throw deleteError;
+      
+      // Then add the new ones
+      if (values.package && values.package.length > 0) {
+        const packageData = values.package.map(packageId => ({
+          project_id: project.id,
+          package_id: packageId
+        }));
+        
+        const { error: insertError } = await supabase
           .from('project_packages')
-          .select('*')
-          .eq('project_id', project.id);
+          .insert(packageData);
           
-        if (checkError) throw checkError;
-
-        if (values.package) {
-          // There's a package to assign
-          if (existingPackage && existingPackage.length > 0) {
-            // Update existing package assignment
-            const { error: updateError } = await supabase
-              .from('project_packages')
-              .update({ package_id: values.package })
-              .eq('project_id', project.id);
-              
-            if (updateError) throw updateError;
-          } else {
-            // Create new package assignment
-            const { error: insertError } = await supabase
-              .from('project_packages')
-              .insert({ project_id: project.id, package_id: values.package });
-              
-            if (insertError) throw insertError;
-          }
-        } else if (existingPackage && existingPackage.length > 0) {
-          // No package to assign, but there is an existing one to remove
-          const { error: deleteError } = await supabase
-            .from('project_packages')
-            .delete()
-            .eq('project_id', project.id);
-            
-          if (deleteError) throw deleteError;
-        }
+        if (insertError) throw insertError;
       }
 
       toast({

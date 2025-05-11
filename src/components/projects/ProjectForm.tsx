@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +27,7 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
       priority: "Medium",
       start_date: undefined,
       due_date: undefined,
-      package: undefined,
+      package: [],
       revenue: undefined,
       slug: "",
     },
@@ -91,19 +92,22 @@ const ProjectForm = ({ onCancel, onSubmitted }: ProjectFormProps) => {
 
       if (projectError) throw projectError;
 
-      if (values.package) {
-        const packageData = {
+      // Handle multiple package assignments
+      if (values.package && values.package.length > 0) {
+        const packageData = values.package.map(packageId => ({
           project_id: newProject.id,
-          package_id: values.package
-        };
+          package_id: packageId
+        }));
+        
         const { error: packageError } = await supabase
           .from('project_packages')
           .insert(packageData);
+          
         if (packageError) {
-          console.error("Error linking package:", packageError);
+          console.error("Error linking packages:", packageError);
           toast({
             title: "Warning",
-            description: "Project created but there was an error linking the package.",
+            description: "Project created but there was an error linking one or more packages.",
             variant: "destructive",
           });
         }

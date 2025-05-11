@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,13 +79,33 @@ const Projects = () => {
       } else {
         console.log(`Found ${data.length} projects with packages:`, data);
 
+        // Group packages by project
+        const projectPackageMap = new Map();
+        
+        data.forEach(project => {
+          if (project.project_packages && project.project_packages.length > 0) {
+            const packageNames = project.project_packages
+              .filter(pp => pp.package_types)
+              .map(pp => pp.package_types.name);
+            
+            projectPackageMap.set(project.id, {
+              package_id: project.project_packages[0]?.package_types?.id || null,
+              package_name: project.project_packages[0]?.package_types?.name || null,
+              package_names: packageNames,
+              package_ids: project.project_packages.map(pp => pp.package_types?.id).filter(Boolean)
+            });
+          }
+        });
+
         const transformedProjects = data.map(project => {
-          const packageInfo = project.project_packages?.[0]?.package_types;
+          const packageInfo = projectPackageMap.get(project.id) || {};
 
           return {
             ...project,
-            package_name: packageInfo?.name || null,
-            package_id: packageInfo?.id || null,
+            package_name: packageInfo.package_name || null,
+            package_id: packageInfo.package_id || null,
+            package_names: packageInfo.package_names || [],
+            package_ids: packageInfo.package_ids || [],
             progress: Math.floor(Math.random() * 101)
           };
         });
@@ -102,7 +123,9 @@ const Projects = () => {
 
           const projectsWithProgress = projectsWithoutPackages.map(project => ({
             ...project,
-            progress: Math.floor(Math.random() * 101)
+            progress: Math.floor(Math.random() * 101),
+            package_names: [],
+            package_ids: []
           }));
 
           setProjects([...transformedProjects, ...projectsWithProgress]);

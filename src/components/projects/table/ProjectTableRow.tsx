@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Project } from "../types";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
@@ -11,9 +12,9 @@ import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
 import { ProjectClientCell } from "./ProjectClientCell";
 import { ProjectExpandedDetails } from "./ProjectExpandedDetails";
-import { ChevronDown, ChevronUp, Edit } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TableRowCollapsible } from "@/components/ui/collapsible";
+
 interface ProjectTableRowProps {
   project: Project;
   selectedProjects: string[];
@@ -23,6 +24,7 @@ interface ProjectTableRowProps {
   onEditProject: (project: Project) => void;
   fetchProjects?: () => void;
 }
+
 export function ProjectTableRowComponent({
   project,
   selectedProjects,
@@ -33,13 +35,22 @@ export function ProjectTableRowComponent({
   fetchProjects
 }: ProjectTableRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  
   const handleDeleteClick = () => {
     setSelectedProjects([project.id]);
     setShowDeleteModal(true);
   };
+  
   const handleEditClick = () => {
     onEditProject(project);
   };
+  
+  // Process packages for the project
+  const enhancedProject = {
+    ...project,
+    packages: project.package_names || []
+  };
+
   return <>
       <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
         <TableCell className="w-[40px] p-4 align-middle">
@@ -63,7 +74,7 @@ export function ProjectTableRowComponent({
           <ProjectPriorityCell priority={project.priority} />
         </TableCell>
         <TableCell className="w-[120px] p-4">
-          <ProjectPackageCell project={project} readOnly={true} />
+          <ProjectPackageCell project={enhancedProject} readOnly={true} />
         </TableCell>
         <TableCell className="w-[120px] p-4">
           <ProjectDateCell date={project.start_date} readOnly={true} />
