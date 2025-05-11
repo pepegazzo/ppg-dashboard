@@ -7,7 +7,7 @@ export function ProjectProgressCell({
 }: ProjectProgressCellProps) {
   return <div className="w-full flex items-center gap-2">
       <Progress value={progress} className="h-2.5 flex-grow" />
-      <span className="text-muted-foreground whitespace-nowrap text-base">
+      <span className="text-muted-foreground whitespace-nowrap text-sm">
         {progress}%
       </span>
     </div>;
