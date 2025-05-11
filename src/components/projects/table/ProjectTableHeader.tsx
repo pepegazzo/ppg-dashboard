@@ -1,7 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableProjectField, SortDirection } from "../types";
-
 interface ProjectTableHeaderProps {
   onSelectAll: () => void;
   allSelected: boolean;
@@ -9,7 +8,6 @@ interface ProjectTableHeaderProps {
   sortField: SortableProjectField;
   sortDirection: SortDirection;
 }
-
 export function ProjectTableHeader({
   onSelectAll,
   allSelected,
@@ -23,13 +21,12 @@ export function ProjectTableHeader({
     }
     return <span className="ml-1 inline-flex items-center opacity-40">↕</span>;
   };
-
   return <TableHeader>
     <TableRow className="bg-muted/50 hover:bg-muted/50 text-xs">
       <TableHead className="w-[40px] p-[10px] text-left">
         <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
       </TableHead>
-      <TableHead onClick={() => onSort('name')} className="cursor-pointer min-w-[180px] p-[10px] text-left">
+      <TableHead onClick={() => onSort('name')} className="p-[10px]">
         <div className="flex items-center">Project {renderSortIndicator('name')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('client_name')} className="cursor-pointer min-w-[140px] p-[10px] text-left">
