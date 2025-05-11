@@ -1,12 +1,11 @@
-
 import { TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
 interface ProjectPriorityCellProps {
   priority: string;
 }
-
-export function ProjectPriorityCell({ priority }: ProjectPriorityCellProps) {
+export function ProjectPriorityCell({
+  priority
+}: ProjectPriorityCellProps) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High':
@@ -19,12 +18,9 @@ export function ProjectPriorityCell({ priority }: ProjectPriorityCellProps) {
         return 'bg-slate-100 text-slate-800';
     }
   };
-
-  return (
-    <TableCell>
+  return <TableCell className="Deparent this div from its children, and delete the parent\n">
       <Badge variant="outline" className={getPriorityColor(priority)}>
         {priority}
       </Badge>
-    </TableCell>
-  );
+    </TableCell>;
 }
