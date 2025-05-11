@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 
 interface ProjectStatusCellProps {
@@ -21,7 +20,7 @@ export function ProjectStatusCell({ project, readOnly }: ProjectStatusCellProps)
   };
 
   return (
-    <Badge className={getStatusColor(project.status)}>
+    <Badge className={`text-xs font-medium px-2.5 py-1 rounded-full w-fit border border-solid inline-flex items-center gap-1 ${getStatusColor(project.status)}`}>
       {project.status}
     </Badge>
   );
