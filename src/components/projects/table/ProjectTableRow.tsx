@@ -42,8 +42,10 @@ export function ProjectTableRowComponent({
   };
   return <>
       <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
-        <TableCell className="w-[40px] p-4">
-          <Checkbox checked={selectedProjects.includes(project.id)} onCheckedChange={() => toggleProjectSelection(project.id)} aria-label={`Select project ${project.name}`} />
+        <TableCell className="w-[40px] p-4 align-middle">
+          <div className="flex items-center h-full justify-center">
+            <Checkbox checked={selectedProjects.includes(project.id)} onCheckedChange={() => toggleProjectSelection(project.id)} aria-label={`Select project ${project.name}`} />
+          </div>
         </TableCell>
         <TableCell className="font-medium w-[200px] p-4">
           <span>{project.name}</span>
