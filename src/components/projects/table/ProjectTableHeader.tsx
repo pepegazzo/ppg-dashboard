@@ -32,7 +32,7 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('client_name')} className="w-[200px] p-2">
         <div className="flex items-left">Client {renderSortIndicator('client_name')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[110px] p-[10px] text-left">
+      <TableHead onClick={() => onSort('status')} className="w-[100px] p-2">
         <div className="flex items-center">Status {renderSortIndicator('status')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('progress')} className="cursor-pointer w-[100px] p-[10px] text-left">
