@@ -26,16 +26,16 @@ export function ProjectTableHeader({
       <TableHead className="w-[40px] p-2">
         <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
       </TableHead>
-      <TableHead onClick={() => onSort('name')} className="w-[200px] p-2">
+      <TableHead onClick={() => onSort('name')} className="w-[200px] p-4">
         <div className="flex items-left">Project {renderSortIndicator('name')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('client_name')} className="w-[200px] p-2">
+      <TableHead onClick={() => onSort('client_name')} className="w-[200px] p-4">
         <div className="flex items-left">Client {renderSortIndicator('client_name')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('status')} className="w-[150px] p-2">
+      <TableHead onClick={() => onSort('status')} className="w-[150px] p-4">
         <div className="flex items-left">Status {renderSortIndicator('status')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('progress')} className="w-[200px] p-2">
+      <TableHead onClick={() => onSort('progress')} className="w-[200px] p-4">
         <div className="flex items-center">Progress {renderSortIndicator('progress')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('priority')} className="cursor-pointer w-[100px] p-[10px] text-left">

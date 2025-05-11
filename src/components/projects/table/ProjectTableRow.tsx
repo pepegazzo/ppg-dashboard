@@ -45,13 +45,13 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[40px] p-2">
           <Checkbox checked={selectedProjects.includes(project.id)} onCheckedChange={() => toggleProjectSelection(project.id)} aria-label={`Select project ${project.name}`} />
         </TableCell>
-        <TableCell className="font-medium w-[200px] p-2">
+        <TableCell className="font-medium w-[200px] p-4">
           <span>{project.name}</span>
         </TableCell>
-        <TableCell className="w-[200px] p-2">
+        <TableCell className="w-[200px] p-4">
           <span>{project.client_name || "No Client"}</span>
         </TableCell>
-        <TableCell className="w-[150px] p-2">
+        <TableCell className="w-[150px] p-4">
           <ProjectStatusCell project={project} readOnly={true} />
         </TableCell>
         <TableCell className="w-[200px] p-4">
