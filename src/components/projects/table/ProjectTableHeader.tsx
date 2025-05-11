@@ -41,7 +41,7 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('priority')} className="w-[120px] p-4">
         <div className="flex items-center">Priority {renderSortIndicator('priority')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('package_name')} className="w-[100px] p-4">
+      <TableHead onClick={() => onSort('package_name')} className="w-[120px] p-4">
         <div className="flex items-center">Service {renderSortIndicator('package_name')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('start_date')} className="w-[120px] p-4">

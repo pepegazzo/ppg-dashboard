@@ -60,7 +60,7 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[120px] p-4">
           <ProjectPriorityCell priority={project.priority} />
         </TableCell>
-        <TableCell className="w-[100px] p-4">
+        <TableCell className="w-[120px] p-4">
           <ProjectPackageCell project={project} readOnly={true} />
         </TableCell>
         <TableCell className="w-[120px] p-4">
