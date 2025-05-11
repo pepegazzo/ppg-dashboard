@@ -22,7 +22,7 @@ const Clients = () => {
             Relationships
           </span>
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-zinc-900">Clients</h1>
+            <h1 className="text-xl font-bold text-zinc-900">Clients</h1>
             <div className="flex gap-2">
               <Button onClick={() => setIsModalOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />

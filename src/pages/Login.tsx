@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,7 +50,7 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardTitle className="text-xl font-bold">Welcome back</CardTitle>
           <CardDescription>
             Enter your email and password to access your dashboard
           </CardDescription>

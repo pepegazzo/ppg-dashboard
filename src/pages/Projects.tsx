@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -224,7 +223,7 @@ const Projects = () => {
         <div className="flex flex-col gap-2 mb-8">
           <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Management</span>
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-zinc-900">Projects</h1>
+            <h1 className="text-xl font-bold text-zinc-900">Projects</h1>
             <div className="flex gap-2">
               <Button onClick={() => setIsCreating(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />

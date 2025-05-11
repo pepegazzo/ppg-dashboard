@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,11 +17,11 @@ const Profile = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 px-4">
-        <h1 className="text-3xl font-bold mb-8">My Profile</h1>
+        <h1 className="text-xl font-bold mb-8">My Profile</h1>
         
         <div className="grid gap-6">
           <div className="bg-card rounded-lg p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Account Information</h2>
+            <h2 className="text-lg font-semibold mb-4">Account Information</h2>
             <div className="space-y-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div>
