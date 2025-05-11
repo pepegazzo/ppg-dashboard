@@ -23,7 +23,7 @@ export function ProjectActionsCell({
   const handlePortalClick = () => {
     setOpen(true);
   };
-  return <TableCell className="flex items-center gap-2 py-0">
+  return <TableCell className="flex items-center gap-0 py-0">
       
       <Button variant="default" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handlePortalClick}>
         <LinkIcon className="mr-1 w-4 h-4" />
