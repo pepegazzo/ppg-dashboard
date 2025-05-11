@@ -38,16 +38,16 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('progress')} className="w-[200px] p-4">
         <div className="flex items-center">Progress {renderSortIndicator('progress')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('priority')} className="cursor-pointer w-[100px] p-[10px] text-left">
+      <TableHead onClick={() => onSort('priority')} className="w-[120px] p-4">
         <div className="flex items-center">Priority {renderSortIndicator('priority')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('package_name')} className="cursor-pointer min-w-[130px] p-[10px] text-left">
+      <TableHead onClick={() => onSort('package_name')} className="w-[100px] p-4">
         <div className="flex items-center">Service {renderSortIndicator('package_name')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-[100px] p-[10px] text-left">
+      <TableHead onClick={() => onSort('start_date')} className="w-[120px] p-4">
         <div className="flex items-center">Start {renderSortIndicator('start_date')}</div>
       </TableHead>
-      <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[100px] p-[10px] text-left">
+      <TableHead onClick={() => onSort('due_date')} className="w-[120px] p-4">
         <div className="flex items-center">End {renderSortIndicator('due_date')}</div>
       </TableHead>
       <TableHead className="w-[80px] p-[10px] text-left">Portal</TableHead>

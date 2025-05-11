@@ -60,13 +60,13 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[120px] p-4">
           <ProjectPriorityCell priority={project.priority} />
         </TableCell>
-        <TableCell className="w-[150px] p-2">
+        <TableCell className="w-[100px] p-4">
           <ProjectPackageCell project={project} readOnly={true} />
         </TableCell>
-        <TableCell className="text-sm w-[100px] p-2">
+        <TableCell className="w-[120px] p-4">
           <ProjectDateCell date={project.start_date} readOnly={true} />
         </TableCell>
-        <TableCell className="text-sm w-[100px] p-2">
+        <TableCell className="w-[120px] p-4">
           <ProjectDateCell date={project.due_date} readOnly={true} />
         </TableCell>
         <TableCell className="w-[80px] p-2">
