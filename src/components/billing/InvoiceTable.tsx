@@ -141,11 +141,11 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'paid':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1 w-fit"><CheckCircle className="h-3 w-3" /> Paid</Badge>;
+        return <Badge variant="success" className="flex items-center gap-1 w-fit"><CheckCircle className="h-3 w-3" /> Paid</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1 w-fit"><Clock className="h-3 w-3" /> Pending</Badge>;
+        return <Badge variant="warning" className="flex items-center gap-1 w-fit"><Clock className="h-3 w-3" /> Pending</Badge>;
       case 'overdue':
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1 w-fit"><AlertCircle className="h-3 w-3" /> Overdue</Badge>;
+        return <Badge variant="destructive" className="flex items-center gap-1 w-fit"><AlertCircle className="h-3 w-3" /> Overdue</Badge>;
       default:
         return <Badge variant="outline" className="w-fit">{status}</Badge>;
     }
@@ -312,18 +312,18 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-2">
                         <div className="flex flex-col gap-1">
-                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'pending' ? 'bg-yellow-50' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'pending')} disabled={updatingInvoiceId === invoice.id}>
-                            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'pending' ? 'bg-muted' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'pending')} disabled={updatingInvoiceId === invoice.id}>
+                            <Badge variant="warning" className="flex items-center gap-1">
                               <Clock className="h-3 w-3" /> Pending
                             </Badge>
                           </Button>
-                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'paid' ? 'bg-green-50' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'paid')} disabled={updatingInvoiceId === invoice.id}>
-                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'paid' ? 'bg-muted' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'paid')} disabled={updatingInvoiceId === invoice.id}>
+                            <Badge variant="success" className="flex items-center gap-1">
                               <CheckCircle className="h-3 w-3" /> Paid
                             </Badge>
                           </Button>
-                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'overdue' ? 'bg-red-50' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'overdue')} disabled={updatingInvoiceId === invoice.id}>
-                            <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'overdue' ? 'bg-muted' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'overdue')} disabled={updatingInvoiceId === invoice.id}>
+                            <Badge variant="destructive" className="flex items-center gap-1">
                               <AlertCircle className="h-3 w-3" /> Overdue
                             </Badge>
                           </Button>

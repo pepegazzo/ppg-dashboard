@@ -64,25 +64,25 @@ export function BillingStats() {
         title="Paid" 
         value={stats?.totalPaid ?? 0} 
         description="Amount already paid" 
-        icon={<CheckCircle className="h-5 w-5 text-green-500" />}
+        icon={<CheckCircle className="h-5 w-5 text-muted-foreground" />}
         isLoading={isLoading}
-        color="text-green-600"
+        variant="success"
       />
       <StatsCard 
         title="Pending" 
         value={stats?.totalPending ?? 0} 
         description="Amount pending payment" 
-        icon={<Clock className="h-5 w-5 text-amber-500" />}
+        icon={<Clock className="h-5 w-5 text-muted-foreground" />}
         isLoading={isLoading}
-        color="text-amber-600"
+        variant="warning"
       />
       <StatsCard 
         title="Overdue" 
         value={stats?.totalOverdue ?? 0} 
         description="Amount overdue" 
-        icon={<AlertCircle className="h-5 w-5 text-red-500" />}
+        icon={<AlertCircle className="h-5 w-5 text-muted-foreground" />}
         isLoading={isLoading}
-        color="text-red-600"
+        variant="destructive"
       />
     </div>
   );
@@ -94,11 +94,18 @@ interface StatsCardProps {
   description: string;
   icon: React.ReactNode;
   isLoading: boolean;
-  color?: string;
+  variant?: 'default' | 'success' | 'warning' | 'destructive';
   className?: string;
 }
 
-function StatsCard({ title, value, description, icon, isLoading, color, className }: StatsCardProps) {
+function StatsCard({ title, value, description, icon, isLoading, variant = 'default', className }: StatsCardProps) {
+  const variantStyles = {
+    default: '',
+    success: 'text-green-600',
+    warning: 'text-amber-600',
+    destructive: 'text-red-600'
+  };
+
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -109,7 +116,7 @@ function StatsCard({ title, value, description, icon, isLoading, color, classNam
         {isLoading ? (
           <Skeleton className="h-7 w-3/4" />
         ) : (
-          <div className={`text-2xl font-bold ${color || ''}`}>
+          <div className={`text-2xl font-bold ${variantStyles[variant]}`}>
             S/ {value.toFixed(2)}
           </div>
         )}
