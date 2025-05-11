@@ -69,7 +69,7 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[120px] p-4">
           <ProjectDateCell date={project.due_date} readOnly={true} />
         </TableCell>
-        <TableCell className="w-[80px] p-2">
+        <TableCell className="w-[80px] p-4">
           <ProjectActionsCell projectId={project.id} projectPassword={project.portal_password || ""} projectSlug={project.slug || ""} setShowDeleteModal={setShowDeleteModal} setSelectedProjects={setSelectedProjects} onEditProject={() => handleEditClick()} />
         </TableCell>
         <TableCell className="w-[60px] p-2 text-center">

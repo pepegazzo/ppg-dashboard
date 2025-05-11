@@ -50,7 +50,7 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('due_date')} className="w-[120px] p-4">
         <div className="flex items-left">End {renderSortIndicator('due_date')}</div>
       </TableHead>
-      <TableHead className="w-[80px] p-[10px] text-left">Portal</TableHead>
+      <TableHead className="w-[80px] p-4">Portal</TableHead>
       <TableHead className="w-[60px] p-[10px] text-center">Details</TableHead>
     </TableRow>
   </TableHeader>;
