@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, Briefcase, CheckSquare, Receipt, FolderArchive, FileText, Users, LogOut, User, LogIn, UserPlus } from "lucide-react";
@@ -45,7 +44,7 @@ const Sidebar = () => {
   return <aside className="h-screen bg-zinc-900 fixed left-0 top-0 w-[16rem] border-r border-zinc-800/30 flex flex-col z-40">
       {/* Header */}
       <div className="h-16 flex items-center px-3 border-b border-zinc-800/30">
-        <div className="text-amber-500 font-semibold text-lg tracking-tight">
+        <div className="text-zinc-400 font-semibold text-lg tracking-tight">
           Creative
         </div>
       </div>
@@ -58,13 +57,13 @@ const Sidebar = () => {
           return <li key={item.path}>
                 <Link to={item.path} className={`
                     relative flex items-center gap-2 px-2 py-1 text-zinc-400 rounded-md transition-all duration-200 ease-in-out text-sm
-                    ${isActive ? 'bg-amber-500/10 text-amber-500' : 'hover:bg-zinc-800/50 hover:text-zinc-200'}
+                    ${isActive ? 'bg-zinc-200/10 text-zinc-400' : 'hover:bg-zinc-800/50 hover:text-zinc-200'}
                   `}>
                   <item.icon className="w-4 h-4" />
                   <span className="font-medium truncate">
                     {item.title}
                   </span>
-                  {isActive && <span className="absolute left-0 w-1 h-full bg-amber-500 rounded-r-full" />}
+                  {isActive && <span className="absolute left-0 w-1 h-full bg-zinc-400 rounded-r-full" />}
                 </Link>
               </li>;
         })}
