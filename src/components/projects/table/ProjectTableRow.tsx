@@ -42,7 +42,7 @@ export function ProjectTableRowComponent({
   };
   return <>
       <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
-        <TableCell className="w-[40px] p-2">
+        <TableCell className="w-[40px] p-4">
           <Checkbox checked={selectedProjects.includes(project.id)} onCheckedChange={() => toggleProjectSelection(project.id)} aria-label={`Select project ${project.name}`} />
         </TableCell>
         <TableCell className="font-medium w-[200px] p-4">
@@ -69,10 +69,10 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[120px] p-4">
           <ProjectDateCell date={project.due_date} readOnly={true} />
         </TableCell>
-        <TableCell className="w-[80px] p-2">
+        <TableCell className="w-[80px] p-4">
           <ProjectActionsCell projectId={project.id} projectPassword={project.portal_password || ""} projectSlug={project.slug || ""} setShowDeleteModal={setShowDeleteModal} setSelectedProjects={setSelectedProjects} onEditProject={() => handleEditClick()} />
         </TableCell>
-        <TableCell className="w-[60px] p-2 text-center">
+        <TableCell className="w-[60px] p-4 text-center">
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-muted" onClick={() => setIsExpanded(!isExpanded)} aria-label={isExpanded ? "Collapse details" : "Expand details"}>
             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
