@@ -27,7 +27,7 @@ export function ProjectTableHeader({
         <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
       </TableHead>
       <TableHead onClick={() => onSort('name')} className="w-[200px] p-2">
-        <div className="flex items-center">Project {renderSortIndicator('name')}</div>
+        <div className="flex items-left">Project {renderSortIndicator('name')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('client_name')} className="w-[200px] p-2">
         <div className="flex items-left">Client {renderSortIndicator('client_name')}</div>
