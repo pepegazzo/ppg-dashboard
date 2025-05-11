@@ -2,7 +2,7 @@
 import * as React from "react"
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 import { cn } from "@/lib/utils"
-import { ReactNode } from "react"
+import { type ReactNode } from "react"
 
 const Collapsible = CollapsiblePrimitive.Root
 
