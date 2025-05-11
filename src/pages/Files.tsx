@@ -5,7 +5,7 @@ const Files = () => {
     <DashboardLayout>
       <div className="animate-fade-in">
         <div className="flex flex-col gap-2 mb-8">
-          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">Resources</span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full w-fit bg-zinc-100 text-zinc-800">Resources</span>
           <h1 className="text-xl font-bold text-zinc-900">Files & Assets</h1>
         </div>
         

@@ -18,9 +18,7 @@ const Clients = () => {
     <DashboardLayout>
       <div className="animate-fade-in">
         <div className="flex flex-col gap-2 mb-8">
-          <span className="text-xs font-medium px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
-            Relationships
-          </span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full w-fit bg-zinc-100 text-zinc-800">Relationships</span>
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold text-zinc-900">Clients</h1>
             <div className="flex gap-2">
