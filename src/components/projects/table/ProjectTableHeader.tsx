@@ -27,35 +27,35 @@ export function ProjectTableHeader({
 
   return <TableHeader>
     <TableRow className="bg-muted/50 hover:bg-muted/50 text-xs">
-      <TableHead className="px-2 py-0 w-[28px] text-left">
+      <TableHead className="w-[40px] px-2 py-0 text-left">
         <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="Select all projects" />
       </TableHead>
-      <TableHead onClick={() => onSort('name')} className="cursor-pointer w-[170px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('name')} className="cursor-pointer w-[200px] px-[10px] text-left">
         Project {renderSortIndicator('name')}
       </TableHead>
-      <TableHead onClick={() => onSort('client_name')} className="cursor-pointer w-[120px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('client_name')} className="cursor-pointer w-[150px] px-[10px] text-left">
         Client {renderSortIndicator('client_name')}
       </TableHead>
-      <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[100px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[120px] px-[10px] text-left">
         Status {renderSortIndicator('status')}
       </TableHead>
-      <TableHead onClick={() => onSort('progress')} className="cursor-pointer w-[95px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('progress')} className="cursor-pointer w-[100px] px-[10px] text-left">
         Progress {renderSortIndicator('progress')}
       </TableHead>
-      <TableHead onClick={() => onSort('priority')} className="cursor-pointer w-[90px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('priority')} className="cursor-pointer w-[100px] px-[10px] text-left">
         Priority {renderSortIndicator('priority')}
       </TableHead>
-      <TableHead onClick={() => onSort('package_name')} className="cursor-pointer w-[90px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('package_name')} className="cursor-pointer w-[130px] px-[10px] text-left">
         Service {renderSortIndicator('package_name')}
       </TableHead>
-      <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-[70px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-[100px] px-[10px] text-left">
         Start {renderSortIndicator('start_date')}
       </TableHead>
-      <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[70px] px-[10px] text-left">
+      <TableHead onClick={() => onSort('due_date')} className="cursor-pointer w-[100px] px-[10px] text-left">
         End {renderSortIndicator('due_date')}
       </TableHead>
-      <TableHead className="w-[60px] px-[10px] text-left">Portal</TableHead>
-      <TableHead className="w-[40px] px-[10px]"></TableHead>
+      <TableHead className="w-[100px] px-[10px] text-left">Portal</TableHead>
+      <TableHead className="w-[60px] px-[10px]"></TableHead>
     </TableRow>
   </TableHeader>;
 }

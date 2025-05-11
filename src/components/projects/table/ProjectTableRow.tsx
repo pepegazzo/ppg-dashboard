@@ -95,14 +95,14 @@ export function ProjectTableRowComponent({
   return (
     <>
       <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
-        <TableCell className="px-2 py-0 w-[28px]">
+        <TableCell className="w-[40px] px-2 py-0">
           <Checkbox 
             checked={selectedProjects.includes(localProject.id)} 
             onCheckedChange={() => toggleProjectSelection(localProject.id)} 
             aria-label={`Select project ${localProject.name}`} 
           />
         </TableCell>
-        <TableCell className="font-medium px-[10px]">
+        <TableCell className="font-medium w-[200px] px-[10px]">
           <ProjectNameCell 
             name={localProject.name} 
             fieldName="name" 
@@ -113,25 +113,35 @@ export function ProjectTableRowComponent({
             onUpdate={updateProjectField}
           />
         </TableCell>
-        <ProjectClientCell 
-          clientName={localProject.client_name} 
-          projectId={localProject.id} 
-        />
-        <ProjectStatusCell 
-          project={localProject} 
-          updatingProjectId={updatingProjectId} 
-          setUpdatingProjectId={setUpdatingProjectId}
-          onUpdate={updateProjectField}
-        />
-        <ProjectProgressCell progress={localProject.progress || 0} />
-        <ProjectPriorityCell priority={localProject.priority} />
-        <ProjectPackageCell 
-          project={localProject}
-          updatingProjectId={updatingProjectId}
-          setUpdatingProjectId={setUpdatingProjectId}
-          onUpdate={updateProjectField}
-        />
-        <TableCell className="text-sm text-muted-foreground justify-items-center px-[10px]">
+        <TableCell className="w-[150px] px-[10px]">
+          <ProjectClientCell 
+            clientName={localProject.client_name} 
+            projectId={localProject.id} 
+          />
+        </TableCell>
+        <TableCell className="w-[120px] px-[10px]">
+          <ProjectStatusCell 
+            project={localProject} 
+            updatingProjectId={updatingProjectId} 
+            setUpdatingProjectId={setUpdatingProjectId}
+            onUpdate={updateProjectField}
+          />
+        </TableCell>
+        <TableCell className="w-[100px] px-[10px]">
+          <ProjectProgressCell progress={localProject.progress || 0} />
+        </TableCell>
+        <TableCell className="w-[100px] px-[10px]">
+          <ProjectPriorityCell priority={localProject.priority} />
+        </TableCell>
+        <TableCell className="w-[130px] px-[10px]">
+          <ProjectPackageCell 
+            project={localProject}
+            updatingProjectId={updatingProjectId}
+            setUpdatingProjectId={setUpdatingProjectId}
+            onUpdate={updateProjectField}
+          />
+        </TableCell>
+        <TableCell className="text-sm w-[100px] text-muted-foreground px-[10px]">
           <ProjectDateCell 
             date={localProject.start_date} 
             fieldName="start_date" 
@@ -141,7 +151,7 @@ export function ProjectTableRowComponent({
             setUpdatingProjectId={setUpdatingProjectId}
           />
         </TableCell>
-        <TableCell className="text-sm text-muted-foreground px-[10px]">
+        <TableCell className="text-sm w-[100px] text-muted-foreground px-[10px]">
           <ProjectDateCell 
             date={localProject.due_date} 
             fieldName="due_date" 
@@ -151,7 +161,7 @@ export function ProjectTableRowComponent({
             setUpdatingProjectId={setUpdatingProjectId}
           />
         </TableCell>
-        <TableCell className="px-[10px]">
+        <TableCell className="w-[100px] px-[10px]">
           <ProjectActionsCell 
             projectId={localProject.id} 
             projectPassword={localProject.portal_password || ""}
@@ -160,7 +170,7 @@ export function ProjectTableRowComponent({
             setSelectedProjects={setSelectedProjects}
           />
         </TableCell>
-        <TableCell className="px-[10px] w-[40px]">
+        <TableCell className="w-[60px] px-[10px]">
           <Button
             variant="ghost"
             size="sm"
