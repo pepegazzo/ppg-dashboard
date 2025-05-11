@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -123,7 +122,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         <Button 
           variant="default"
           size="sm"
-          className="h-7 px-3 text-xs bg-amber-300 text-amber-900 hover:bg-amber-400 hover:text-amber-950 focus:ring-amber-400"
+          className="h-7 px-3 text-xs bg-zinc-100 text-zinc-800 border-zinc-200 hover:bg-zinc-200 hover:text-zinc-900 focus:ring-zinc-400"
           disabled={isUpdating}
         >
           <Plus className="h-3 w-3 mr-1" />

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Loader2, Check } from "lucide-react";
@@ -100,7 +99,7 @@ export default function ClientProjectField({
         <Button 
           variant="ghost" 
           size="sm" 
-          className="ml-1 h-7 text-amber-600 hover:text-amber-700"
+          className="ml-1 h-7 text-zinc-800 hover:text-zinc-900"
           disabled={isUpdating}
         >
           {isUpdating ? (

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -52,7 +51,7 @@ const InlineEdit = ({ value, onSave, className }: InlineEditProps) => {
   return (
     <span 
       onClick={() => setIsEditing(true)} 
-      className={cn("cursor-pointer hover:text-amber-600 transition-colors", className)}
+      className={cn("cursor-pointer hover:text-zinc-700 transition-colors", className)}
     >
       {value}
     </span>
