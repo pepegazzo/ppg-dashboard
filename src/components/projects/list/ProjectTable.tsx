@@ -9,9 +9,8 @@ interface ProjectTableProps {
   selectedProjects: string[];
   toggleProjectSelection: (projectId: string) => void;
   setSelectedProjects: (projectIds: string[]) => void;
-  updatingProjectId: string | null;
-  setUpdatingProjectId: (projectId: string | null) => void;
   setShowDeleteModal: (show: boolean) => void;
+  onEditProject: (project: Project) => void;
   fetchProjects: () => void;
   handleSort: (field: SortableProjectField) => void;
   handleSelectAllProjects: () => void;
@@ -24,9 +23,8 @@ export function ProjectTable({
   selectedProjects,
   toggleProjectSelection,
   setSelectedProjects,
-  updatingProjectId,
-  setUpdatingProjectId,
   setShowDeleteModal,
+  onEditProject,
   fetchProjects,
   handleSort,
   handleSelectAllProjects,
@@ -53,9 +51,8 @@ export function ProjectTable({
               selectedProjects={selectedProjects}
               toggleProjectSelection={toggleProjectSelection}
               setSelectedProjects={setSelectedProjects}
-              updatingProjectId={updatingProjectId}
-              setUpdatingProjectId={setUpdatingProjectId}
               setShowDeleteModal={setShowDeleteModal}
+              onEditProject={onEditProject}
               fetchProjects={fetchProjects}
             />
           ))}

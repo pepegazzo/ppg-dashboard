@@ -1,13 +1,9 @@
+
 import { useState } from "react";
 import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { LinkIcon } from "lucide-react";
+import { Edit, LinkIcon } from "lucide-react";
 import { ProjectPasswordDialog } from "./ProjectPasswordDialog";
-
-// Helper to generate an 8-character alphanumeric password
-function generateSimplePassword() {
-  return Math.random().toString(36).slice(-8).toUpperCase();
-}
 
 interface ProjectActionsCellProps {
   projectId: string;
@@ -15,6 +11,7 @@ interface ProjectActionsCellProps {
   projectSlug?: string | null;
   setShowDeleteModal: (show: boolean) => void;
   setSelectedProjects: (ids: string[]) => void;
+  onEditProject: () => void;
 }
 
 export function ProjectActionsCell({
@@ -23,6 +20,7 @@ export function ProjectActionsCell({
   projectSlug,
   setShowDeleteModal,
   setSelectedProjects,
+  onEditProject,
 }: ProjectActionsCellProps) {
   const [open, setOpen] = useState(false);
 
@@ -31,15 +29,24 @@ export function ProjectActionsCell({
   };
 
   return (
-    <TableCell className="flex items-center gap-2 p-0">
+    <TableCell className="flex items-center gap-2 py-0">
+      <Button
+        variant="ghost" 
+        size="icon"
+        className="h-8 w-8 rounded-full hover:bg-muted"
+        onClick={onEditProject}
+        aria-label="Edit project"
+      >
+        <Edit className="h-4 w-4" />
+      </Button>
       <Button
         variant="default"
         size="sm"
         className="bg-primary text-primary-foreground hover:bg-primary/90"
         onClick={handlePortalClick}
       >
+        <LinkIcon className="mr-1 w-4 h-4" />
         Portal
-        <LinkIcon className="ml-1 w-4 h-4" />
       </Button>
       <ProjectPasswordDialog
         open={open}

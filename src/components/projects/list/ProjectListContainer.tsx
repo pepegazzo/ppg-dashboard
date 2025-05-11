@@ -10,6 +10,7 @@ import { ProjectListLoading } from "./ProjectListLoading";
 import { ProjectListError } from "./ProjectListError";
 import { ProjectListEmpty } from "./ProjectListEmpty";
 import { ProjectListNoMatch } from "./ProjectListNoMatch";
+import { ProjectEditDialog } from "../ProjectEditDialog";
 
 interface ProjectListContainerProps {
   projects: Project[];
@@ -39,7 +40,8 @@ export function ProjectListContainer({
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const handleSort = (field: SortableProjectField) => {
     if (field === sortField) {
@@ -85,6 +87,21 @@ export function ProjectListContainer({
     }
   };
 
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setShowEditModal(true);
+  };
+
+  const handleEditSelected = () => {
+    if (selectedProjects.length === 1) {
+      const projectToEdit = projects.find(p => p.id === selectedProjects[0]);
+      if (projectToEdit) {
+        setEditingProject(projectToEdit);
+        setShowEditModal(true);
+      }
+    }
+  };
+
   if (loading) return <ProjectListLoading />;
   if (error) return <ProjectListError error={error} fetchProjects={fetchProjects} />;
   if (projects.length === 0)
@@ -115,6 +132,8 @@ export function ProjectListContainer({
           count={selectedProjects.length}
           isDeleting={isDeleting}
           onDelete={() => setShowDeleteModal(true)}
+          onEdit={handleEditSelected}
+          canEdit={selectedProjects.length === 1}
         />
       )}
 
@@ -124,9 +143,8 @@ export function ProjectListContainer({
           selectedProjects={selectedProjects}
           toggleProjectSelection={toggleProjectSelection}
           setSelectedProjects={setSelectedProjects}
-          updatingProjectId={updatingProjectId}
-          setUpdatingProjectId={setUpdatingProjectId}
           setShowDeleteModal={setShowDeleteModal}
+          onEditProject={handleEditProject}
           fetchProjects={fetchProjects}
           handleSort={handleSort}
           handleSelectAllProjects={handleSelectAllProjects}
@@ -155,6 +173,13 @@ export function ProjectListContainer({
         selectedProjects={selectedProjects}
         setSelectedProjects={setSelectedProjects}
         fetchProjects={fetchProjects}
+      />
+
+      <ProjectEditDialog
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        project={editingProject}
+        onProjectUpdated={fetchProjects}
       />
     </div>
   );

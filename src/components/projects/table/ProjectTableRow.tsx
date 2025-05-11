@@ -1,8 +1,6 @@
 
 import { useState } from "react";
 import { Project } from "../types";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProjectNameCell } from "./ProjectNameCell";
@@ -14,17 +12,17 @@ import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
 import { ProjectClientCell } from "./ProjectClientCell";
 import { ProjectExpandedDetails } from "./ProjectExpandedDetails";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TableRowCollapsible } from "@/components/ui/collapsible";
 
 interface ProjectTableRowProps {
   project: Project;
   selectedProjects: string[];
   toggleProjectSelection: (projectId: string) => void;
   setSelectedProjects: (projectIds: string[]) => void;
-  updatingProjectId: string | null;
-  setUpdatingProjectId: (projectId: string | null) => void;
   setShowDeleteModal: (show: boolean) => void;
+  onEditProject: (project: Project) => void;
   fetchProjects?: () => void;
 }
 
@@ -33,141 +31,63 @@ export function ProjectTableRowComponent({
   selectedProjects,
   toggleProjectSelection,
   setSelectedProjects,
-  updatingProjectId,
-  setUpdatingProjectId,
   setShowDeleteModal,
+  onEditProject,
   fetchProjects
 }: ProjectTableRowProps) {
-  const { toast } = useToast();
-  const [localProject, setLocalProject] = useState<Project>(project);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const updateProjectField = async (projectId: string, field: string, value: string) => {
-    try {
-      setUpdatingProjectId(projectId);
-      const updateData: Record<string, any> = {
-        [field]: value
-      };
-      const {
-        data,
-        error
-      } = await supabase.from('projects').update(updateData).eq('id', projectId).select();
-      if (error) {
-        console.error(`Error updating project ${field}:`, error);
-        toast({
-          title: `Error updating ${field}`,
-          description: error.message || "Please try again later.",
-          variant: "destructive"
-        });
-        return;
-      }
-      if (data && data[0]) {
-        const updatedProject = {
-          ...localProject,
-          [field]: data[0][field]
-        };
-        setLocalProject(updatedProject);
-        console.log(`Project ${field} updated:`, data[0][field]);
-        toast({
-          title: `${field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')} updated`,
-          description: `Project ${field.replace('_', ' ')} has been updated`
-        });
-      }
-    } catch (err) {
-      console.error(`Unexpected error updating ${field}:`, err);
-      toast({
-        title: `Error updating ${field}`,
-        description: "An unexpected error occurred. Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
-      setUpdatingProjectId(null);
-    }
-  };
-
   const handleDeleteClick = () => {
-    setSelectedProjects([localProject.id]);
+    setSelectedProjects([project.id]);
     setShowDeleteModal(true);
   };
 
-  const isUpdating = updatingProjectId === localProject.id;
+  const handleEditClick = () => {
+    onEditProject(project);
+  };
 
   return (
     <>
       <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
         <TableCell className="w-[40px] px-2 py-2">
           <Checkbox 
-            checked={selectedProjects.includes(localProject.id)} 
-            onCheckedChange={() => toggleProjectSelection(localProject.id)} 
-            aria-label={`Select project ${localProject.name}`} 
+            checked={selectedProjects.includes(project.id)} 
+            onCheckedChange={() => toggleProjectSelection(project.id)} 
+            aria-label={`Select project ${project.name}`} 
           />
         </TableCell>
         <TableCell className="font-medium w-[200px] px-4 py-2">
-          <ProjectNameCell 
-            name={localProject.name} 
-            fieldName="name" 
-            projectId={localProject.id} 
-            value={localProject.name}
-            updatingProjectId={updatingProjectId}
-            setUpdatingProjectId={setUpdatingProjectId}
-            onUpdate={updateProjectField}
-          />
+          <span>{project.name}</span>
         </TableCell>
         <TableCell className="w-[150px] px-4 py-2">
-          <ProjectClientCell 
-            clientName={localProject.client_name} 
-            projectId={localProject.id} 
-          />
+          <span>{project.client_name || "No Client"}</span>
         </TableCell>
         <TableCell className="w-[120px] px-4 py-2">
-          <ProjectStatusCell 
-            project={localProject} 
-            updatingProjectId={updatingProjectId} 
-            setUpdatingProjectId={setUpdatingProjectId}
-            onUpdate={updateProjectField}
-          />
+          <ProjectStatusCell project={project} readOnly={true} />
         </TableCell>
         <TableCell className="w-[100px] px-4 py-2">
-          <ProjectProgressCell progress={localProject.progress || 0} />
+          <ProjectProgressCell progress={project.progress || 0} />
         </TableCell>
         <TableCell className="w-[100px] px-4 py-2">
-          <ProjectPriorityCell priority={localProject.priority} />
+          <ProjectPriorityCell priority={project.priority} />
         </TableCell>
         <TableCell className="w-[150px] px-4 py-2">
-          <ProjectPackageCell 
-            project={localProject}
-            updatingProjectId={updatingProjectId}
-            setUpdatingProjectId={setUpdatingProjectId}
-            onUpdate={updateProjectField}
-          />
+          <ProjectPackageCell project={project} readOnly={true} />
         </TableCell>
         <TableCell className="text-sm w-[100px] px-4 py-2">
-          <ProjectDateCell 
-            date={localProject.start_date} 
-            fieldName="start_date" 
-            projectId={localProject.id} 
-            onUpdate={updateProjectField} 
-            updatingProjectId={updatingProjectId} 
-            setUpdatingProjectId={setUpdatingProjectId}
-          />
+          <ProjectDateCell date={project.start_date} readOnly={true} />
         </TableCell>
         <TableCell className="text-sm w-[100px] px-4 py-2">
-          <ProjectDateCell 
-            date={localProject.due_date} 
-            fieldName="due_date" 
-            projectId={localProject.id} 
-            onUpdate={updateProjectField} 
-            updatingProjectId={updatingProjectId}
-            setUpdatingProjectId={setUpdatingProjectId}
-          />
+          <ProjectDateCell date={project.due_date} readOnly={true} />
         </TableCell>
         <TableCell className="w-[80px] px-4 py-2">
           <ProjectActionsCell 
-            projectId={localProject.id} 
-            projectPassword={localProject.portal_password || ""}
-            projectSlug={localProject.slug || ""}
+            projectId={project.id} 
+            projectPassword={project.portal_password || ""}
+            projectSlug={project.slug || ""}
             setShowDeleteModal={setShowDeleteModal}
             setSelectedProjects={setSelectedProjects}
+            onEditProject={() => handleEditClick()}
           />
         </TableCell>
         <TableCell className="w-[60px] px-4 py-2 text-center">
@@ -187,7 +107,7 @@ export function ProjectTableRowComponent({
       </UITableRow>
       
       {isExpanded && (
-        <ProjectExpandedDetails project={localProject} />
+        <ProjectExpandedDetails project={project} />
       )}
     </>
   );
