@@ -53,7 +53,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge variant="secondary" size="sm" className="text-xs h-5 px-1.5 flex items-center gap-0.5">
+              <Badge variant="secondary" className="text-xs h-5 px-1.5 flex items-center gap-0.5">
                 <Tags className="h-2.5 w-2.5" />
                 +{additionalPackages.length}
               </Badge>
