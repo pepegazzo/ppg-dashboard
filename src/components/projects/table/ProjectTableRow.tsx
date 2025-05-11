@@ -54,7 +54,7 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[100px] p-2">
           <ProjectStatusCell project={project} readOnly={true} />
         </TableCell>
-        <TableCell className="w-[100px] p-2">
+        <TableCell className="w-[200px] p-2">
           <ProjectProgressCell progress={project.progress || 0} />
         </TableCell>
         <TableCell className="w-[100px] p-2">
