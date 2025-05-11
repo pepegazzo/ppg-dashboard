@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
 import { Wrench, Palette, Video, Globe, Heart, Check, Plus, X } from "lucide-react";
@@ -117,8 +116,7 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
           {getSelectedPackageNames().map((name, index) => (
             <Badge 
               key={index} 
-              className="gap-1 pl-1 pr-1 py-1.5 h-7" 
-              variant="secondary"
+              className="gap-1 pl-1 pr-1 py-1.5 h-7 bg-zinc-100 text-zinc-800 border-zinc-200"
             >
               {getServiceIcon(name)}
               <span className="text-xs">{name}</span>

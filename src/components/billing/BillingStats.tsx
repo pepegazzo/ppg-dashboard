@@ -57,32 +57,29 @@ export function BillingStats() {
         title="Total Invoiced" 
         value={stats?.totalInvoiced ?? 0} 
         description="Total amount invoiced" 
-        icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
+        icon={<DollarSign className="h-5 w-5 text-zinc-500" />}
         isLoading={isLoading}
       />
       <StatsCard 
         title="Paid" 
         value={stats?.totalPaid ?? 0} 
         description="Amount already paid" 
-        icon={<CheckCircle className="h-5 w-5 text-muted-foreground" />}
+        icon={<CheckCircle className="h-5 w-5 text-zinc-500" />}
         isLoading={isLoading}
-        variant="success"
       />
       <StatsCard 
         title="Pending" 
         value={stats?.totalPending ?? 0} 
         description="Amount pending payment" 
-        icon={<Clock className="h-5 w-5 text-muted-foreground" />}
+        icon={<Clock className="h-5 w-5 text-zinc-500" />}
         isLoading={isLoading}
-        variant="warning"
       />
       <StatsCard 
         title="Overdue" 
         value={stats?.totalOverdue ?? 0} 
         description="Amount overdue" 
-        icon={<AlertCircle className="h-5 w-5 text-muted-foreground" />}
+        icon={<AlertCircle className="h-5 w-5 text-zinc-500" />}
         isLoading={isLoading}
-        variant="destructive"
       />
     </div>
   );
@@ -94,33 +91,25 @@ interface StatsCardProps {
   description: string;
   icon: React.ReactNode;
   isLoading: boolean;
-  variant?: 'default' | 'success' | 'warning' | 'destructive';
   className?: string;
 }
 
-function StatsCard({ title, value, description, icon, isLoading, variant = 'default', className }: StatsCardProps) {
-  const variantStyles = {
-    default: '',
-    success: 'text-green-600',
-    warning: 'text-amber-600',
-    destructive: 'text-red-600'
-  };
-
+function StatsCard({ title, value, description, icon, isLoading, className }: StatsCardProps) {
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-zinc-700">{title}</CardTitle>
         {icon}
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-7 w-3/4" />
         ) : (
-          <div className={`text-2xl font-bold ${variantStyles[variant]}`}>
+          <div className="text-2xl font-bold text-zinc-800">
             S/ {value.toFixed(2)}
           </div>
         )}
-        <CardDescription>{description}</CardDescription>
+        <CardDescription className="text-zinc-500">{description}</CardDescription>
       </CardContent>
     </Card>
   );

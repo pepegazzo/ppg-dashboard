@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -91,7 +90,7 @@ export function DeleteConfirmDialog({
           <AlertDialogAction 
             onClick={deleteSelectedProjects}
             disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-zinc-200 text-zinc-800 hover:bg-zinc-300"
           >
             {isDeleting ? (
               <>

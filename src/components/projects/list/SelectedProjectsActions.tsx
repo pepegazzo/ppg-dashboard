@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 
@@ -34,7 +33,7 @@ export function SelectedProjectsActions({
           </Button>
         )}
         <Button
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={onDelete}
           disabled={isDeleting}

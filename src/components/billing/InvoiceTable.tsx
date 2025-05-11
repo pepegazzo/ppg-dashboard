@@ -139,16 +139,15 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'paid':
-        return <Badge variant="success" className="flex items-center gap-1 w-fit"><CheckCircle className="h-3 w-3" /> Paid</Badge>;
-      case 'pending':
-        return <Badge variant="warning" className="flex items-center gap-1 w-fit"><Clock className="h-3 w-3" /> Pending</Badge>;
-      case 'overdue':
-        return <Badge variant="destructive" className="flex items-center gap-1 w-fit"><AlertCircle className="h-3 w-3" /> Overdue</Badge>;
-      default:
-        return <Badge variant="outline" className="w-fit">{status}</Badge>;
-    }
+    return <Badge className="bg-zinc-100 text-zinc-800 border-zinc-200 flex items-center gap-1 w-fit">{
+      status.toLowerCase() === 'paid' && <><CheckCircle className="h-3 w-3 text-zinc-500" /> Paid</>
+    }{
+      status.toLowerCase() === 'pending' && <><Clock className="h-3 w-3 text-zinc-500" /> Pending</>
+    }{
+      status.toLowerCase() === 'overdue' && <><AlertCircle className="h-3 w-3 text-zinc-500" /> Overdue</>
+    }{
+      !['paid','pending','overdue'].includes(status.toLowerCase()) && status
+    }</Badge>;
   };
 
   const renderSortIndicator = (field: SortableField) => {
@@ -296,7 +295,7 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
                     {invoice.description || '-'}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
+                    <Badge className="bg-zinc-100 text-zinc-800 border-zinc-200 w-fit">
                       S/ {invoice.amount.toFixed(2)}
                     </Badge>
                   </TableCell>
@@ -312,19 +311,19 @@ export function InvoiceTable({ initialProjectFilter }: InvoiceTableProps) {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-2">
                         <div className="flex flex-col gap-1">
-                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'pending' ? 'bg-muted' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'pending')} disabled={updatingInvoiceId === invoice.id}>
-                            <Badge variant="warning" className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" /> Pending
+                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'pending' ? 'bg-zinc-100' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'pending')} disabled={updatingInvoiceId === invoice.id}>
+                            <Badge className="bg-zinc-100 text-zinc-800 border-zinc-200 flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-zinc-500" /> Pending
                             </Badge>
                           </Button>
-                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'paid' ? 'bg-muted' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'paid')} disabled={updatingInvoiceId === invoice.id}>
-                            <Badge variant="success" className="flex items-center gap-1">
-                              <CheckCircle className="h-3 w-3" /> Paid
+                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'paid' ? 'bg-zinc-100' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'paid')} disabled={updatingInvoiceId === invoice.id}>
+                            <Badge className="bg-zinc-100 text-zinc-800 border-zinc-200 flex items-center gap-1">
+                              <CheckCircle className="h-3 w-3 text-zinc-500" /> Paid
                             </Badge>
                           </Button>
-                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'overdue' ? 'bg-muted' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'overdue')} disabled={updatingInvoiceId === invoice.id}>
-                            <Badge variant="destructive" className="flex items-center gap-1">
-                              <AlertCircle className="h-3 w-3" /> Overdue
+                          <Button variant="ghost" size="sm" className={`justify-start ${invoice.status === 'overdue' ? 'bg-zinc-100' : ''}`} onClick={() => updateInvoiceStatus(invoice.id, 'overdue')} disabled={updatingInvoiceId === invoice.id}>
+                            <Badge className="bg-zinc-100 text-zinc-800 border-zinc-200 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3 text-zinc-500" /> Overdue
                             </Badge>
                           </Button>
                         </div>
