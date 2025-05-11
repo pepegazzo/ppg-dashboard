@@ -36,7 +36,6 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('client_name')} className="cursor-pointer w-[120px] px-[10px] text-left">
         Client {renderSortIndicator('client_name')}
       </TableHead>
-      <TableHead className="w-[100px] px-[10px] text-left">Contact</TableHead>
       <TableHead onClick={() => onSort('status')} className="cursor-pointer w-[100px] px-[10px] text-left">
         Status {renderSortIndicator('status')}
       </TableHead>
@@ -49,9 +48,6 @@ export function ProjectTableHeader({
       <TableHead onClick={() => onSort('package_name')} className="cursor-pointer w-[90px] px-[10px] text-left">
         Service {renderSortIndicator('package_name')}
       </TableHead>
-      <TableHead onClick={() => onSort('revenue')} className="cursor-pointer w-[100px] px-[10px] text-left">
-        Revenue {renderSortIndicator('revenue')}
-      </TableHead>
       <TableHead onClick={() => onSort('start_date')} className="cursor-pointer w-[70px] px-[10px] text-left">
         Start {renderSortIndicator('start_date')}
       </TableHead>
@@ -59,7 +55,7 @@ export function ProjectTableHeader({
         End {renderSortIndicator('due_date')}
       </TableHead>
       <TableHead className="w-[60px] px-[10px] text-left">Portal</TableHead>
+      <TableHead className="w-[40px] px-[10px]"></TableHead>
     </TableRow>
   </TableHeader>;
 }
-
