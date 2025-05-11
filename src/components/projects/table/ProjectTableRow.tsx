@@ -57,7 +57,7 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[200px] p-4">
           <ProjectProgressCell progress={project.progress || 0} />
         </TableCell>
-        <TableCell className="w-[100px] p-2">
+        <TableCell className="w-[120px] p-4">
           <ProjectPriorityCell priority={project.priority} />
         </TableCell>
         <TableCell className="w-[150px] p-2">
