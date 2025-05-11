@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LinkIcon, Ungroup } from "lucide-react";
+import { LinkIcon } from "lucide-react";
 import { ProjectPasswordDialog } from "./ProjectPasswordDialog";
 
 interface ProjectActionsCellProps {
@@ -29,7 +29,7 @@ export function ProjectActionsCell({
   return (
     <>
       <Button variant="default" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handlePortalClick}>
-        <Ungroup className="mr-1 w-4 h-4" />
+        <LinkIcon className="mr-1 w-4 h-4" />
         Portal
       </Button>
       <ProjectPasswordDialog open={open} setOpen={setOpen} projectId={projectId} projectPassword={projectPassword} projectSlug={projectSlug} />
