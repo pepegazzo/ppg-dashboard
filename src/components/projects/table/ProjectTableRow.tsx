@@ -51,7 +51,7 @@ export function ProjectTableRowComponent({
         <TableCell className="w-[200px] p-2">
           <span>{project.client_name || "No Client"}</span>
         </TableCell>
-        <TableCell className="w-[100px] p-2">
+        <TableCell className="w-[150px] p-2">
           <ProjectStatusCell project={project} readOnly={true} />
         </TableCell>
         <TableCell className="w-[200px] p-2">
