@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Project } from "../types";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
@@ -49,38 +48,38 @@ export function ProjectTableRowComponent({
   return (
     <>
       <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
-        <TableCell className="w-[40px] px-2 py-2">
+        <TableCell className="w-[40px] p-2">
           <Checkbox 
             checked={selectedProjects.includes(project.id)} 
             onCheckedChange={() => toggleProjectSelection(project.id)} 
             aria-label={`Select project ${project.name}`} 
           />
         </TableCell>
-        <TableCell className="font-medium w-[200px] px-4 py-2">
+        <TableCell className="font-medium w-[200px] p-2">
           <span>{project.name}</span>
         </TableCell>
-        <TableCell className="w-[150px] px-4 py-2">
+        <TableCell className="w-[150px] p-2">
           <span>{project.client_name || "No Client"}</span>
         </TableCell>
-        <TableCell className="w-[120px] px-4 py-2">
+        <TableCell className="w-[120px] p-2">
           <ProjectStatusCell project={project} readOnly={true} />
         </TableCell>
-        <TableCell className="w-[100px] px-4 py-2">
+        <TableCell className="w-[100px] p-2">
           <ProjectProgressCell progress={project.progress || 0} />
         </TableCell>
-        <TableCell className="w-[100px] px-4 py-2">
+        <TableCell className="w-[100px] p-2">
           <ProjectPriorityCell priority={project.priority} />
         </TableCell>
-        <TableCell className="w-[150px] px-4 py-2">
+        <TableCell className="w-[150px] p-2">
           <ProjectPackageCell project={project} readOnly={true} />
         </TableCell>
-        <TableCell className="text-sm w-[100px] px-4 py-2">
+        <TableCell className="text-sm w-[100px] p-2">
           <ProjectDateCell date={project.start_date} readOnly={true} />
         </TableCell>
-        <TableCell className="text-sm w-[100px] px-4 py-2">
+        <TableCell className="text-sm w-[100px] p-2">
           <ProjectDateCell date={project.due_date} readOnly={true} />
         </TableCell>
-        <TableCell className="w-[80px] px-4 py-2">
+        <TableCell className="w-[80px] p-2">
           <ProjectActionsCell 
             projectId={project.id} 
             projectPassword={project.portal_password || ""}
@@ -90,7 +89,7 @@ export function ProjectTableRowComponent({
             onEditProject={() => handleEditClick()}
           />
         </TableCell>
-        <TableCell className="w-[60px] px-4 py-2 text-center">
+        <TableCell className="w-[60px] p-2 text-center">
           <Button
             variant="ghost"
             size="sm"
