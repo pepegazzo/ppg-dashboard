@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Control, useController } from "react-hook-form";
 import { Wrench, Palette, Video, Globe, Heart, Check, Plus, X } from "lucide-react";
@@ -110,7 +109,7 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
 
   return (
     <div className="space-y-2 h-full flex flex-col">
-      <Label>Packages</Label>
+      <Label>Services</Label>
       
       <div className="space-y-2">
         <div className="flex flex-wrap gap-1.5 min-h-10">
@@ -143,19 +142,19 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
                 type="button"
               >
                 <Plus className="h-3.5 w-3.5 mr-1" />
-                Add Package
+                Add Service
               </Button>
             </PopoverTrigger>
             
             <PopoverContent className="w-[250px] p-0" align="start">
               <div className="p-2">
-                <div className="font-medium text-sm mb-2">Available Packages</div>
+                <div className="font-medium text-sm mb-2">Available Services</div>
                 {loading ? (
-                  <div className="p-2 text-sm text-muted-foreground">Loading packages...</div>
+                  <div className="p-2 text-sm text-muted-foreground">Loading services...</div>
                 ) : error ? (
                   <div className="p-2 text-sm text-red-500">Error: {error}</div>
                 ) : packages.length === 0 ? (
-                  <div className="p-2 text-sm text-muted-foreground">No packages available</div>
+                  <div className="p-2 text-sm text-muted-foreground">No services available</div>
                 ) : (
                   <div className="max-h-[300px] overflow-auto">
                     {packages.map((pkg) => (

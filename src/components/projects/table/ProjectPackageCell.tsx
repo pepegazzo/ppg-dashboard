@@ -44,7 +44,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
         ) : (
           <>
             <PackageIcon className="h-3 w-3 shrink-0 opacity-70 mr-1" />
-            <span className="text-muted-foreground">No package</span>
+            <span className="text-muted-foreground">No service</span>
           </>
         )}
       </Badge>
@@ -60,7 +60,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
             </TooltipTrigger>
             <TooltipContent side="bottom" align="start" className="max-w-[200px]">
               <div className="text-xs">
-                Additional packages:
+                Additional services:
                 <ul className="mt-1 list-disc pl-4">
                   {additionalPackages.map((pkg, i) => (
                     <li key={i}>{pkg}</li>
