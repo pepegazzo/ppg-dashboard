@@ -1,12 +1,9 @@
 
 import { Button } from "@/components/ui/button";
-import { ProjectListFilterBar } from "./ProjectListFilterBar";
 
 interface ProjectListNoMatchProps {
-  nameFilter: string;
-  setNameFilter: (value: string) => void;
-  clientFilter: string;
-  setClientFilter: (value: string) => void;
+  searchFilter: string;
+  setSearchFilter: (value: string) => void;
   statusFilter: string;
   setStatusFilter: (value: string) => void;
   priorityFilter: string;
@@ -15,10 +12,8 @@ interface ProjectListNoMatchProps {
 }
 
 export function ProjectListNoMatch({
-  nameFilter,
-  setNameFilter,
-  clientFilter,
-  setClientFilter,
+  searchFilter,
+  setSearchFilter,
   statusFilter,
   setStatusFilter,
   priorityFilter,
@@ -26,24 +21,20 @@ export function ProjectListNoMatch({
   resetFilters,
 }: ProjectListNoMatchProps) {
   return (
-    <div>
-      <ProjectListFilterBar
-        nameFilter={nameFilter}
-        setNameFilter={setNameFilter}
-        clientFilter={clientFilter}
-        setClientFilter={setClientFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        priorityFilter={priorityFilter}
-        setPriorityFilter={setPriorityFilter}
-        resetFilters={resetFilters}
-      />
-      <div className="text-center p-8 border rounded-md">
-        <h3 className="text-lg font-medium mb-2">No matching projects</h3>
-        <p className="text-muted-foreground mb-4">Try adjusting your filters to see more results.</p>
-        <Button variant="outline" onClick={resetFilters}>
-          Clear All Filters
-        </Button>
+    <div className="text-center py-12 border rounded-lg bg-background">
+      <h3 className="text-lg font-medium mb-2">No matching projects found</h3>
+      <p className="text-muted-foreground mb-4">
+        Try adjusting your search or filter criteria
+      </p>
+      <div className="flex justify-center gap-4">
+        {searchFilter && (
+          <Button variant="outline" onClick={() => setSearchFilter("")}>
+            Clear search
+          </Button>
+        )}
+        {(statusFilter !== "all" || priorityFilter !== "all" || searchFilter) && (
+          <Button onClick={resetFilters}>Reset all filters</Button>
+        )}
       </div>
     </div>
   );

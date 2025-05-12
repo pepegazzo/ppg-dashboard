@@ -33,8 +33,7 @@ export function ProjectListContainer({
 }: ProjectListContainerProps) {
   const [sortField, setSortField] = useState<SortableProjectField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [nameFilter, setNameFilter] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
+  const [searchFilter, setSearchFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
@@ -53,16 +52,14 @@ export function ProjectListContainer({
   };
 
   const resetFilters = () => {
-    setNameFilter('');
-    setClientFilter('');
+    setSearchFilter('');
     setStatusFilter('all');
     setPriorityFilter('all');
   };
 
   const filteredAndSortedProjects = useFilteredSortedProjects({
     projects,
-    nameFilter,
-    clientFilter,
+    searchFilter,
     statusFilter,
     priorityFilter,
     sortField,
@@ -116,10 +113,8 @@ export function ProjectListContainer({
   return (
     <div>
       <ProjectListFilterBar
-        nameFilter={nameFilter}
-        setNameFilter={setNameFilter}
-        clientFilter={clientFilter}
-        setClientFilter={setClientFilter}
+        searchFilter={searchFilter}
+        setSearchFilter={setSearchFilter}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
         priorityFilter={priorityFilter}
@@ -153,10 +148,8 @@ export function ProjectListContainer({
         />
       ) : (
         <ProjectListNoMatch
-          nameFilter={nameFilter}
-          setNameFilter={setNameFilter}
-          clientFilter={clientFilter}
-          setClientFilter={setClientFilter}
+          searchFilter={searchFilter}
+          setSearchFilter={setSearchFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           priorityFilter={priorityFilter}
