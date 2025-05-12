@@ -78,7 +78,7 @@ export function ProjectExpandedDetails({
           <div className="space-y-3 bg-muted/5 p-4 rounded-md">
             <h4 className="text-sm font-medium flex items-center gap-2 text-primary">
               <Package className="w-4 h-4" /> 
-              Project Packages
+              Project Services
             </h4>
             <div className="space-y-4">
               {enhancedProject.packages && enhancedProject.packages.length > 0 ? <div className="flex flex-wrap gap-2">
