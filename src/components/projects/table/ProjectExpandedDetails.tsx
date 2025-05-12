@@ -80,9 +80,7 @@ export function ProjectExpandedDetails({
                     </Badge>)}
                 </div> : <p className="text-xs text-muted-foreground">No packages assigned</p>}
               
-              <div className="pt-2 border-t border-muted/30">
-                
-              </div>
+              
             </div>
           </div>
         </div>
