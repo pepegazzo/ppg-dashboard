@@ -20,7 +20,7 @@ export function ProjectExpandedDetails({
   // Calculate payment status based on revenue
   const paymentStatus = project.revenue && project.revenue > 0 ? "Paid" : "Pending";
   return <TableRow className="bg-muted/5 hover:bg-muted/10 animate-accordion-down">
-      <TableCell className="p-0 w-[40px]" />
+      <TableCell className="w-[40px]" />
       <TableCell colSpan={10} className="">
         <div className="grid grid-cols-3 border-t border-muted/30 h-full">
           {/* Portal Info */}
