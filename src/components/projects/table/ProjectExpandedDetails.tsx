@@ -39,9 +39,7 @@ export function ProjectExpandedDetails({
                 <span className="text-muted-foreground font-mono">{project.portal_password || "Not set"}</span>
               </p>
               
-              <div className="mt-2 pt-2 border-t border-muted/30">
-                
-              </div>
+              
             </div>
           </div>
           
