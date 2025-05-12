@@ -1,5 +1,6 @@
+
 import { Badge } from "@/components/ui/badge";
-import { Package as PackageIcon, Wrench, Palette, Video, Globe, Heart, Box, Tags } from "lucide-react";
+import { Package as PackageIcon, Wrench, Palette, Video, Globe, Heart, Box } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 interface ProjectPackageCellProps {
   project: any;
@@ -47,7 +48,6 @@ export function ProjectPackageCell({
           <Tooltip>
             <TooltipTrigger asChild>
               <Badge variant="outline" className="ml-1 bg-zinc-50 border-zinc-200">
-                <Tags className="h-2.5 w-2.5" />
                 +{additionalPackages.length}
               </Badge>
             </TooltipTrigger>
