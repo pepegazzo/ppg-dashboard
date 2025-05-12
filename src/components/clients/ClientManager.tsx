@@ -15,9 +15,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface ClientManagerProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
+  onRefresh?: () => void;
 }
 
-export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProps) {
+export function ClientManager({ isModalOpen, setIsModalOpen, onRefresh }: ClientManagerProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,7 +101,17 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
         title: "Success",
         description: "Company and primary contact created"
       });
+      
+      // Refresh all client-related data
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
+      
+      // Call the parent's refresh handler if provided
+      if (onRefresh) {
+        onRefresh();
+      }
+      
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error in createClient:", error);
@@ -144,7 +155,10 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
       {filteredAndSortedClients && filteredAndSortedClients.length === 0 ? (
         <EmptyState 
           setIsCreating={() => setIsModalOpen(true)} 
-          handleRefreshClients={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
+          handleRefreshClients={() => {
+            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            if (onRefresh) onRefresh();
+          }}
           testCreateClient={async () => {
             await createClient({
               company_name: "Test Company",
@@ -183,6 +197,7 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
               updateClient={updateClient}
               handleSort={handleSort}
               sortConfig={sortConfig}
+              onRefresh={onRefresh}
             />
           </div>
         </>
@@ -202,6 +217,7 @@ export function ClientManager({ isModalOpen, setIsModalOpen }: ClientManagerProp
         onSuccess={() => {
           setSelectedClients([]);
           queryClient.invalidateQueries({ queryKey: ['clients'] });
+          if (onRefresh) onRefresh();
         }}
       />
     </>

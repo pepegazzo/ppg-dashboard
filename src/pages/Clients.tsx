@@ -1,17 +1,40 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, RefreshCw } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { ClientManager } from "@/components/clients/ClientManager";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 const Clients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // This function will be passed to ClientManager which handles the actual refresh
-    setTimeout(() => setIsRefreshing(false), 1000);
+    try {
+      // Invalidate all client-related queries to force a fresh fetch
+      await queryClient.invalidateQueries({ queryKey: ['clients'] });
+      await queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
+      
+      toast({
+        title: "Refreshed",
+        description: "Client information updated successfully"
+      });
+    } catch (error) {
+      console.error("Error refreshing client data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh client data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (
@@ -41,6 +64,7 @@ const Clients = () => {
         <ClientManager 
           isModalOpen={isModalOpen} 
           setIsModalOpen={setIsModalOpen} 
+          onRefresh={handleRefresh}
         />
       </div>
     </DashboardLayout>

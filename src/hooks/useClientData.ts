@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,56 +45,72 @@ export function useClientData() {
   const {
     data: rawClients,
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
     queryKey: ['clients', nameFilter, projectFilter],
     queryFn: async () => {
-      // Get company data
+      console.log('Fetching clients data...');
+      
+      // Get company data with contacts
       const { data: companiesData, error: clientsError } = await supabase
         .from('clients')
-        .select('*, contacts:contacts(*), client_project_assignments:client_project_assignments(project_id), projects:projects(id, name, status)')
-        .order('company_name');
+        .select('*, contacts:contacts(*)');
 
-      if (clientsError) throw clientsError;
+      if (clientsError) {
+        console.error('Error fetching clients:', clientsError);
+        throw clientsError;
+      }
 
       // For compatibility with old code: fetch active projects for each company
       const companiesWithExtras = await Promise.all(
         companiesData.map(async (company) => {
-          // fetch projects assigned to this company (as before)
-          const { data: assignments, error: assignmentsError } = await supabase
+          // Fetch all projects associated with this client through client_project_assignments
+          const { data: projectAssignments, error: assignmentsError } = await supabase
             .from('client_project_assignments')
             .select(`
               project_id,
-              projects (id, name, status)
+              projects:projects(id, name, status)
             `)
             .eq('client_id', company.id);
 
+          if (assignmentsError) {
+            console.error("Error fetching client project assignments:", assignmentsError);
+            return {
+              ...company,
+              contacts: company.contacts || [],
+              active_projects: [],
+            };
+          }
+
+          // Map the projects from assignments
+          const activeProjects = projectAssignments
+            ? projectAssignments.map(assignment => assignment.projects).filter(Boolean)
+            : [];
+
           // Fetch all contacts for this company
-          const { data: companyContacts } = await supabase
+          const { data: companyContacts, error: contactsError } = await supabase
             .from('contacts')
             .select('*')
             .eq('company_id', company.id)
             .order('is_primary', { ascending: false });
 
-          if (assignmentsError) {
-            console.error("Error fetching client projects:", assignmentsError);
-            return {
-              ...company,
-              contacts: companyContacts ?? [],
-              active_projects: [],
-            };
+          if (contactsError) {
+            console.error("Error fetching contacts:", contactsError);
           }
 
           return {
             ...company,
-            contacts: companyContacts ?? [],
-            active_projects: assignments?.map(a => a.projects) || []
+            contacts: companyContacts || [],
+            active_projects: activeProjects
           };
         })
       );
 
+      console.log('Clients data fetched:', companiesWithExtras);
       return companiesWithExtras;
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const filteredAndSortedClients = useMemo(() => {
@@ -137,12 +154,21 @@ export function useClientData() {
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
-      await queryClient.invalidateQueries({ queryKey: ['clients'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['clients'] }),
+        queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] }),
+        queryClient.invalidateQueries({ queryKey: ['client-available-projects'] }),
+        fetchAllProjects()
+      ]);
+      
+      await refetch();
+      
       toast({
         title: "Refreshed",
         description: "Client information updated"
       });
     } catch (error) {
+      console.error("Error refreshing client data:", error);
       toast({
         title: "Error refreshing",
         description: "Could not refresh client data",
@@ -194,6 +220,8 @@ export function useClientData() {
       });
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
     } catch (error) {
       console.error("Error in updateClient:", error);
     }

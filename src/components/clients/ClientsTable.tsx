@@ -23,6 +23,7 @@ interface ClientsTableProps {
     key: keyof Client | 'company' | 'email' | 'active_projects';
     direction: 'asc' | 'desc';
   };
+  onRefresh?: () => void;
 }
 
 const renderSortIndicator = (key: keyof Client | 'company' | 'email' | 'active_projects', sortConfig: ClientsTableProps['sortConfig']) => {
@@ -39,7 +40,8 @@ export const ClientsTable = ({
   handleSelectAll,
   updateClient,
   handleSort,
-  sortConfig
+  sortConfig,
+  onRefresh
 }: ClientsTableProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -54,6 +56,11 @@ export const ClientsTable = ({
     queryClient.invalidateQueries({
       queryKey: ['clients']
     });
+    
+    // Call parent's refresh handler if provided
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   const removeProjectFromClient = async (clientId: string, projectId: string, projectName: string) => {
@@ -110,10 +117,16 @@ export const ClientsTable = ({
         description: `${projectName} is no longer assigned to this client`,
       });
       
+      // Refresh all relevant queries
       queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
       queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      
+      // Call parent's refresh handler if provided
+      if (onRefresh) {
+        onRefresh();
+      }
     } catch (error) {
       console.error("Error removing project from client:", error);
       toast({
@@ -266,6 +279,7 @@ export const ClientsTable = ({
                             queryClient.invalidateQueries({
                               queryKey: ['clients']
                             });
+                            if (onRefresh) onRefresh();
                           }} 
                         />
                       )}

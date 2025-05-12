@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Fetch assigned projects (to not double-assign)
-  const { data: assignedProjects, isLoading: isLoadingAssigned } = useQuery({
+  const { data: assignedProjects, isLoading: isLoadingAssigned, refetch: refetchAssigned } = useQuery({
     queryKey: ['client-assigned-projects', clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -54,9 +55,10 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
   useEffect(() => {
     if (isPopoverOpen) {
+      refetchAssigned();
       refetchAvailable();
     }
-  }, [isPopoverOpen, refetchAvailable]);
+  }, [isPopoverOpen, refetchAssigned, refetchAvailable]);
 
   const assignProjectToClient = async (projectId: string, projectName: string) => {
     try {
@@ -71,6 +73,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
       if (clientError) throw clientError;
       const clientName = clientData?.company_name || 'Unknown';
 
+      // Create assignment record
       const { error: assignError } = await supabase
         .from('client_project_assignments')
         .insert({
@@ -80,6 +83,7 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
 
       if (assignError) throw assignError;
 
+      // Also update the project to set this client as the primary client
       const { error: updateError } = await supabase
         .from('projects')
         .update({
@@ -97,15 +101,19 @@ export function ProjectSelect({ clientId, onUpdate }: ProjectSelectProps) {
         description: `${projectName} has been assigned to this client`,
       });
 
-      queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['client-available-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      // Invalidate all client and project-related queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['client-assigned-projects'] }),
+        queryClient.invalidateQueries({ queryKey: ['client-available-projects'] }),
+        queryClient.invalidateQueries({ queryKey: ['projects'] }),
+        queryClient.invalidateQueries({ queryKey: ['clients'] })
+      ]);
 
       if (onUpdate) {
         onUpdate();
       }
     } catch (error) {
+      console.error("Error assigning project to client:", error);
       toast({
         title: "Error",
         description: "Failed to assign project to client",
