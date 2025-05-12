@@ -1,36 +1,23 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, Briefcase, CheckSquare, Receipt, FolderArchive, FileText, Users, LogOut, User, LogIn, UserPlus } from "lucide-react";
+import { Briefcase, Receipt, Users, LogOut, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 const menuItems = [{
-  title: "Overview",
-  icon: LayoutDashboard,
-  path: "/"
-}, {
   title: "Projects",
   icon: Briefcase,
   path: "/projects"
-}, {
-  title: "Tasks",
-  icon: CheckSquare,
-  path: "/tasks"
 }, {
   title: "Billing",
   icon: Receipt,
   path: "/billing"
 }, {
-  title: "Files & Assets",
-  icon: FolderArchive,
-  path: "/files"
-}, {
-  title: "Notes",
-  icon: FileText,
-  path: "/notes"
-}, {
   title: "Clients",
   icon: Users,
   path: "/clients"
 }];
+
 const Sidebar = () => {
   const location = useLocation();
   const {
@@ -38,6 +25,7 @@ const Sidebar = () => {
     signOut,
     isOwner
   } = useAuth();
+  
   return <aside className="h-screen bg-zinc-900 fixed left-0 top-0 w-[16rem] border-r border-zinc-800/30 flex flex-col z-40">
       {/* Header */}
       <div className="h-16 flex items-center px-3 border-b border-zinc-800/30">
@@ -89,10 +77,9 @@ const Sidebar = () => {
                 Sign In
               </Button>
             </Link>
-            
-            
           </>}
       </div>
     </aside>;
 };
+
 export default Sidebar;
