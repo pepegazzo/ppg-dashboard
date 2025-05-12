@@ -65,10 +65,7 @@ export function ProjectExpandedDetails({
               </p>
               
               <div className="mt-2 pt-2 border-t border-muted/30">
-                <div className="flex items-center gap-1">
-                  <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Financial Details</span>
-                </div>
+                
               </div>
             </div>
           </div>
