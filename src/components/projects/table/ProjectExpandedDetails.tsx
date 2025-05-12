@@ -22,7 +22,7 @@ export function ProjectExpandedDetails({
   return <TableRow className="bg-muted/5 hover:bg-muted/10 animate-accordion-down">
       <TableCell className="p-0 w-[40px]" />
       <TableCell colSpan={10} className="">
-        <div className="grid grid-cols-3 gap-6 border-t border-muted/30">
+        <div className="grid grid-cols-3  border-t border-muted/30">
           {/* Portal Info */}
           <div className="space-y-3 bg-muted/5 p-4 rounded-md">
             <h4 className="text-sm font-medium flex items-center gap-2 text-primary">
