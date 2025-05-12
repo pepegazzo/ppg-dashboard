@@ -140,7 +140,7 @@ export const ClientsTable = ({
             </TableHead>
             <TableHead className="w-[220px] cursor-pointer align-middle" onClick={() => handleSort('company_name')}>
               <div className="flex items-center h-10">
-                Company / Brand {renderSortIndicator('company_name', sortConfig)}
+                Brand {renderSortIndicator('company_name', sortConfig)}
               </div>
             </TableHead>
             <TableHead className="align-middle">
