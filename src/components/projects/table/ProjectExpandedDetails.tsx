@@ -9,120 +9,111 @@ import {
   DollarSign, 
   FileText, 
   Link as LinkIcon,
-  User,
-  Building,
-  Tag
+  Key,
+  Tag,
+  Package
 } from "lucide-react";
+import { ProjectPackageCell } from "./ProjectPackageCell";
 
 interface ProjectExpandedDetailsProps {
   project: Project;
 }
 
 export function ProjectExpandedDetails({ project }: ProjectExpandedDetailsProps) {
+  // Process packages for the project
+  const enhancedProject = {
+    ...project,
+    packages: project.package_names || []
+  };
+
+  // Calculate payment status based on revenue
+  const paymentStatus = project.revenue && project.revenue > 0 
+    ? "Paid" 
+    : "Pending";
+
   return (
     <TableRow className="bg-muted/5 hover:bg-muted/10 animate-accordion-down">
       <TableCell className="p-0 w-[40px]" />
       <TableCell colSpan={10} className="py-4">
         <div className="px-4 py-4 grid grid-cols-3 gap-6 border-t border-muted/30">
+          {/* Portal Info */}
           <div className="space-y-3 bg-muted/5 p-4 rounded-md">
             <h4 className="text-sm font-medium flex items-center gap-2 text-primary">
-              <FileText className="w-4 h-4" /> 
-              Project Details
+              <LinkIcon className="w-4 h-4" /> 
+              Portal Info
             </h4>
             <div className="space-y-2">
               <p className="text-xs flex items-center justify-between">
-                <span className="font-medium">ID:</span> 
-                <span className="text-muted-foreground font-mono">{project.id.substring(0, 8)}...</span>
+                <span className="font-medium">Slug:</span> 
+                <span className="text-muted-foreground">{project.slug || "Not set"}</span>
               </p>
-              {project.slug && (
-                <p className="text-xs flex items-center justify-between">
-                  <span className="font-medium">Slug:</span> 
-                  <span className="text-muted-foreground">{project.slug}</span>
-                </p>
-              )}
               <p className="text-xs flex items-center justify-between">
-                <span className="font-medium">Created:</span> 
-                <span className="text-muted-foreground">{new Date(project.created_at).toLocaleDateString()}</span>
+                <span className="font-medium">Password:</span> 
+                <span className="text-muted-foreground font-mono">{project.portal_password || "Not set"}</span>
               </p>
               
-              <div className="pt-2">
-                <h5 className="text-xs font-medium flex items-center gap-2 mb-2">
-                  <User className="w-3.5 h-3.5 text-muted-foreground" /> 
-                  Contact Information
-                </h5>
-                <p className="text-xs text-muted-foreground bg-background/50 p-2 rounded">
-                  {project.contact_id ? `Contact ID: ${project.contact_id}` : 'No contact assigned'}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-3 bg-muted/5 p-4 rounded-md">
-            <h4 className="text-sm font-medium flex items-center gap-2 text-primary">
-              <Calendar className="w-4 h-4" /> 
-              Timeline & Progress
-            </h4>
-            <div className="space-y-2">
-              <p className="text-xs flex items-center justify-between">
-                <span className="font-medium">Start Date:</span> 
-                <span className="text-muted-foreground">
-                  {project.start_date ? new Date(project.start_date).toLocaleDateString() : 'Not set'}
-                </span>
-              </p>
-              <p className="text-xs flex items-center justify-between">
-                <span className="font-medium">Due Date:</span> 
-                <span className="text-muted-foreground">
-                  {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
-                </span>
-              </p>
-              <p className="text-xs flex items-center justify-between">
-                <span className="font-medium">Progress:</span> 
-                <span className="text-muted-foreground font-semibold">{project.progress}%</span>
-              </p>
-              
-              <div className="pt-2">
-                <h5 className="text-xs font-medium flex items-center gap-2 mb-2">
-                  <Tag className="w-3.5 h-3.5 text-muted-foreground" /> 
-                  Project Status
-                </h5>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {project.priority} Priority
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {project.status}
-                  </Badge>
+              <div className="mt-2 pt-2 border-t border-muted/30">
+                <div className="flex items-center gap-1">
+                  <Key className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Portal Access</span>
                 </div>
               </div>
             </div>
           </div>
           
+          {/* Payment Info */}
           <div className="space-y-3 bg-muted/5 p-4 rounded-md">
             <h4 className="text-sm font-medium flex items-center gap-2 text-primary">
               <DollarSign className="w-4 h-4" /> 
-              Financial Information
+              Payment Info
             </h4>
             <div className="space-y-2">
               <p className="text-xs flex items-center justify-between">
                 <span className="font-medium">Revenue:</span> 
-                <span className="text-muted-foreground font-semibold">{project.revenue ? `$${project.revenue.toLocaleString()}` : 'Not set'}</span>
+                <span className="text-muted-foreground font-semibold">
+                  {project.revenue ? `$${project.revenue.toLocaleString()}` : 'Not set'}
+                </span>
               </p>
-              {project.package_name && (
-                <p className="text-xs flex items-center justify-between">
-                  <span className="font-medium">Package:</span> 
-                  <span className="text-muted-foreground">{project.package_name}</span>
-                </p>
+              <p className="text-xs flex items-center justify-between">
+                <span className="font-medium">Payment Status:</span> 
+                <Badge variant="outline" className={`text-xs ${paymentStatus === 'Paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                  {paymentStatus}
+                </Badge>
+              </p>
+              
+              <div className="mt-2 pt-2 border-t border-muted/30">
+                <div className="flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Financial Details</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Project Details */}
+          <div className="space-y-3 bg-muted/5 p-4 rounded-md">
+            <h4 className="text-sm font-medium flex items-center gap-2 text-primary">
+              <Package className="w-4 h-4" /> 
+              Project Services
+            </h4>
+            <div className="space-y-4">
+              {enhancedProject.packages && enhancedProject.packages.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {enhancedProject.packages.map((packageName, index) => (
+                    <Badge key={index} variant="outline" className="text-xs bg-zinc-50 border-zinc-200">
+                      {packageName}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No services assigned</p>
               )}
               
-              <div className="pt-2">
-                <h5 className="text-xs font-medium flex items-center gap-2 mb-2">
-                  <Building className="w-3.5 h-3.5 text-muted-foreground" /> 
-                  Client Information
-                </h5>
-                <p className="text-xs text-muted-foreground bg-background/50 p-2 rounded">
-                  <span className="font-medium">Client:</span> {project.client_name}
-                  {project.client_id && <span className="block text-xs opacity-75 mt-1">ID: {project.client_id}</span>}
-                </p>
+              <div className="pt-2 border-t border-muted/30">
+                <div className="flex items-center gap-1">
+                  <Tag className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Service Details</span>
+                </div>
               </div>
             </div>
           </div>

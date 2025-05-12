@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Package as PackageIcon, Wrench, Palette, Video, Globe, Heart, Box, Tags } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,7 +35,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
 
   return (
     <div className="flex items-center gap-1">
-      <Badge variant="table">
+      <Badge variant="outline" className="bg-zinc-50 border-zinc-200">
         {mainPackage ? (
           <>
             {getServiceIcon(mainPackage)}
@@ -52,7 +53,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge variant="table" className="ml-1">
+              <Badge variant="outline" className="ml-1 bg-zinc-50 border-zinc-200">
                 <Tags className="h-2.5 w-2.5" />
                 +{additionalPackages.length}
               </Badge>
