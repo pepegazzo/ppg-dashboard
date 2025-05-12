@@ -84,10 +84,7 @@ export function ProjectExpandedDetails({
                 </div> : <p className="text-xs text-muted-foreground">No services assigned</p>}
               
               <div className="pt-2 border-t border-muted/30">
-                <div className="flex items-center gap-1">
-                  <Tag className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Service Details</span>
-                </div>
+                
               </div>
             </div>
           </div>
