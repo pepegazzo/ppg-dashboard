@@ -1,25 +1,15 @@
-
 import React from "react";
 import { Project } from "../types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  FileText, 
-  Link as LinkIcon,
-  Key,
-  Tag,
-  Package
-} from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Link as LinkIcon, Key, Tag, Package } from "lucide-react";
 import { ProjectPackageCell } from "./ProjectPackageCell";
-
 interface ProjectExpandedDetailsProps {
   project: Project;
 }
-
-export function ProjectExpandedDetails({ project }: ProjectExpandedDetailsProps) {
+export function ProjectExpandedDetails({
+  project
+}: ProjectExpandedDetailsProps) {
   // Process packages for the project
   const enhancedProject = {
     ...project,
@@ -27,12 +17,8 @@ export function ProjectExpandedDetails({ project }: ProjectExpandedDetailsProps)
   };
 
   // Calculate payment status based on revenue
-  const paymentStatus = project.revenue && project.revenue > 0 
-    ? "Paid" 
-    : "Pending";
-
-  return (
-    <TableRow className="bg-muted/5 hover:bg-muted/10 animate-accordion-down">
+  const paymentStatus = project.revenue && project.revenue > 0 ? "Paid" : "Pending";
+  return <TableRow className="bg-muted/5 hover:bg-muted/10 animate-accordion-down">
       <TableCell className="p-0 w-[40px]" />
       <TableCell colSpan={10} className="py-4">
         <div className="px-4 py-4 grid grid-cols-3 gap-6 border-t border-muted/30">
@@ -53,10 +39,7 @@ export function ProjectExpandedDetails({ project }: ProjectExpandedDetailsProps)
               </p>
               
               <div className="mt-2 pt-2 border-t border-muted/30">
-                <div className="flex items-center gap-1">
-                  <Key className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Portal Access</span>
-                </div>
+                
               </div>
             </div>
           </div>
@@ -97,17 +80,11 @@ export function ProjectExpandedDetails({ project }: ProjectExpandedDetailsProps)
               Project Services
             </h4>
             <div className="space-y-4">
-              {enhancedProject.packages && enhancedProject.packages.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {enhancedProject.packages.map((packageName, index) => (
-                    <Badge key={index} variant="outline" className="text-xs bg-zinc-50 border-zinc-200">
+              {enhancedProject.packages && enhancedProject.packages.length > 0 ? <div className="flex flex-wrap gap-2">
+                  {enhancedProject.packages.map((packageName, index) => <Badge key={index} variant="outline" className="text-xs bg-zinc-50 border-zinc-200">
                       {packageName}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">No services assigned</p>
-              )}
+                    </Badge>)}
+                </div> : <p className="text-xs text-muted-foreground">No services assigned</p>}
               
               <div className="pt-2 border-t border-muted/30">
                 <div className="flex items-center gap-1">
@@ -119,6 +96,5 @@ export function ProjectExpandedDetails({ project }: ProjectExpandedDetailsProps)
           </div>
         </div>
       </TableCell>
-    </TableRow>
-  );
+    </TableRow>;
 }
