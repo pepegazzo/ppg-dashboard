@@ -10,7 +10,6 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
 import { ProjectClientCell } from "./ProjectClientCell";
-import { ProjectContactCell } from "./ProjectContactCell";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -58,9 +57,6 @@ export function ProjectTableRowComponent({
       </TableCell>
       <TableCell className="w-[160px] p-4">
         <span>{project.client_name || "No Client"}</span>
-      </TableCell>
-      <TableCell className="w-[160px] p-4">
-        <span>{project.contact_name || "No Contact"}</span>
       </TableCell>
       <TableCell className="w-[120px] p-4">
         <ProjectStatusCell project={project} readOnly={true} />
