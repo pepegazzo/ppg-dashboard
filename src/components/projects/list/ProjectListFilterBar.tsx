@@ -2,10 +2,8 @@
 import { FilterBar } from "../FilterBar";
 
 interface ProjectListFilterBarProps {
-  nameFilter: string;
-  setNameFilter: (value: string) => void;
-  clientFilter: string;
-  setClientFilter: (value: string) => void;
+  searchFilter: string;
+  setSearchFilter: (value: string) => void;
   statusFilter: string;
   setStatusFilter: (value: string) => void;
   priorityFilter: string;

@@ -4,8 +4,7 @@ import { Project, SortableProjectField, SortDirection } from "../types";
 
 interface UseFilteredSortedProjectsArgs {
   projects: Project[];
-  nameFilter: string;
-  clientFilter: string;
+  searchFilter: string;
   statusFilter: string;
   priorityFilter: string;
   sortField: SortableProjectField;
@@ -14,8 +13,7 @@ interface UseFilteredSortedProjectsArgs {
 
 export function useFilteredSortedProjects({
   projects,
-  nameFilter,
-  clientFilter,
+  searchFilter,
   statusFilter,
   priorityFilter,
   sortField,
@@ -23,14 +21,21 @@ export function useFilteredSortedProjects({
 }: UseFilteredSortedProjectsArgs): Project[] {
   return useMemo(() => {
     let result = projects.filter(project => {
-      const nameMatch = project.name.toLowerCase().includes(nameFilter.toLowerCase());
-      const clientMatch = project.client_name
-        ? project.client_name.toLowerCase().includes(clientFilter.toLowerCase())
-        : clientFilter === ''; // Only match null client_name when clientFilter is empty
+      // Search in multiple fields with the single search filter
+      const searchLower = searchFilter.toLowerCase();
+      const searchMatch = searchFilter === '' || 
+        project.name.toLowerCase().includes(searchLower) || 
+        (project.client_name && project.client_name.toLowerCase().includes(searchLower)) ||
+        (project.package_name && project.package_name.toLowerCase().includes(searchLower)) ||
+        (project.status && project.status.toLowerCase().includes(searchLower)) ||
+        (project.priority && project.priority.toLowerCase().includes(searchLower));
+        
       const statusMatch = !statusFilter || statusFilter === "all" || project.status === statusFilter;
       const priorityMatch = !priorityFilter || priorityFilter === "all" || project.priority === priorityFilter;
-      return nameMatch && clientMatch && statusMatch && priorityMatch;
+      
+      return searchMatch && statusMatch && priorityMatch;
     });
+    
     return result.sort((a, b) => {
       if (sortField === 'package_name') {
         const packageA = a.package_name || '';
@@ -57,5 +62,5 @@ export function useFilteredSortedProjects({
         return sortDirection === 'asc' ? compareResult : -compareResult;
       }
     });
-  }, [projects, nameFilter, clientFilter, statusFilter, priorityFilter, sortField, sortDirection]);
+  }, [projects, searchFilter, statusFilter, priorityFilter, sortField, sortDirection]);
 }
