@@ -9,6 +9,7 @@ export type Project = {
   client_name: string;
   client_id?: string | null;
   contact_id?: string | null;
+  contact_name?: string | null;
   status: 'Onboarding' | 'Active' | 'Completed' | 'Cancelled';
   priority: 'Low' | 'Medium' | 'High';
   start_date: string | null;
@@ -32,4 +33,4 @@ export type PackageType = {
 
 export type SortDirection = 'asc' | 'desc';
 
-export type SortableProjectField = 'name' | 'client_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';
+export type SortableProjectField = 'name' | 'client_name' | 'contact_name' | 'status' | 'priority' | 'start_date' | 'due_date' | 'created_at' | 'package_name' | 'revenue' | 'progress';

@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Project } from "../types";
 import { TableCell, TableRow as UITableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,9 +10,7 @@ import { ProjectPackageCell } from "./ProjectPackageCell";
 import { ProjectDateCell } from "./ProjectDateCell";
 import { ProjectActionsCell } from "./ProjectActionsCell";
 import { ProjectClientCell } from "./ProjectClientCell";
-import { ProjectExpandedDetails } from "./ProjectExpandedDetails";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ProjectContactCell } from "./ProjectContactCell";
 
 interface ProjectTableRowProps {
   project: Project;
@@ -34,8 +31,6 @@ export function ProjectTableRowComponent({
   onEditProject,
   fetchProjects
 }: ProjectTableRowProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
   const handleDeleteClick = () => {
     setSelectedProjects([project.id]);
     setShowDeleteModal(true);
@@ -51,49 +46,45 @@ export function ProjectTableRowComponent({
     packages: project.package_names || []
   };
 
-  return <>
-      <UITableRow className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/10' : ''}`}>
-        <TableCell className="w-[40px] p-4 align-middle">
-          <div className="flex items-center h-full justify-center">
-            <Checkbox checked={selectedProjects.includes(project.id)} onCheckedChange={() => toggleProjectSelection(project.id)} aria-label={`Select project ${project.name}`} />
-          </div>
-        </TableCell>
-        <TableCell className="font-medium w-[200px] p-4">
-          <span>{project.name}</span>
-        </TableCell>
-        <TableCell className="w-[160px] p-4">
-          <span>{project.client_name || "No Client"}</span>
-        </TableCell>
-        <TableCell className="w-[120px] p-4">
-          <ProjectStatusCell project={project} readOnly={true} />
-        </TableCell>
-        <TableCell className="w-[200px] p-4">
-          <ProjectProgressCell progress={project.progress || 0} />
-        </TableCell>
-        <TableCell className="w-[120px] p-4">
-          <ProjectPriorityCell priority={project.priority} />
-        </TableCell>
-        <TableCell className="w-[120px] p-4">
-          <ProjectPackageCell project={enhancedProject} readOnly={true} />
-        </TableCell>
-        <TableCell className="w-[120px] p-4">
-          <ProjectDateCell date={project.start_date} readOnly={true} />
-        </TableCell>
-        <TableCell className="w-[120px] p-4">
-          <ProjectDateCell date={project.due_date} readOnly={true} />
-        </TableCell>
-        <TableCell className="w-[80px] p-4">
-          <ProjectActionsCell projectId={project.id} projectPassword={project.portal_password || ""} projectSlug={project.slug || ""} setShowDeleteModal={setShowDeleteModal} setSelectedProjects={setSelectedProjects} onEditProject={() => handleEditClick()} />
-        </TableCell>
-        <TableCell className="w-[60px] p-4 text-center">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-muted" onClick={() => setIsExpanded(!isExpanded)} aria-label={isExpanded ? "Collapse details" : "Expand details"}>
-            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-        </TableCell>
-      </UITableRow>
-      
-      {isExpanded && <ProjectExpandedDetails project={project} />}
-    </>;
+  return (
+    <UITableRow className="hover:bg-muted/30 transition-colors">
+      <TableCell className="w-[40px] p-4 align-middle">
+        <div className="flex items-center h-full justify-center">
+          <Checkbox checked={selectedProjects.includes(project.id)} onCheckedChange={() => toggleProjectSelection(project.id)} aria-label={`Select project ${project.name}`} />
+        </div>
+      </TableCell>
+      <TableCell className="font-medium w-[200px] p-4">
+        <span>{project.name}</span>
+      </TableCell>
+      <TableCell className="w-[160px] p-4">
+        <span>{project.client_name || "No Client"}</span>
+      </TableCell>
+      <TableCell className="w-[160px] p-4">
+        <span>{project.contact_name || "No Contact"}</span>
+      </TableCell>
+      <TableCell className="w-[120px] p-4">
+        <ProjectStatusCell project={project} readOnly={true} />
+      </TableCell>
+      <TableCell className="w-[200px] p-4">
+        <ProjectProgressCell progress={project.progress || 0} />
+      </TableCell>
+      <TableCell className="w-[120px] p-4">
+        <ProjectPriorityCell priority={project.priority} />
+      </TableCell>
+      <TableCell className="w-[120px] p-4">
+        <ProjectPackageCell project={enhancedProject} readOnly={true} />
+      </TableCell>
+      <TableCell className="w-[120px] p-4">
+        <ProjectDateCell date={project.start_date} readOnly={true} />
+      </TableCell>
+      <TableCell className="w-[120px] p-4">
+        <ProjectDateCell date={project.due_date} readOnly={true} />
+      </TableCell>
+      <TableCell className="w-[80px] p-4">
+        <ProjectActionsCell projectId={project.id} projectPassword={project.portal_password || ""} projectSlug={project.slug || ""} setShowDeleteModal={setShowDeleteModal} setSelectedProjects={setSelectedProjects} onEditProject={() => handleEditClick()} />
+      </TableCell>
+    </UITableRow>
+  );
 }
 
 // Export with the original name for backward compatibility
