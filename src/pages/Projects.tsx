@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import ProjectForm from "@/components/projects/ProjectForm";
 import { ProjectList } from "@/components/projects/list";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -225,10 +226,10 @@ const Projects = () => {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold text-zinc-900">Projects</h1>
             <div className="flex gap-2">
-              <Button onClick={() => setIsCreating(true)}>
+              <PrimaryButton onClick={() => setIsCreating(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Project
-              </Button>
+              </PrimaryButton>
               <Button variant="outline" onClick={handleRefreshProjects}>
                 Refresh
               </Button>

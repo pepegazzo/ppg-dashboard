@@ -1,6 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Info, PlusCircle } from "lucide-react";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
 
 interface EmptyStateProps {
   setIsCreating: (value: boolean) => void;
@@ -20,10 +20,10 @@ export function EmptyState({ setIsCreating, handleRefreshProjects, testCreatePro
           You haven't created any projects yet. Get started by creating your first project.
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
-          <Button onClick={() => setIsCreating(true)}>
+          <PrimaryButton onClick={() => setIsCreating(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Create your first project
-          </Button>
+          </PrimaryButton>
           <Button variant="outline" onClick={handleRefreshProjects}>
             Refresh Projects
           </Button>
