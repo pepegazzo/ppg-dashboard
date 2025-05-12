@@ -5,8 +5,21 @@ interface ProjectPriorityCellProps {
 export function ProjectPriorityCell({
   priority
 }: ProjectPriorityCellProps) {
+  const getPriorityVariant = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case 'high':
+        return 'error';
+      case 'medium':
+        return 'warning';
+      case 'low':
+        return 'success';
+      default:
+        return 'outline';
+    }
+  };
+
   return (
-    <Badge variant="outline" className="text-xs font-medium px-2.5 py-1 rounded-full w-fit border border-zinc-300 bg-zinc-100 text-zinc-800 inline-flex items-center gap-1">
+    <Badge variant={getPriorityVariant(priority)} className="text-xs font-medium">
       {priority}
     </Badge>
   );

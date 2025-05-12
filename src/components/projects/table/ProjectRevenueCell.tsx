@@ -11,14 +11,14 @@ export function ProjectRevenueCell({ revenue }: ProjectRevenueCellProps) {
     return `S/ ${amount.toFixed(2)}`;
   };
 
-  const getRevenueColor = () => {
-    if (!revenue || revenue === 0) return "bg-gray-50 text-gray-700 border-gray-200";
-    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  const getRevenueVariant = () => {
+    if (!revenue || revenue === 0) return "outline";
+    return "success";
   };
 
   return (
     <TableCell>
-      <Badge className="text-xs font-medium px-2.5 py-1 rounded-full w-fit border border-zinc-200 bg-zinc-100 text-zinc-800 inline-flex items-center gap-1">
+      <Badge variant={getRevenueVariant()} className="text-xs font-medium">
         {formatRevenue(revenue)}
       </Badge>
     </TableCell>
