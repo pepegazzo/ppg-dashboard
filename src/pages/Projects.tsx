@@ -9,6 +9,7 @@ import { PlusCircle } from "lucide-react";
 import ProjectForm from "@/components/projects/ProjectForm";
 import { ProjectList } from "@/components/projects/list";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { SecondaryButton } from "@/components/ui/SecondaryButton";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -230,9 +231,9 @@ const Projects = () => {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Project
               </PrimaryButton>
-              <Button variant="outline" onClick={handleRefreshProjects}>
+              <SecondaryButton onClick={handleRefreshProjects}>
                 Refresh
-              </Button>
+              </SecondaryButton>
             </div>
           </div>
         </div>
