@@ -25,7 +25,7 @@ const Sidebar = () => {
     isOwner
   } = useAuth();
   
-  return <aside className="h-screen bg-zinc-900 fixed left-0 top-0 w-64 rounded-2xl m-4 flex flex-col z-40 shadow-xl p-6">
+  return <aside className="h-[95vh] bg-zinc-900 fixed left-0 top-0 w-64 rounded-2xl rounded-b-2xl m-4 mb-4 flex flex-col z-40 shadow-xl p-6">
       {/* Header */}
       <div className="h-16 flex items-center mb-8">
         <div className="flex items-center gap-3">
