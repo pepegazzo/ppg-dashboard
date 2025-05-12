@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Project } from "../types";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -64,9 +63,7 @@ export function ProjectExpandedDetails({
                 </span>
               </p>
               
-              <div className="mt-2 pt-2 border-t border-muted/30">
-                
-              </div>
+              
             </div>
           </div>
           
