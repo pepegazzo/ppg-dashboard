@@ -5,6 +5,8 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, DollarSign, FileText, Link as LinkIcon, Key, Tag, Package } from "lucide-react";
 import { ProjectPackageCell } from "./ProjectPackageCell";
+import { updateProjectRevenue } from "@/utils/projectRevenue";
+
 interface ProjectExpandedDetailsProps {
   project: Project;
 }
@@ -19,6 +21,7 @@ export function ProjectExpandedDetails({
 
   // Calculate payment status based on revenue
   const paymentStatus = project.revenue && project.revenue > 0 ? "Paid" : "Pending";
+  
   return <TableRow className="bg-muted/5 hover:bg-muted/10 animate-accordion-down">
       <TableCell className="p-0 w-[40px]" />
       <TableCell colSpan={10} className="py-4">
@@ -60,7 +63,7 @@ export function ProjectExpandedDetails({
               </p>
               <p className="text-xs flex items-center justify-between">
                 <span className="font-medium">Payment Status:</span> 
-                <span className={`text-xs ${paymentStatus === 'Paid' ? 'text-green-600' : 'text-amber-600'}`}>
+                <span className="text-xs text-muted-foreground">
                   {paymentStatus}
                 </span>
               </p>
