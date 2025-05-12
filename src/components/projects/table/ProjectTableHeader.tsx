@@ -1,3 +1,4 @@
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableProjectField, SortDirection } from "../types";
@@ -44,7 +45,7 @@ export function ProjectTableHeader({
         <div className="flex items-left">Priority {renderSortIndicator('priority')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('package_name')} className="w-[120px] p-4">
-        <div className="flex items-left">Service {renderSortIndicator('package_name')}</div>
+        <div className="flex items-left">Package {renderSortIndicator('package_name')}</div>
       </TableHead>
       <TableHead onClick={() => onSort('start_date')} className="w-[120px] p-4">
         <div className="flex items-left">Start {renderSortIndicator('start_date')}</div>
