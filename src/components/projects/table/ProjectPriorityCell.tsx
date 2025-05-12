@@ -6,7 +6,7 @@ export function ProjectPriorityCell({
   priority
 }: ProjectPriorityCellProps) {
   return (
-    <Badge variant="secondary" className="text-xs font-medium">
+    <Badge variant="table">
       {priority}
     </Badge>
   );

@@ -18,7 +18,7 @@ export function ProjectRevenueCell({ revenue }: ProjectRevenueCellProps) {
 
   return (
     <TableCell>
-      <Badge variant={getRevenueVariant()} className="text-xs font-medium">
+      <Badge variant="table">
         {formatRevenue(revenue)}
       </Badge>
     </TableCell>

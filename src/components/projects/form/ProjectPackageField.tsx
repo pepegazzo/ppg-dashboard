@@ -116,7 +116,8 @@ export function ProjectPackageField({ control }: ProjectPackageFieldProps) {
           {getSelectedPackageNames().map((name, index) => (
             <Badge 
               key={index} 
-              className="gap-1 pl-1 pr-1 py-1.5 h-7 bg-zinc-100 text-zinc-800 border-zinc-200"
+              variant="table"
+              className="gap-1"
             >
               {getServiceIcon(name)}
               <span className="text-xs">{name}</span>

@@ -34,7 +34,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
 
   return (
     <div className="flex items-center gap-1">
-      <Badge variant="outline" className="text-xs font-medium px-2.5 py-1 rounded-full w-fit border border-zinc-300 bg-zinc-100 text-zinc-800 inline-flex items-center gap-1">
+      <Badge variant="table">
         {mainPackage ? (
           <>
             {getServiceIcon(mainPackage)}
@@ -52,7 +52,7 @@ export function ProjectPackageCell({ project, readOnly }: ProjectPackageCellProp
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge variant="secondary" className="text-xs font-medium px-2.5 py-1 rounded-full w-fit border border-zinc-300 bg-zinc-100 text-zinc-800 inline-flex items-center gap-1 ml-1">
+              <Badge variant="table" className="ml-1">
                 <Tags className="h-2.5 w-2.5" />
                 +{additionalPackages.length}
               </Badge>

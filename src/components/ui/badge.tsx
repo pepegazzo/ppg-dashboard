@@ -14,6 +14,7 @@ const badgeVariants = cva(
         success: "bg-emerald-100 text-emerald-800 border-emerald-200",
         warning: "bg-amber-100 text-amber-800 border-amber-200",
         error: "bg-red-100 text-red-800 border-red-200",
+        table: "px-2.5 py-1 rounded-full w-fit border border-zinc-300 bg-zinc-100 text-zinc-800 inline-flex items-center gap-1 text-xs font-medium",
       },
     },
     defaultVariants: {
