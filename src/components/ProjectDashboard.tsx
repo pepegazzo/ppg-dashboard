@@ -9,12 +9,16 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { Separator } from "./ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
-import { DollarSign, TrendingUp, Briefcase, Users, ChevronLeft, ChevronRight, LayoutDashboard, FolderKanban, FileText, UsersRound, Plus, Trash2, Edit, MoreVertical, X, Calendar as CalendarIcon, Receipt, Building, Mail, Phone, Eye, Download, Clock } from "lucide-react";
+import { DollarSign, TrendingUp, Briefcase, Users, ChevronLeft, ChevronRight, LayoutDashboard, FolderKanban, FileText, UsersRound, Plus, Trash2, Edit, MoreVertical, X, Calendar as CalendarIcon, Receipt, Building, Mail, Phone, Eye, Download, Clock, Pencil, ChevronDown, ChevronUp, MapPin, Globe } from "lucide-react";
 import { baseUrl } from "../lib/base-url";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { toast } from "sonner";
+import { CompanyForm } from "./CompanyForm";
+import { ContactForm } from "./ContactForm";
 
 interface Project {
   id: string;
@@ -56,6 +60,7 @@ interface InvoiceItem {
 
 interface Contact {
   id: string;
+  companyId?: string | null;
   name: string;
   lastName: string;
   email: string;
@@ -65,19 +70,29 @@ interface Contact {
   projects: string[];
 }
 
+interface Company {
+  id: string;
+  name: string;
+  legalName?: string | null;
+  taxId?: string | null;
+  industry?: string | null;
+  website?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  logo?: string | null;
+}
+
 export default function ProjectDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [activeTab, setActiveTab] = useState("summary");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; type: 'contact' | 'project' | 'invoice' | null; id: string | null; name: string }>({
-    open: false,
-    type: null,
-    id: null,
-    name: ''
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
+  const [selectedCompanyForContact, setSelectedCompanyForContact] = useState<string | null>(null);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [activeView, setActiveView] = useState('summary');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; type: 'contact' | 'project' | 'invoice' | null; id: string | null; name: string }>({
@@ -86,25 +101,31 @@ export default function ProjectDashboard() {
     id: null,
     name: ''
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'company' | 'contact' | 'project', id: string } | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState<{ projectId: string; field: 'startDate' | 'endDate' } | null>(null);
+  const [collapsedCompanies, setCollapsedCompanies] = useState<Set<string>>(new Set());
+  const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
+  const [isAddInvoiceOpen, setIsAddInvoiceOpen] = useState(false);
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [selectedProject, setSelectedProject] = useState('');
+  const [prefilledProjectId, setPrefilledProjectId] = useState('');
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([{ id: '1', serviceName: '', description: '', unitPrice: 0, quantity: 1, total: 0 }]);
+  const [invoiceNotes, setInvoiceNotes] = useState('');
+  const [invoiceCurrency, setInvoiceCurrency] = useState<'PEN' | 'USD'>('PEN');
+  const [exchangeRate, setExchangeRate] = useState(3.75);
   const [projectForm, setProjectForm] = useState({
     name: '',
     company: '',
     contactId: '',
-    status: 'planning',
+    status: 'planning' as 'active' | 'completed' | 'on-hold' | 'planning' | 'cancelled',
     startDate: '',
     endDate: ''
   });
-  const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<string>('');
-  const [prefilledProjectId, setPrefilledProjectId] = useState<string>('');
-  const [isAddInvoiceOpen, setIsAddInvoiceOpen] = useState(false);
-  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([
-    { id: '1', serviceName: '', description: '', unitPrice: 0, quantity: 1, total: 0 }
-  ]);
-  const [invoiceNotes, setInvoiceNotes] = useState('');
-  const [invoiceCurrency, setInvoiceCurrency] = useState<'PEN' | 'USD'>('PEN');
-  const [exchangeRate, setExchangeRate] = useState(3.75); // Default exchange rate
-  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     id: '',
     name: '',
@@ -114,32 +135,32 @@ export default function ProjectDashboard() {
     company: '',
     role: ''
   });
-  const [isEditingContact, setIsEditingContact] = useState(false);
-  const [datePickerOpen, setDatePickerOpen] = useState<{ projectId: string; field: 'startDate' | 'endDate' } | null>(null);
 
   // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [projectsRes, invoicesRes, contactsRes] = await Promise.all([
+        const [projectsRes, invoicesRes, contactsRes, companiesRes] = await Promise.all([
           fetch(`${baseUrl}/api/projects`),
           fetch(`${baseUrl}/api/invoices`),
-          fetch(`${baseUrl}/api/contacts`)
+          fetch(`${baseUrl}/api/contacts`),
+          fetch(`${baseUrl}/api/companies`)
         ]);
 
-        if (!projectsRes.ok || !invoicesRes.ok || !contactsRes.ok) {
+        if (!projectsRes.ok || !invoicesRes.ok || !contactsRes.ok || !companiesRes.ok) {
           throw new Error('Failed to fetch data');
         }
 
-        const [projectsData, invoicesData, contactsData] = await Promise.all([
+        const [projectsData, invoicesData, contactsData, companiesData] = await Promise.all([
           projectsRes.json(),
           invoicesRes.json(),
-          contactsRes.json()
+          contactsRes.json(),
+          companiesRes.json()
         ]);
 
-        setProjects(projectsData);
-        setInvoices(invoicesData);
-        setContacts(contactsData.map((c: any) => {
+        setProjects(projectsData as Project[]);
+        setInvoices(invoicesData as Invoice[]);
+        setContacts((contactsData as any[]).map((c: any) => {
           try {
             return {
               ...c,
@@ -153,6 +174,7 @@ export default function ProjectDashboard() {
             };
           }
         }));
+        setCompanies(companiesData as Company[]);
         setIsLoading(false);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -163,6 +185,135 @@ export default function ProjectDashboard() {
 
     loadData();
   }, []);
+
+  const toggleCompany = (companyId: string) => {
+    setCollapsedCompanies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(companyId)) {
+        newSet.delete(companyId);
+      } else {
+        newSet.add(companyId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleAddCompany = async (data: { name: string; ruc?: string; phone?: string; email?: string; website?: string; address?: string; contactName?: string; contactPhone?: string; contactEmail?: string }) => {
+    try {
+      const companyResponse = await fetch(`${baseUrl}/api/companies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          ruc: data.ruc || '',
+          phone: data.phone || '',
+          email: data.email || '',
+          website: data.website || '',
+          address: data.address || '',
+        }),
+      });
+      
+      if (!companyResponse.ok) throw new Error('Failed to add company');
+      const newCompany = await companyResponse.json() as Company;
+      
+      // Only add contact if contact name is provided
+      if (data.contactName?.trim()) {
+        const contactResponse = await fetch(`${baseUrl}/api/contacts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: data.contactName,
+            company: newCompany.name,
+            phone: data.contactPhone || '',
+            email: data.contactEmail || '',
+            lastName: '',
+            role: '',
+            projects: []
+          }),
+        });
+        
+        if (!contactResponse.ok) throw new Error('Failed to add contact');
+        const newContact = await contactResponse.json() as Contact;
+        setContacts([...contacts, newContact]);
+      }
+      
+      setCompanies([...companies, newCompany]);
+      setIsCompanyDialogOpen(false);
+      toast.success('Cliente agregado exitosamente');
+    } catch (error) {
+      toast.error('Error al agregar cliente');
+      console.error(error);
+    }
+  };
+
+  const handleUpdateCompany = async (data: { name: string; ruc?: string; phone?: string; email?: string; website?: string; address?: string }) => {
+    if (!editingCompany) return;
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/companies/${editingCompany.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) throw new Error('Failed to update company');
+      const updatedCompany = await response.json() as Company;
+      
+      setCompanies(companies.map(c => c.id === updatedCompany.id ? updatedCompany : c));
+      setIsCompanyDialogOpen(false);
+      setEditingCompany(null);
+      toast.success('Cliente actualizado exitosamente');
+    } catch (error) {
+      toast.error('Error al actualizar cliente');
+      console.error(error);
+    }
+  };
+
+  const handleUpdateContact = async (data: { name: string; phone?: string; email?: string; company: string }) => {
+    if (!editingContact) return;
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/contacts/${editingContact.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          lastName: editingContact.lastName,
+          role: editingContact.role,
+          projects: editingContact.projects
+        }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to update contact');
+      const updatedContact = await response.json() as Contact;
+      
+      setContacts(contacts.map(c => c.id === updatedContact.id ? updatedContact : c));
+      setIsContactDialogOpen(false);
+      setEditingContact(null);
+      setSelectedCompanyForContact(null);
+      toast.success('Contacto actualizado exitosamente');
+    } catch (error) {
+      toast.error('Error al actualizar contacto');
+      console.error(error);
+    }
+  };
+
+  const handleDeleteCompany = async (id: string) => {
+    try {
+      const response = await fetch(`${baseUrl}/api/companies/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete company');
+      
+      setCompanies(companies.filter(c => c.id !== id));
+      setDeleteConfirm(null);
+      toast.success('Cliente eliminado exitosamente');
+    } catch (error) {
+      toast.error('Error al eliminar cliente');
+      console.error(error);
+    }
+  };
 
   const getContactsByCompany = (company: string) => {
     const filtered = contacts.filter(contact => contact.company === company);
@@ -415,80 +566,41 @@ export default function ProjectDashboard() {
     setIsEditingContact(false);
   };
 
-  const handleAddContact = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!contactForm.name || !contactForm.lastName || !contactForm.email || !contactForm.phone || !contactForm.company || !contactForm.role) {
-      alert('Por favor completa todos los campos');
-      return;
-    }
-
+  const handleAddContact = async (data: { name: string; phone?: string; email?: string; company: string }) => {
     try {
       const response = await fetch(`${baseUrl}/api/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...contactForm,
-          projects: [] // Empty projects array initially
-        })
-      });
-
-      if (response.ok) {
-        const createdContact = await response.json() as Contact;
-        setContacts([...contacts, createdContact]);
-        setIsAddContactOpen(false);
-        resetContactForm();
-      }
-    } catch (error) {
-      console.error('Error creating contact:', error);
-      alert('Error al crear el contacto');
-    }
-  };
-
-  const handleEditContact = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const contactToUpdate = contacts.find(c => c.id === contactForm.id);
-      const response = await fetch(`${baseUrl}/api/contacts/${contactForm.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: contactForm.name,
-          lastName: contactForm.lastName,
-          email: contactForm.email,
-          phone: contactForm.phone,
-          company: contactForm.company,
-          role: contactForm.role,
-          projects: contactToUpdate?.projects || []
-        })
+        body: JSON.stringify(data),
       });
       
-      if (response.ok) {
-        const updatedContact = await response.json() as Contact;
-        setContacts(contacts.map(c => c.id === updatedContact.id ? updatedContact : c));
-        setIsAddContactOpen(false);
-        resetContactForm();
-      }
+      if (!response.ok) throw new Error('Failed to add contact');
+      const newContact = await response.json() as Contact;
+      
+      setContacts([...contacts, newContact]);
+      setIsContactDialogOpen(false);
+      setSelectedCompanyForContact(null);
+      toast.success('Contacto agregado exitosamente');
     } catch (error) {
-      console.error('Error updating contact:', error);
+      toast.error('Error al agregar contacto');
+      console.error(error);
     }
   };
 
   const handleDeleteContact = async (id: string) => {
-    if (!deleteDialog.id) return;
-    
     try {
-      const response = await fetch(`${baseUrl}/api/contacts/${deleteDialog.id}`, {
+      const response = await fetch(`${baseUrl}/api/contacts/${id}`, {
         method: 'DELETE',
       });
-
-      if (!response.ok) throw new Error('Error al eliminar contacto');
-
-      setContacts(contacts.filter(c => c.id !== deleteDialog.id));
-      setDeleteDialog({ open: false, type: null, id: null, name: '' });
+      
+      if (!response.ok) throw new Error('Failed to delete contact');
+      
+      setContacts(contacts.filter(c => c.id !== id));
+      setDeleteConfirm(null);
+      toast.success('Contacto eliminado exitosamente');
     } catch (error) {
-      console.error('Error deleting contact:', error);
-      alert('Error al eliminar el contacto');
+      toast.error('Error al eliminar contacto');
+      console.error(error);
     }
   };
 
@@ -678,7 +790,7 @@ export default function ProjectDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-white">
       {/* Sidebar Navigation */}
       <div 
         className={`fixed left-0 top-0 h-full bg-card border-r border-border transition-all duration-300 z-50 ${
@@ -956,7 +1068,10 @@ export default function ProjectDashboard() {
                                     <SelectContent>
                                       {getContactsByCompany(projectForm.company).map(c => (
                                         <SelectItem key={c.id} value={c.id}>
-                                          {c.name} {c.lastName || ''} {c.role ? `- ${c.role}` : ''}
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{c.name} {c.lastName || ''}</span>
+                                            <span className="text-xs text-muted-foreground">{c.role}</span>
+                                          </div>
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
@@ -1067,7 +1182,7 @@ export default function ProjectDashboard() {
                                 <TableRow key={project.id}>
                                   <TableCell className="font-medium max-w-[220px] break-words whitespace-normal">{project.name}</TableCell>
                                   <TableCell className="max-w-[160px] break-words whitespace-normal">{project.client}</TableCell>
-                                  <TableCell className="max-w-[180px]">
+                                  <TableCell>
                                     {contact ? (
                                       <Select
                                         value={project.contactId || ''}
@@ -1076,7 +1191,7 @@ export default function ProjectDashboard() {
                                             const response = await fetch(`${baseUrl}/api/projects/${project.id}`, {
                                               method: 'PUT',
                                               headers: { 'Content-Type': 'application/json' },
-                                              body: JSON.stringify({ 
+                                              body: JSON.stringify({
                                                 name: project.name,
                                                 client: project.client,
                                                 contactId: value,
@@ -1123,7 +1238,7 @@ export default function ProjectDashboard() {
                                             const response = await fetch(`${baseUrl}/api/projects/${project.id}`, {
                                               method: 'PUT',
                                               headers: { 'Content-Type': 'application/json' },
-                                              body: JSON.stringify({ 
+                                              body: JSON.stringify({
                                                 name: project.name,
                                                 client: project.client,
                                                 contactId: value,
@@ -1426,163 +1541,233 @@ export default function ProjectDashboard() {
                       <div className="flex justify-between items-center">
                         <div>
                           <CardTitle>Clientes</CardTitle>
-                          <CardDescription>Gestiona información de clientes</CardDescription>
+                          <CardDescription>Gestiona empresas y sus contactos</CardDescription>
                         </div>
-                        <Dialog open={isAddContactOpen} onOpenChange={(open) => {
-                          setIsAddContactOpen(open);
-                          if (!open) resetContactForm();
-                        }}>
+                        <Dialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen}>
                           <DialogTrigger asChild>
-                            <Button>
-                              <Plus className="mr-2 h-4 w-4" />
-                              Agregar Cliente
+                            <Button onClick={() => setEditingCompany(null)}>
+                              <Plus className="mr-2 h-4 w-4" /> Agregar Cliente
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-md">
+                          <DialogContent className="max-w-2xl">
                             <DialogHeader>
-                              <DialogTitle>{isEditingContact ? 'Editar Cliente' : 'Agregar Cliente'}</DialogTitle>
-                              <DialogDescription>
-                                {isEditingContact ? 'Actualizar información del cliente' : 'Agregar un nuevo cliente'}
-                              </DialogDescription>
+                              <DialogTitle>{editingCompany ? 'Editar Cliente' : 'Agregar Cliente'}</DialogTitle>
                             </DialogHeader>
-                            <form onSubmit={isEditingContact ? handleEditContact : handleAddContact}>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="contact-name">Nombre</Label>
-                                    <Input 
-                                      id="contact-name" 
-                                      placeholder="Nombre" 
-                                      value={contactForm.name}
-                                      onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                                      required
-                                    />
-                                  </div>
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="contact-lastname">Apellido</Label>
-                                    <Input 
-                                      id="contact-lastname" 
-                                      placeholder="Apellido" 
-                                      value={contactForm.lastName}
-                                      onChange={(e) => setContactForm({...contactForm, lastName: e.target.value})}
-                                      required
-                                    />
-                                  </div>
-                                </div>
-                                <div className="grid gap-2">
-                                  <Label htmlFor="email">Correo Electrónico</Label>
-                                  <Input 
-                                    id="email" 
-                                    type="email" 
-                                    placeholder="correo@ejemplo.com" 
-                                    value={contactForm.email}
-                                    onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
-                                    required
-                                  />
-                                </div>
-                                <div className="grid gap-2">
-                                  <Label htmlFor="phone">Teléfono</Label>
-                                  <Input 
-                                    id="phone" 
-                                    type="tel" 
-                                    placeholder="+51 999 999 999" 
-                                    value={contactForm.phone}
-                                    onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
-                                    required
-                                  />
-                                </div>
-                                <div className="grid gap-2">
-                                  <Label htmlFor="company">Empresa</Label>
-                                  <Input 
-                                    id="company" 
-                                    placeholder="Nombre de la empresa" 
-                                    value={contactForm.company}
-                                    onChange={(e) => setContactForm({...contactForm, company: e.target.value})}
-                                    required
-                                  />
-                                </div>
-                                <div className="grid gap-2">
-                                  <Label htmlFor="role">Cargo</Label>
-                                  <Input 
-                                    id="role" 
-                                    placeholder="Título del puesto" 
-                                    value={contactForm.role}
-                                    onChange={(e) => setContactForm({...contactForm, role: e.target.value})}
-                                    required
-                                  />
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => {
-                                  setIsAddContactOpen(false);
-                                  resetContactForm();
-                                }}>
-                                  Cancelar
-                                </Button>
-                                <Button type="submit">
-                                  {isEditingContact ? 'Actualizar Cliente' : 'Agregar Cliente'}
-                                </Button>
-                              </DialogFooter>
-                            </form>
+                            <CompanyForm
+                              company={editingCompany}
+                              onSubmit={editingCompany ? handleUpdateCompany : handleAddCompany}
+                              onCancel={() => {
+                                setIsCompanyDialogOpen(false);
+                                setEditingCompany(null);
+                              }}
+                            />
                           </DialogContent>
                         </Dialog>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {contacts.map((contact) => (
-                          <Card key={contact.id}>
-                            <CardHeader>
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium">{contact.name} {contact.lastName}</p>
-                                  <p className="text-sm text-muted-foreground">{contact.role}</p>
-                                </div>
-                                <div className="flex gap-1">
-                                  <Button variant="ghost" size="sm" onClick={() => openEditContact(contact)}>
-                                    <Edit className="h-4 w-4" />
+                      <div className="space-y-6">
+                        {companies.map((company) => {
+                          const companyContacts = contacts.filter(c => c.company === company.name);
+                          const companyProjects = projects.filter(p => p.client === company.name);
+                          const companyActiveProjects = projects.filter(p => p.client === company.name && (p.status === 'active' || p.status === 'on-hold'));
+                          const isCollapsed = collapsedCompanies.has(company.id);
+                          
+                          return (
+                            <Card key={company.id} className="border-2">
+                              <CardHeader>
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <div>
+                                      <h3 className="font-semibold text-lg">{company.name}</h3>
+                                      {company.industry && (
+                                        <p className="text-sm text-muted-foreground">{company.industry}</p>
+                                      )}
+                                    </div>
+                                    <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                      {company.legalName && (
+                                        <div className="flex items-center gap-2">
+                                          <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                          <div>
+                                            <span className="text-xs text-muted-foreground">Razón Social: </span>
+                                            <span className="font-medium">{company.legalName}</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {company.taxId && (
+                                        <div className="flex items-center gap-2">
+                                          <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                          <div>
+                                            <span className="text-xs text-muted-foreground">RUC: </span>
+                                            <span className="font-medium">{company.taxId}</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {company.phone && (
+                                        <div className="flex items-center gap-2">
+                                          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                          <a href={`tel:${company.phone}`} className="text-primary hover:underline">
+                                            {company.phone}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {company.website && (
+                                        <div className="flex items-center gap-2">
+                                          <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                          <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
+                                            {company.website}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {company.address && (
+                                        <div className="flex items-center gap-2">
+                                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                          <span className="text-muted-foreground">{company.address}</span>
+                                        </div>
+                                      )}
+                                      <div className="flex gap-2">
+                                        <Badge variant="outline">
+                                          {companyContacts.length} contacto{companyContacts.length !== 1 ? 's' : ''}
+                                        </Badge>
+                                        {companyActiveProjects.length > 0 && (
+                                          <Badge variant="outline">
+                                            {companyActiveProjects.length} proyecto{companyActiveProjects.length !== 1 ? 's' : ''} activo{companyActiveProjects.length !== 1 ? 's' : ''}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => toggleCompany(company.id)}
+                                  >
+                                    {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                                   </Button>
-                                  <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({
-                                    open: true,
-                                    type: 'contact',
-                                    id: contact.id,
-                                    name: `${contact.name} ${contact.lastName}`
-                                  })}>
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
                                 </div>
+                              </CardHeader>
+                              <div 
+                                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                                  isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'
+                                }`}
+                              >
+                                <CardContent className="pt-4">
+                                  <div className="space-y-6">
+                                    <div>
+                                      <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-semibold text-sm">Contactos</h3>
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          className="mt-3"
+                                          onClick={() => {
+                                            setSelectedCompanyForContact(company.id);
+                                            setEditingContact(null);
+                                            setIsContactDialogOpen(true);
+                                          }}
+                                        >
+                                          <Plus className="h-3 w-3 mr-1" /> Agregar Contacto
+                                        </Button>
+                                      </div>
+                                      {companyContacts.length > 0 ? (
+                                        <div className="space-y-3">
+                                          {companyContacts.map((contact) => {
+                                            const contactProjects = projects.filter(p => p.contactId === contact.id);
+                                            return (
+                                            <div key={contact.id} className="flex items-start p-3 bg-muted/20 rounded-lg border border-border gap-6">
+                                              {/* First div: Contact info */}
+                                              <div className="flex-1">
+                                                <p className="font-medium">{contact.name} {contact.lastName}</p>
+                                                <p className="text-sm text-muted-foreground">{contact.role}</p>
+                                                <div className="flex gap-4 mt-2">
+                                                  {contact.phone && (
+                                                    <div className="flex items-center gap-1 text-sm">
+                                                      <Phone className="h-3 w-3 text-muted-foreground" />
+                                                      <a href={`tel:${contact.phone}`} className="text-primary hover:underline">
+                                                        {contact.phone}
+                                                      </a>
+                                                    </div>
+                                                  )}
+                                                  {contact.email && (
+                                                    <div className="flex items-center gap-1 text-sm">
+                                                      <Mail className="h-3 w-3 text-muted-foreground" />
+                                                      <a href={`mailto:${contact.email}`} className="text-primary hover:underline">
+                                                        {contact.email}
+                                                      </a>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              
+                                              {/* Second div: Projects */}
+                                              <div className="flex-1">
+                                                <div className="text-xs text-muted-foreground mb-1">Proyectos activos:</div>
+                                                {contactProjects.length > 0 ? (
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {contactProjects.map(project => (
+                                                      <Badge key={project.id} variant="outline" className="text-xs">
+                                                        {project.name}
+                                                      </Badge>
+                                                    ))}
+                                                  </div>
+                                                ) : (
+                                                  <span className="text-xs text-muted-foreground italic">Ninguno</span>
+                                                )}
+                                              </div>
+                                              
+                                              {/* Third div: Buttons */}
+                                              <div className="flex gap-1">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="h-8 w-8"
+                                                  onClick={() => {
+                                                    setEditingContact(contact);
+                                                    setSelectedCompanyForContact(company.id);
+                                                    setIsContactDialogOpen(true);
+                                                  }}
+                                                >
+                                                  <Pencil className="h-3 w-3" />
+                                                </Button>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="h-8 w-8 text-destructive"
+                                                  onClick={() => setDeleteConfirm({ type: 'contact', id: contact.id })}
+                                                >
+                                                  <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                              </div>
+                                            </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                          <p className="text-sm">No hay contactos registrados</p>
+                                          <Button 
+                                            size="sm" 
+                                            variant="outline"
+                                            className="mt-3"
+                                            onClick={() => {
+                                              setSelectedCompanyForContact(company.id);
+                                              setEditingContact(null);
+                                              setIsContactDialogOpen(true);
+                                            }}
+                                          >
+                                            <Plus className="h-3 w-3 mr-1" /> Agregar Primer Contacto
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </CardContent>
                               </div>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                              <div className="flex items-center gap-2 text-sm">
-                                <Building className="h-4 w-4 text-muted-foreground" />
-                                <span>{contact.company}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm">
-                                <Mail className="h-4 w-4 text-muted-foreground" />
-                                <a href={`mailto:${contact.email}`} className="text-primary hover:underline">
-                                  {contact.email}
-                                </a>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm">
-                                <Phone className="h-4 w-4 text-muted-foreground" />
-                                <a href={`tel:${contact.phone}`} className="text-primary hover:underline">
-                                  {contact.phone}
-                                </a>
-                              </div>
-                              <div className="pt-2 border-t">
-                                <p className="text-xs text-muted-foreground mb-2">Proyectos Asociados:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {projects.filter(p => p.contactId === contact.id && (p.status === 'active' || p.status === 'on-hold')).map(project => (
-                                    <Badge key={project.id} variant="outline" className="text-xs">
-                                      {project.name}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                            </Card>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
@@ -1850,19 +2035,25 @@ export default function ProjectDashboard() {
                                   <div className="flex justify-between text-sm">
                                     <span>Subtotal:</span>
                                     <span className="font-medium">
-                                      {invoiceCurrency === 'PEN' ? 'S/' : '$'} {calculateInvoiceTotals().subtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                      {invoiceCurrency === 'PEN' 
+                                        ? 'S/' 
+                                        : '$'} {calculateInvoiceTotals().subtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                   </div>
                                   <div className="flex justify-between text-sm text-muted-foreground">
                                     <span>Retención (8%):</span>
                                     <span>
-                                      {invoiceCurrency === 'PEN' ? 'S/' : '$'} {calculateInvoiceTotals().retention.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                      {invoiceCurrency === 'PEN' 
+                                        ? 'S/' 
+                                        : '$'} {calculateInvoiceTotals().retention.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                   </div>
                                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                                     <span>Monto a Facturar:</span>
                                     <span className="text-primary">
-                                      {invoiceCurrency === 'PEN' ? 'S/' : '$'} {calculateInvoiceTotals().total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                      {invoiceCurrency === 'PEN' 
+                                        ? 'S/' 
+                                        : '$'} {calculateInvoiceTotals().total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                   </div>
                                   <p className="text-xs text-muted-foreground mt-1">
@@ -1944,98 +2135,6 @@ export default function ProjectDashboard() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

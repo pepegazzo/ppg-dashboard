@@ -1,5 +1,20 @@
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 
+// Nueva tabla de empresas/clientes
+export const companies = sqliteTable('companies', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  legalName: text('legal_name'), // Razón Social
+  taxId: text('tax_id'), // RUC
+  industry: text('industry'),
+  website: text('website'),
+  phone: text('phone'),
+  address: text('address'),
+  logo: text('logo'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
 export const projects = sqliteTable('projects', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -33,11 +48,12 @@ export const invoices = sqliteTable('invoices', {
 
 export const contacts = sqliteTable('contacts', {
   id: text('id').primaryKey(),
+  companyId: text('company_id').references(() => companies.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   lastName: text('last_name').notNull().default(''),
   email: text('email').notNull(),
   phone: text('phone').notNull(),
-  company: text('company').notNull(),
+  company: text('company').notNull(), // Mantener por compatibilidad
   role: text('role').notNull(),
   projects: text('projects').notNull(), // Stored as JSON string array
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
@@ -52,6 +68,12 @@ export type NewInvoice = typeof invoices.$inferInsert;
 
 export type Contact = typeof contacts.$inferSelect;
 export type NewContact = typeof contacts.$inferInsert;
+
+export type Company = typeof companies.$inferSelect;
+export type NewCompany = typeof companies.$inferInsert;
+
+
+
 
 
 
