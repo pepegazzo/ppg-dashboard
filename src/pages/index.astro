@@ -1,0 +1,21 @@
+---
+import MainLayout from '../layouts/main.astro';
+import ProjectDashboard from '../components/ProjectDashboard';
+
+const pageClass = 'dashboard';
+---
+
+<MainLayout pageClass={pageClass}>
+  <ProjectDashboard client:only="react" />
+</MainLayout>
+
+<style is:global>
+  html.dashboard {
+    height: 100%;
+  }
+  
+  html.dashboard body {
+    height: 100%;
+    margin: 0;
+  }
+</style>

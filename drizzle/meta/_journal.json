@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1775969139900,
+      "tag": "0000_foamy_steel_serpent",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1776125767946,
+      "tag": "0001_easy_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776125795817,
+      "tag": "0002_good_aqueduct",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1776131457676,
+      "tag": "0003_short_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1776133623476,
+      "tag": "0004_workable_screwball",
+      "breakpoints": true
+    }
+  ]
+}
